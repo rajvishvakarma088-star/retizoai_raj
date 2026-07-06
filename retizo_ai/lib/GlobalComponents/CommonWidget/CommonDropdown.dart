@@ -97,7 +97,7 @@ class _CommonDropdownState extends State<CommonDropdown> {
               decoration:
                   widget.decoration ??
                   BoxDecoration(
-                    color: const Color(0xFFF3F5F6),
+                    color: Colors.transparent,
                     borderRadius: BorderRadius.circular(6),
                   ),
               child: DropdownButtonHideUnderline(
@@ -186,13 +186,13 @@ class _CommonDropdownState extends State<CommonDropdown> {
                         offset: Offset(dx, -5),
                         maxHeight: 200,
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: GlobalAppColor.WhiteColorCode,
                           borderRadius: const BorderRadius.only(
                             bottomLeft: Radius.circular(10),
                             bottomRight: Radius.circular(10),
                           ),
                           border: Border.all(
-                            color: GlobalAppColor.DarkTextColorCode,
+                            color: GlobalAppColor.DarkTextColorCode.withOpacity(0.2),
                             width: 0.6,
                           ),
                         ),

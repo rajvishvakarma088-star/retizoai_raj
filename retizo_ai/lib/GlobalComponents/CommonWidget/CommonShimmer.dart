@@ -7,6 +7,9 @@ import 'package:flutter/material.dart';
 class CommonShimmer {
   //-✅-----------OrderListShimmer----------------------------------------✅-//
   static Widget OrderListShimmer(BuildContext context, int value) {
+    final bool isDark = GlobalAppColor.DarkTextColorCode.value == 0xFFE2E8F0;
+    final baseColor = isDark ? const Color(0xFF1E293B) : const Color(0xFFE0E0E0);
+    final highlightColor = isDark ? const Color(0xFF334155) : const Color(0xFFF5F5F5);
     const double itemSize = 50.0;
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -41,8 +44,8 @@ class CommonShimmer {
                     child: CommonWidget().buildStaggeredAnimation(
                       index: rowIndex,
                       child: Shimmer.fromColors(
-                        baseColor: const Color(0xFFE0E0E0),
-                        highlightColor: const Color(0xFFF5F5F5),
+                        baseColor: baseColor,
+                        highlightColor: highlightColor,
                         child: Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
@@ -225,6 +228,9 @@ class CommonShimmer {
 
   //-✅-----------CategoryListShimmer-------------------------------------✅-//
   static Widget CategoryListShimmer(BuildContext context, int value) {
+    final bool isDark = GlobalAppColor.DarkTextColorCode.value == 0xFFE2E8F0;
+    final baseColor = isDark ? const Color(0xFF1E293B) : const Color(0xFFE0E0E0);
+    final highlightColor = isDark ? const Color(0xFF334155) : const Color(0xFFF5F5F5);
     const double itemSize = 50.0;
 
     return LayoutBuilder(
@@ -261,8 +267,8 @@ class CommonShimmer {
                     child: CommonWidget().buildStaggeredAnimation(
                       index: rowIndex,
                       child: Shimmer.fromColors(
-                        baseColor: const Color(0xFFE0E0E0),
-                        highlightColor: const Color(0xFFF5F5F5),
+                        baseColor: baseColor,
+                        highlightColor: highlightColor,
                         child: Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
@@ -324,6 +330,9 @@ class CommonShimmer {
 
   //-✅-----------MenuListShimmer-----------------------------------------✅-//
   static Widget MenuListShimmer(BuildContext context, int value) {
+    final bool isDark = GlobalAppColor.DarkTextColorCode.value == 0xFFE2E8F0;
+    final baseColor = isDark ? const Color(0xFF1E293B) : const Color(0xFFE0E0E0);
+    final highlightColor = isDark ? const Color(0xFF334155) : const Color(0xFFF5F5F5);
     const double itemSize = 50.0;
 
     return LayoutBuilder(
@@ -360,8 +369,8 @@ class CommonShimmer {
                     child: CommonWidget().buildStaggeredAnimation(
                       index: rowIndex,
                       child: Shimmer.fromColors(
-                        baseColor: const Color(0xFFE0E0E0),
-                        highlightColor: const Color(0xFFF5F5F5),
+                        baseColor: baseColor,
+                        highlightColor: highlightColor,
                         child: Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(

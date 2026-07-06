@@ -35,7 +35,7 @@ class _DashBoardState extends State<DashBoard> with WidgetsBindingObserver {
         final kds = context.read<KdsProvider>();
 
         kds.GetKitchenOrderListService(context, kds.selectedKDSDate, silent: true);
-        kds.GetReadyOrderListService(context, kds.selectedKDSDate);
+        kds.GetReadyOrderListService(context, kds.selectedKDSDate, silent: true);
 
         kds.GetFilterOrderListService(
           context,
@@ -70,7 +70,7 @@ class _DashBoardState extends State<DashBoard> with WidgetsBindingObserver {
         final kds = context.read<KdsProvider>();
         kds.resetPreparedTracking();
         kds.GetKitchenOrderListService(context, kds.selectedKDSDate);
-        kds.GetReadyOrderListService(context, kds.selectedKDSDate);
+        kds.GetReadyOrderListService(context, kds.selectedKDSDate, silent: true);
         kds.restoreTimerState().then((_) {
           if (kds.activeOrderId != null) {
             kds.initializeActiveOrderTimers();
@@ -126,121 +126,150 @@ class _DashBoardState extends State<DashBoard> with WidgetsBindingObserver {
 }
 
 //----------------- MOBILE/TABLET NAV -----------------//
-class CustomBottomNavigationBar extends StatelessWidget {
+class CustomBottomNavigationBar extends StatefulWidget {
   const CustomBottomNavigationBar({super.key});
+
+  @override
+  State<CustomBottomNavigationBar> createState() => _CustomBottomNavigationBarState();
+}
+
+class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
+  late HomeProvider _homeCtrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _homeCtrl = Provider.of<HomeProvider>(context, listen: false);
+    _homeCtrl.myFocusNodeSearchOrder.addListener(_onStateUpdate);
+    _homeCtrl.SearchOrderController.addListener(_onStateUpdate);
+  }
+
+  @override
+  void dispose() {
+    _homeCtrl.myFocusNodeSearchOrder.removeListener(_onStateUpdate);
+    _homeCtrl.SearchOrderController.removeListener(_onStateUpdate);
+    super.dispose();
+  }
+
+  void _onStateUpdate() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<BottomNavProvider>(context);
+    final themeCtrl = Provider.of<ThemeProvider>(context); // Listen to theme updates
     final media = MediaQuery.of(context);
 
-    final double safeBottom =
-        media.padding.bottom; // iOS notch / Android gestures
-    final double barHeight = 60.0;
+    final double safeBottom = media.padding.bottom;
+    final double barHeight = 64.0;
+
+    final bool isSearchSelected = provider.SELECTED_INDEX == BottomNavProvider.TabOrder &&
+        (_homeCtrl.myFocusNodeSearchOrder.hasFocus || _homeCtrl.SearchOrderController.text.isNotEmpty);
+
+    final bool isHomeSelected = provider.SELECTED_INDEX == BottomNavProvider.TabOrder && !isSearchSelected;
+
+    debugPrint("🎨 CustomBottomNavigationBar built with theme: ${themeCtrl.currentTheme}, color: ${GlobalAppColor.WhiteColorCode}");
 
     return Container(
-      width: double.infinity,
-      height: barHeight + safeBottom,
-      padding: EdgeInsets.only(bottom: safeBottom),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)],
+      margin: EdgeInsets.only(
+        left: 24,
+        right: 24,
+        bottom: safeBottom > 0 ? safeBottom : 16,
+      ),
+      height: barHeight,
+      decoration: BoxDecoration(
+        color: GlobalAppColor.WhiteColorCode,
+        borderRadius: BorderRadius.circular(32),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        border: Border.all(
+          color: GlobalAppColor.DarkTextColorCode.withOpacity(0.06),
+          width: 1,
+        ),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Expanded(
-            child: navItem(
-              context,
-              Icons.shopping_cart,
-              "ORDER",
-              BottomNavProvider.TabOrder,
-            ),
-          ),
-          // Center: Add New Order Button
-          GestureDetector(
-            onTap: () async {
-              final drawerCtrl = context.read<CashDrawerProvider>();
-              if (!drawerCtrl.isDrawerOpen) {
-                GlobalFunction().showError(
-                  context,
-                  "Open the cash drawer first to create orders.",
-                );
-                return;
-              }
-              if (await GlobalFunction().checkInternetConnection(context)) {
-                Navigator.push(
-                  context,
-                  SlideTransitionRoute(page: const AddNewOrder()),
-                ).then((_) {
-                  final home = context.read<HomeProvider>();
-                  home.InitializeData(context);
-                });
-              }
+          // 1. Home / Orders Button
+          _navItem(
+            context,
+            icon: Icons.home_rounded,
+            isSelected: isHomeSelected,
+            onTap: () {
+              // Clear focus and query if active
+              _homeCtrl.myFocusNodeSearchOrder.unfocus();
+              _homeCtrl.SearchOrderController.clear();
+              _homeCtrl.SearchFilteredOrders(searchQuery: '');
+              provider.changeTab(BottomNavProvider.TabOrder);
             },
-            child: Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: GlobalAppColor.ButtonColor,
-                boxShadow: [
-                  BoxShadow(
-                    color: GlobalAppColor.ButtonColor.withOpacity(0.35),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: const Icon(
-                Icons.add,
-                color: Colors.white,
-                size: 26,
-              ),
-            ),
           ),
-          Expanded(
-            child: navItem(
-              context,
-              Icons.child_care,
-              "KDS",
-              BottomNavProvider.TabKds,
-            ),
+          // 2. Search Button
+          _navItem(
+            context,
+            icon: Icons.search_rounded,
+            isSelected: isSearchSelected,
+            onTap: () {
+              provider.changeTab(BottomNavProvider.TabOrder);
+              Future.delayed(const Duration(milliseconds: 100), () {
+                _homeCtrl.myFocusNodeSearchOrder.requestFocus();
+              });
+            },
+          ),
+          // 3. KDS Button
+          _navItem(
+            context,
+            icon: Icons.child_care_rounded,
+            isSelected: provider.SELECTED_INDEX == BottomNavProvider.TabKds,
+            onTap: () {
+              provider.changeTab(BottomNavProvider.TabKds);
+            },
+          ),
+          // 4. Person / Profile Button
+          _navItem(
+            context,
+            icon: Icons.person_rounded,
+            isSelected: false,
+            onTap: () {
+              ProfileDrawer.show(context, onLogout: () async {
+                await GlobalFunction.LogOutApplication(context: context);
+              });
+            },
           ),
         ],
       ),
     );
   }
 
-  Widget navItem(BuildContext context, IconData icon, String label, int index) {
-    final provider = Provider.of<BottomNavProvider>(context);
-    bool selected = provider.SELECTED_INDEX == index;
-
-    return GestureDetector(
-      onTap: () => provider.changeTab(index),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            icon,
-            color: selected
-                ? GlobalAppColor.ButtonDarkColor
-                : GlobalAppColor.DarkTextColorCode.withOpacity(.6),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: CommonWidget.CommonTitleTextStyle(
-              color: selected
-                  ? GlobalAppColor.ButtonDarkColor
-                  : GlobalAppColor.DarkTextColorCode.withOpacity(.6),
-              fontSize: 12,
-              fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+  Widget _navItem(
+    BuildContext context, {
+    required IconData icon,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return Expanded(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 26,
+              color: isSelected
+                  ? GlobalAppColor.ButtonColor
+                  : GlobalAppColor.DarkTextColorCode.withOpacity(0.5), // Inactive color
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

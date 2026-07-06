@@ -47,10 +47,23 @@ class HomeScreenState extends State<HomeScreen>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<HomeProvider>().InitializeData(context);
+      final homeCtrl = context.read<HomeProvider>();
+      homeCtrl.InitializeData(context);
       _checkDrawerStatus();
+      // Listen to search focus to automatically expand/minimize card
+      homeCtrl.myFocusNodeSearchOrder.addListener(_handleSearchFocusChange);
     });
     _startAutoRefreshTimer();
+  }
+
+  void _handleSearchFocusChange() {
+    if (!mounted) return;
+    final homeCtrl = context.read<HomeProvider>();
+    if (homeCtrl.myFocusNodeSearchOrder.hasFocus) {
+      setState(() {
+        _isCardExpanded = true;
+      });
+    }
   }
 
   //-✅---Check Drawer Status---------------------------------------------✅-//
@@ -67,6 +80,9 @@ class HomeScreenState extends State<HomeScreen>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _autoRefreshTimer?.cancel();
+    try {
+      context.read<HomeProvider>().myFocusNodeSearchOrder.removeListener(_handleSearchFocusChange);
+    } catch (_) {}
     super.dispose();
   }
 
@@ -155,7 +171,7 @@ class HomeScreenState extends State<HomeScreen>
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: GlobalAppColor.WhiteColorCode, // Match theme
                               borderRadius: BorderRadius.circular(12),
                               boxShadow: [
                                 BoxShadow(
@@ -165,7 +181,7 @@ class HomeScreenState extends State<HomeScreen>
                                 ),
                               ],
                               border: Border.all(
-                                color: Colors.grey.shade100,
+                                color: GlobalAppColor.DarkTextColorCode.withOpacity(0.08),
                                 width: 1,
                               ),
                             ),
@@ -551,14 +567,12 @@ class HomeScreenState extends State<HomeScreen>
                                 child: Container(
                                   padding: EdgeInsets.all(AppDimensions.sm),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFFCE7F3),
+                                    color: GlobalAppColor.ButtonColor.withOpacity(0.08),
                                     borderRadius: BorderRadius.circular(
                                       AppBorderRadius.xs,
                                     ),
                                     border: Border.all(
-                                      color: GlobalAppColor.RedCode.withOpacity(
-                                        .3,
-                                      ),
+                                      color: GlobalAppColor.ButtonColor.withOpacity(0.2),
                                     ),
                                   ),
                                   child: Row(
@@ -570,12 +584,10 @@ class HomeScreenState extends State<HomeScreen>
                                         width: 40,
                                         height: 40,
                                         decoration: BoxDecoration(
-                                          color: GlobalAppColor
-                                              .RedCode.withOpacity(.1),
+                                          color: GlobalAppColor.ButtonColor.withOpacity(0.12),
                                           shape: BoxShape.circle,
                                           border: Border.all(
-                                            color: GlobalAppColor
-                                                .RedCode.withOpacity(.3),
+                                            color: GlobalAppColor.ButtonColor.withOpacity(0.3),
                                           ),
                                         ),
                                         child: Center(
@@ -767,10 +779,10 @@ class HomeScreenState extends State<HomeScreen>
         alignment: Alignment.center,
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: GlobalAppColor.WhiteColorCode,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: Colors.grey.shade200,
+            color: GlobalAppColor.DarkTextColorCode.withOpacity(0.1),
             width: 1.5,
           ),
         ),
@@ -779,7 +791,7 @@ class HomeScreenState extends State<HomeScreen>
           mainAxisSize: MainAxisSize.min,
           children: [
             if (icon != null) ...[
-              Icon(icon, size: 14, color: Colors.grey.shade600),
+              Icon(icon, size: 14, color: GlobalAppColor.DarkTextColorCode.withOpacity(0.6)),
               const SizedBox(width: 6),
             ],
             if (hasDot) ...[
@@ -798,7 +810,7 @@ class HomeScreenState extends State<HomeScreen>
               style: TextStyle(
                 fontSize: 11.5,
                 fontWeight: FontWeight.w600,
-                color: Colors.grey.shade800,
+                color: GlobalAppColor.DarkTextColorCode,
               ),
             ),
           ],

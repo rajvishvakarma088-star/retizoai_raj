@@ -650,2371 +650,214 @@ class HomeWidget {
   }
 
   //-✅--OrderListWidget-------------------------------------------------✅-//
+  //-✅--OrderListWidget (List Type)--------------------------------------------✅-//
   Widget OrderListWidget(
     BuildContext context,
     List<OrderData> data,
     HomeProvider HomeCtrl,
   ) {
-    const double itemSize = 50.0;
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final screenWidth = constraints.maxWidth;
-
-        // 🔹 Responsive items per row
-        int itemsPerRow;
-        if (screenWidth < 600) {
-          itemsPerRow = 1; // mobile
-        } else if (screenWidth < 1000) {
-          itemsPerRow = 2; // tablet
-        } else {
-          itemsPerRow = 3; // desktop / web
-        }
-
-        final rowCount = (data.length / itemsPerRow).ceil();
-
-        return ListView.separated(
-          shrinkWrap: true,
-          physics: const BouncingScrollPhysics(),
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).padding.bottom + 100,
-            left: 8,
-            right: 8,
-          ),
-          itemCount: rowCount,
-          separatorBuilder: (_, __) => const SizedBox(height: 8),
-          itemBuilder: (context, rowIndex) {
-            List<Widget> rowItems = [];
-            for (int i = 0; i < itemsPerRow; i++) {
-              if (rowIndex >= rowCount) {
-                return const SizedBox.shrink(); // Out of bounds check
-              }
-              final itemIndex = rowIndex * itemsPerRow + i;
-              if (itemIndex < data.length) {
-                final item = data[itemIndex];
-                // 🔹 DropdownOne value
-                String selectedOneValue =
-                    item.selectedDropDownOne ??
-                    HomeCtrl.DropDownOne.firstWhere(
-                      (e) =>
-                          e.title!.toLowerCase() ==
-                          item.orderStatus.toLowerCase(),
-                      orElse: () => HomeCtrl.DropDownOne[0],
-                    ).title!;
-
-                // 🔹 DropdownOne value
-                String selectedTwoValue =
-                    item.selectedDropDownTwo ??
-                    HomeCtrl.DropDownTwo.firstWhere(
-                      (e) =>
-                          e.title!.toLowerCase() == item.priority.toLowerCase(),
-                      orElse: () => HomeCtrl.DropDownTwo[0],
-                    ).title!;
-
-                // ✅ Prepared items ring — matches web app hasPreparedItems logic
-                final bool hasPreparedItems = item.details.any(
-                  (d) => d.status.toLowerCase() == 'prepared',
-                );
-
-                rowItems.add(
-                  Expanded(
-                    child: AnimationLimiter(
-                      child: CommonWidget().buildStaggeredAnimation(
-                        index: rowIndex,
-                        child: IntrinsicHeight(
-                          child: Container(
-                            clipBehavior: Clip.antiAlias,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(14),
-                              border: Border.all(
-                                color: hasPreparedItems
-                                    ? const Color(0xFFF9A8D4)
-                                    : const Color(0xFFE2E8F0),
-                                width: hasPreparedItems ? 2 : 1,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.05),
-                                  blurRadius: 12,
-                                  spreadRadius: 0,
-                                  offset: const Offset(0, 4),
-                                ),
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.03),
-                                  blurRadius: 3,
-                                  offset: const Offset(0, 1),
-                                ),
-                              ],
-                            ),
-                            child: SingleChildScrollView(
-                              physics: const NeverScrollableScrollPhysics(),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  // ── Header band ──────────────────────────
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 10,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: hasPreparedItems
-                                          ? const Color(0xFFFFF1F5)
-                                          : const Color(0xFFF9FAFB),
-                                      borderRadius: const BorderRadius.only(
-                                        topLeft: Radius.circular(13),
-                                        topRight: Radius.circular(13),
-                                      ),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        // Order number
-                                        Text(
-                                          "#${item.orderNo.toString().padLeft(4, '0')}",
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.w800,
-                                            fontSize: 16,
-                                            color: Color(0xFF111827),
-                                            letterSpacing: 0.3,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 6),
-                                        // ✅ Group parent badge
-                                        if (item.isGroup)
-                                          _buildChip(
-                                            'Grouped',
-                                            const Color(0xFF7C3AED),
-                                            const Color(0xFFEDE9FE),
-                                          )
-                                        else if (item.groupId != 0 &&
-                                            item.groupId != item.orderId)
-                                          _buildChip(
-                                            'With #${item.groupId.toString().padLeft(4, '0')}',
-                                            const Color(0xFFD97706),
-                                            const Color(0xFFFEF3C7),
-                                          ),
-                                        const Spacer(),
-                                        // Status badge
-                                        HomeWidget().buildTag(
-                                          item.orderStatus[0].toUpperCase() +
-                                              item.orderStatus
-                                                  .substring(1)
-                                                  .toLowerCase(),
-                                          getStatusColor(item.orderStatus),
-                                          getStatusBgColor(item.orderStatus),
-                                        ),
-                                        // Priority badge (non-normal only)
-                                        if (item.priority.toLowerCase() !=
-                                                'normal' &&
-                                            item.priority != 'N/A') ...[
-                                          const SizedBox(width: 6),
-                                          HomeWidget().buildTag(
-                                            item.priority[0].toUpperCase() +
-                                                item.priority
-                                                    .substring(1)
-                                                    .toLowerCase(),
-                                            getPriorityColor(item.priority),
-                                            getPriorityBgColor(item.priority),
-                                          ),
-                                        ],
-                                      ],
-                                    ),
-                                  ),
-
-                                  // ── Body ─────────────────────────────────
-                                  Padding(
-                                    padding: const EdgeInsets.fromLTRB(
-                                      12,
-                                      10,
-                                      12,
-                                      0,
-                                    ),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        // ── Primary row: customer + amount ──
-                                        Row(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: [
-                                            const Icon(
-                                              Icons.person_outline_rounded,
-                                              size: 14,
-                                              color: Color(0xFF9CA3AF),
-                                            ),
-                                            const SizedBox(width: 5),
-                                            Expanded(
-                                              child: Text(
-                                                item.customer != 'N/A'
-                                                    ? item.customer
-                                                    : 'Guest Customer',
-                                                style: const TextStyle(
-                                                  fontWeight: FontWeight.w600,
-                                                  fontSize: 13,
-                                                  color: Color(0xFF111827),
-                                                ),
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                            ),
-                                            const SizedBox(width: 8),
-                                            // Payment status badge
-                                            HomeWidget().buildTag(
-                                              GlobalFunction()
-                                                  .capitalizeEachPart(
-                                                    item.paymentStatus,
-                                                  ),
-                                              getPriorityColor(
-                                                item.paymentStatus,
-                                              ),
-                                              getPriorityBgColor(
-                                                item.paymentStatus,
-                                              ),
-                                            ),
-                                            const SizedBox(width: 6),
-                                            // Grand total
-                                            Text(
-                                              "SAR ${item.calculatedTotalAmtStr}",
-                                              style: const TextStyle(
-                                                fontWeight: FontWeight.w800,
-                                                fontSize: 15,
-                                                color: Color(0xFF111827),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        const SizedBox(height: 5),
-                                        // ── Secondary row: type · table | time ──
-                                        Row(
-                                          children: [
-                                            const Icon(
-                                              Icons.table_restaurant_outlined,
-                                              size: 12,
-                                              color: Color(0xFFB0B8C8),
-                                            ),
-                                            const SizedBox(width: 4),
-                                            Expanded(
-                                              child: Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  Flexible(
-                                                    child: Text(
-                                                      "${GlobalFunction().capitalizeEachPart(item.type.toString())} · Table:",
-                                                      style: const TextStyle(
-                                                        fontSize: 11,
-                                                        color: Color(
-                                                          0xFF6B7280,
-                                                        ),
-                                                        fontWeight:
-                                                            FontWeight.w500,
-                                                      ),
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                    ),
-                                                  ),
-                                                  const SizedBox(width: 4),
-                                                  if (_isPremiumTable(
-                                                    context,
-                                                    item,
-                                                  ))
-                                                    Container(
-                                                      padding:
-                                                          const EdgeInsets.symmetric(
-                                                            horizontal: 5,
-                                                            vertical: 2,
-                                                          ),
-                                                      decoration: BoxDecoration(
-                                                        color: const Color(
-                                                          0xFF8B5CF6,
-                                                        ),
-                                                        borderRadius:
-                                                            BorderRadius.circular(
-                                                              4,
-                                                            ),
-                                                      ),
-                                                      child: Row(
-                                                        mainAxisSize:
-                                                            MainAxisSize.min,
-                                                        children: [
-                                                          const Icon(
-                                                            Icons
-                                                                .workspace_premium,
-                                                            size: 10,
-                                                            color: Colors.white,
-                                                          ),
-                                                          const SizedBox(
-                                                            width: 2,
-                                                          ),
-                                                          Text(
-                                                            _tableDisplayNameFromMetadata(
-                                                              context,
-                                                              item,
-                                                            ),
-                                                            style:
-                                                                const TextStyle(
-                                                                  fontSize: 10,
-                                                                  color: Colors
-                                                                      .white,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w700,
-                                                                ),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    )
-                                                  else
-                                                    Flexible(
-                                                      child: Text(
-                                                        _tableDisplayNameFromMetadata(
-                                                          context,
-                                                          item,
-                                                        ),
-                                                        style: const TextStyle(
-                                                          fontSize: 11,
-                                                          color: Color(
-                                                            0xFF6B7280,
-                                                          ),
-                                                          fontWeight:
-                                                              FontWeight.w500,
-                                                        ),
-                                                        overflow: TextOverflow
-                                                            .ellipsis,
-                                                      ),
-                                                    ),
-                                                ],
-                                              ),
-                                            ),
-                                            SizedBox(
-                                              width: 88,
-                                              child: Builder(
-                                                builder: (context) {
-                                                  final raw = GlobalFunction()
-                                                      .formatOrderDate(
-                                                        item.orderDate.toString(),
-                                                      );
-                                                  final parts = raw.split(' | ');
-                                                  final datePart = parts.isNotEmpty ? parts[0] : raw;
-                                                  final timePart = parts.length > 1 ? parts[1] : '';
-                                                  return Column(
-                                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                                    children: [
-                                                      Text(
-                                                        datePart,
-                                                        style: const TextStyle(
-                                                          fontSize: 10,
-                                                          color: Color(0xFF9CA3AF),
-                                                        ),
-                                                        overflow: TextOverflow.ellipsis,
-                                                        textAlign: TextAlign.right,
-                                                      ),
-                                                      if (timePart.isNotEmpty)
-                                                        Text(
-                                                          timePart,
-                                                          style: const TextStyle(
-                                                            fontSize: 10,
-                                                            color: Color(0xFF9CA3AF),
-                                                            fontWeight: FontWeight.w500,
-                                                          ),
-                                                          textAlign: TextAlign.right,
-                                                        ),
-                                                    ],
-                                                  );
-                                                },
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        // ── Inline payment breakdown text (mirrors web card) ──
-                                        // Only shown for paid/partial orders, backend-driven from payments[]/cashout/cardout
-                                        if (item.paymentStatus.toLowerCase() ==
-                                                'paid' ||
-                                            item.paymentStatus.toLowerCase() ==
-                                                'partial') ...[
-                                          Builder(
-                                            builder: (context) {
-                                              // Build breakdown rows using same priority as buildPaymentBreakdown
-                                              final List<Map<String, dynamic>>
-                                              pRows = [];
-                                              if (item.payments.isNotEmpty) {
-                                                for (final p in item.payments) {
-                                                  if (p.amount > 0) {
-                                                    pRows.add({
-                                                      'label':
-                                                          p.methodName.isEmpty
-                                                          ? 'Payment'
-                                                          : p.methodName,
-                                                      'amount': p.amount,
-                                                    });
-                                                  }
-                                                }
-                                              }
-                                              // Single generic "Split Payment" → decompose into Cash/Card
-                                              if (pRows.length == 1) {
-                                                final lbl =
-                                                    (pRows.first['label']
-                                                            as String)
-                                                        .toUpperCase();
-                                                if (lbl == 'SPLIT PAYMENT' ||
-                                                    lbl == 'SPLIT') {
-                                                  final cash =
-                                                      double.tryParse(
-                                                        item.cashout,
-                                                      ) ??
-                                                      0.0;
-                                                  final card =
-                                                      double.tryParse(
-                                                        item.cardout,
-                                                      ) ??
-                                                      0.0;
-                                                  if (cash > 0 && card > 0) {
-                                                    pRows.clear();
-                                                    pRows.add({
-                                                      'label': 'Cash',
-                                                      'amount': cash,
-                                                    });
-                                                    pRows.add({
-                                                      'label': 'Card',
-                                                      'amount': card,
-                                                    });
-                                                  }
-                                                }
-                                              }
-                                              // Fallback to cashout/cardout fields
-                                              if (pRows.isEmpty) {
-                                                final cash =
-                                                    double.tryParse(
-                                                      item.cashout,
-                                                    ) ??
-                                                    0.0;
-                                                final card =
-                                                    double.tryParse(
-                                                      item.cardout,
-                                                    ) ??
-                                                    0.0;
-                                                if (cash > 0)
-                                                  pRows.add({
-                                                    'label': 'Cash',
-                                                    'amount': cash,
-                                                  });
-                                                if (card > 0)
-                                                  pRows.add({
-                                                    'label': 'Card',
-                                                    'amount': card,
-                                                  });
-                                                if (pRows.isEmpty &&
-                                                    item.paymentMethodName !=
-                                                        'N/A' &&
-                                                    item
-                                                        .paymentMethodName
-                                                        .isNotEmpty) {
-                                                  pRows.add({
-                                                    'label':
-                                                        item.paymentMethodName,
-                                                    'amount': item.grandTotal,
-                                                  });
-                                                }
-                                              }
-                                              if (pRows.isEmpty)
-                                                return const SizedBox.shrink();
-                                              final typeLabel =
-                                                  item.paymentStatus
-                                                          .toLowerCase() ==
-                                                      'partial'
-                                                  ? 'PARTIAL'
-                                                  : item.paymentTypeLabel;
-                                              final detailStr = pRows
-                                                  .map(
-                                                    (r) =>
-                                                        '${r['label']} ${(r['amount'] as double).toStringAsFixed(2)}',
-                                                  )
-                                                  .join(', ');
-                                              return Padding(
-                                                padding: const EdgeInsets.only(
-                                                  top: 3,
-                                                ),
-                                                child: Row(
-                                                  children: [
-                                                    Text(
-                                                      typeLabel.isEmpty
-                                                          ? ''
-                                                          : '$typeLabel ',
-                                                      style: const TextStyle(
-                                                        fontSize: 10,
-                                                        fontWeight:
-                                                            FontWeight.w600,
-                                                        color: Color(
-                                                          0xFF2563EB,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    Flexible(
-                                                      child: Text(
-                                                        '($detailStr)',
-                                                        style: const TextStyle(
-                                                          fontSize: 10,
-                                                          color: Color(
-                                                            0xFF6B7280,
-                                                          ),
-                                                        ),
-                                                        overflow: TextOverflow
-                                                            .ellipsis,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              );
-                                            },
-                                          ),
-                                        ],
-                                        // ── Note row (conditional) ──
-                                        if (item.orderDes != null &&
-                                            item.orderDes
-                                                .toString()
-                                                .trim()
-                                                .isNotEmpty &&
-                                            item.orderDes
-                                                    .toString()
-                                                    .trim()
-                                                    .toLowerCase() !=
-                                                "null") ...[
-                                          const SizedBox(height: 4),
-                                          Row(
-                                            children: [
-                                              const Icon(
-                                                Icons.notes_rounded,
-                                                size: 12,
-                                                color: Color(0xFFD1D5DB),
-                                              ),
-                                              const SizedBox(width: 4),
-                                              Expanded(
-                                                child: Text(
-                                                  GlobalFunction()
-                                                      .capitalizeEachPart(
-                                                        item.orderDes
-                                                            .toString(),
-                                                      ),
-                                                  maxLines: 1,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                  style: const TextStyle(
-                                                    fontSize: 11,
-                                                    color: Color(0xFF9CA3AF),
-                                                    fontStyle: FontStyle.italic,
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                        // ── Due / Refunded indicator ──
-                                        if (item.paymentStatus.toLowerCase() !=
-                                            'paid') ...[
-                                          const SizedBox(height: 6),
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 8,
-                                              vertical: 5,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: const Color(0xFFFFFBEB),
-                                              borderRadius:
-                                                  BorderRadius.circular(6),
-                                              border: Border.all(
-                                                color: const Color(0xFFFDE68A),
-                                              ),
-                                            ),
-                                            child: Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                const Icon(
-                                                  Icons.hourglass_top_rounded,
-                                                  size: 11,
-                                                  color: Color(0xFFD97706),
-                                                ),
-                                                const SizedBox(width: 5),
-                                                Text(
-                                                  "SAR ${item.remainingBalance.toStringAsFixed(2)} remaining",
-                                                  style: const TextStyle(
-                                                    fontSize: 11,
-                                                    fontWeight: FontWeight.w600,
-                                                    color: Color(0xFF92400E),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ] else if (item.hasRefund) ...[
-                                          const SizedBox(height: 6),
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 8,
-                                              vertical: 5,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: const Color(0xFFFEF2F2),
-                                              borderRadius:
-                                                  BorderRadius.circular(6),
-                                              border: Border.all(
-                                                color: const Color(0xFFFECACA),
-                                              ),
-                                            ),
-                                            child: Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                const Icon(
-                                                  Icons.undo_rounded,
-                                                  size: 11,
-                                                  color: Color(0xFFEF4444),
-                                                ),
-                                                const SizedBox(width: 5),
-                                                Text(
-                                                  "Refunded SAR ${item.calculatedRefund.toStringAsFixed(2)}",
-                                                  style: const TextStyle(
-                                                    fontSize: 11,
-                                                    fontWeight: FontWeight.w600,
-                                                    color: Color(0xFFDC2626),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ] else ...[
-                                          const SizedBox(height: 6),
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 8,
-                                              vertical: 5,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: const Color(0xFFF0FDF4),
-                                              borderRadius:
-                                                  BorderRadius.circular(6),
-                                              border: Border.all(
-                                                color: const Color(0xFFBBF7D0),
-                                              ),
-                                            ),
-                                            child: Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                const Icon(
-                                                  Icons
-                                                      .check_circle_outline_rounded,
-                                                  size: 11,
-                                                  color: Color(0xFF059669),
-                                                ),
-                                                const SizedBox(width: 5),
-                                                Text(
-                                                  "Paid SAR ${item.calculatedTotalAmtStr}",
-                                                  style: const TextStyle(
-                                                    fontSize: 11,
-                                                    fontWeight: FontWeight.w600,
-                                                    color: Color(0xFF047857),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ],
-                                        const SizedBox(height: 10),
-                                        const Divider(
-                                          color: Color(0xFFE5E7EB),
-                                          height: 1,
-                                          thickness: 1,
-                                        ),
-                                        const SizedBox(height: 8),
-                                        // ── Items section header ──
-                                        Row(
-                                          children: [
-                                            const Text(
-                                              "ITEMS",
-                                              style: TextStyle(
-                                                fontSize: 10,
-                                                fontWeight: FontWeight.w700,
-                                                color: Color(0xFF9CA3AF),
-                                                letterSpacing: 1.2,
-                                              ),
-                                            ),
-                                            const SizedBox(width: 6),
-                                            Container(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                    horizontal: 6,
-                                                    vertical: 1,
-                                                  ),
-                                              decoration: BoxDecoration(
-                                                color: const Color(0xFFF1F5F9),
-                                                borderRadius:
-                                                    BorderRadius.circular(10),
-                                              ),
-                                              child: Text(
-                                                "${item.details.where((d) => d.itemType.toLowerCase() != 'modifier').length}",
-                                                style: const TextStyle(
-                                                  fontSize: 10,
-                                                  fontWeight: FontWeight.w600,
-                                                  color: Color(0xFF64748B),
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        const SizedBox(height: 6),
-                                      ],
-                                    ),
-                                  ),
-
-                                  // ── Items list (flush padding) ────────────
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                    ),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        // 🔹 Item Row — modifiers grouped under parent (matches web app)
-                                        Column(
-                                          children: item.details
-                                              .where(
-                                                (detail) =>
-                                                    detail.itemType
-                                                        .toLowerCase() !=
-                                                    'modifier',
-                                              )
-                                              .map((detail) {
-                                                final cancelledQty = (detail.cancelledQty > (detail.originalQty - detail.quantity))
-                                                    ? detail.cancelledQty
-                                                    : (detail.originalQty - detail.quantity);
-                                                final isCancelled =
-                                                    detail.status
-                                                        .toLowerCase() ==
-                                                    'cancelled';
-                                                final unitPrice =
-                                                    double.tryParse(
-                                                      detail.rate.isNotEmpty &&
-                                                              detail.rate != '0'
-                                                          ? detail.rate
-                                                          : detail.price,
-                                                    ) ??
-                                                    0.0;
-                                                final quantity =
-                                                    detail.quantity;
-                                                final itemTotal =
-                                                    double.tryParse(
-                                                      detail.subtotal,
-                                                    ) ??
-                                                    0.0;
-                                                // When the whole order is cancelled, suppress partial-cancel
-                                                // indicators — show all items as fully cancelled
-                                                final isOrderFullyCancelled =
-                                                    item.orderStatus
-                                                        .toLowerCase() ==
-                                                    'cancelled';
-
-                                                // ✅ Modifiers linked to this item
-                                                // The server may return either:
-                                                //   • numeric order_det_id as "link" → compare to orderDetId.toString()
-                                                //   • original cart_uuid as "link"   → compare to detail.cartUuid
-                                                final linkedMods = item.details
-                                                    .where(
-                                                      (d) =>
-                                                          d.itemType
-                                                                  .toLowerCase() ==
-                                                              'modifier' &&
-                                                          (d.link ==
-                                                                  detail
-                                                                      .orderDetId
-                                                                      .toString() ||
-                                                              (detail.cartUuid !=
-                                                                      null &&
-                                                                  d.link ==
-                                                                      detail
-                                                                          .cartUuid)),
-                                                    )
-                                                    .toList();
-
-                                                return Container(
-                                                  margin: const EdgeInsets.only(
-                                                    bottom: 6,
-                                                  ),
-                                                  padding:
-                                                      const EdgeInsets.symmetric(
-                                                        horizontal: 9,
-                                                        vertical: 7,
-                                                      ),
-                                                  decoration: BoxDecoration(
-                                                    color:
-                                                        (isCancelled &&
-                                                                quantity ==
-                                                                    0) ||
-                                                            isOrderFullyCancelled
-                                                        ? const Color(
-                                                            0xFFFEF2F2,
-                                                          )
-                                                        : const Color(
-                                                            0xFFFAFAFC,
-                                                          ),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          8,
-                                                        ),
-                                                    border: Border.all(
-                                                      color:
-                                                          (isCancelled &&
-                                                                  quantity ==
-                                                                      0) ||
-                                                              isOrderFullyCancelled
-                                                          ? const Color(
-                                                              0xFFFECACA,
-                                                            )
-                                                          : const Color(
-                                                              0xFFE2E8F0,
-                                                            ),
-                                                      width: 1,
-                                                    ),
-                                                  ),
-                                                  child: Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: [
-                                                      Row(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .center,
-                                                        children: [
-                                                          /// LEFT SIDE (Product Name + Price + Quantity)
-                                                          Expanded(
-                                                            child: Row(
-                                                              crossAxisAlignment:
-                                                                  CrossAxisAlignment
-                                                                      .center,
-                                                              children: [
-                                                                /// Product display
-                                                                Expanded(
-                                                                  child: RichText(
-                                                                    maxLines: 2,
-                                                                    overflow:
-                                                                        TextOverflow
-                                                                            .ellipsis,
-                                                                    text: TextSpan(
-                                                                      style: CommonWidget.CommonTitleTextStyle(
-                                                                        color: GlobalAppColor
-                                                                            .HomeDarkTextColor,
-                                                                      ),
-                                                                      children: [
-                                                                        if (!(isCancelled &&
-                                                                                quantity ==
-                                                                                    0) &&
-                                                                            !isOrderFullyCancelled)
-                                                                          // Quantity in front (e.g. 1x )
-                                                                          TextSpan(
-                                                                            text: "${quantity}x ",
-                                                                            style: TextStyle(
-                                                                              fontWeight: FontWeight.w600,
-                                                                              color: GlobalAppColor.ButtonColor,
-                                                                            ),
-                                                                          ),
-                                                                        // Product name — strikethrough if fully cancelled (qty == 0)
-                                                                        TextSpan(
-                                                                          text:
-                                                                              detail.name !=
-                                                                                  'N/A'
-                                                                              ? detail.name
-                                                                              : detail.product.mPName,
-                                                                          style: TextStyle(
-                                                                            fontWeight:
-                                                                                FontWeight.w600,
-                                                                            decoration:
-                                                                                (isCancelled &&
-                                                                                        quantity ==
-                                                                                            0) ||
-                                                                                    isOrderFullyCancelled
-                                                                                ? TextDecoration.lineThrough
-                                                                                : TextDecoration.none,
-                                                                            color:
-                                                                                (isCancelled &&
-                                                                                        quantity ==
-                                                                                            0) ||
-                                                                                    isOrderFullyCancelled
-                                                                                ? GlobalAppColor.RedCode
-                                                                                : GlobalAppColor.HomeDarkTextColor,
-                                                                          ),
-                                                                        ),
-                                                                        if (!(isCancelled &&
-                                                                                quantity ==
-                                                                                    0) &&
-                                                                            !isOrderFullyCancelled) ...[
-                                                                          // Unit price
-                                                                          TextSpan(
-                                                                            text:
-                                                                                " (SAR ${unitPrice.toStringAsFixed(2)})",
-                                                                            style: TextStyle(
-                                                                              color: GlobalAppColor.HomeLightTextColor,
-                                                                              fontSize: 13,
-                                                                            ),
-                                                                          ),
-                                                                          // ✅ Cancelled qty badge (matches web app "(X cancelled)")
-                                                                          if (cancelledQty >
-                                                                              0)
-                                                                            TextSpan(
-                                                                              text: ' ($cancelledQty cancelled)',
-                                                                              style: const TextStyle(
-                                                                                fontSize: 11,
-                                                                                color: Color(
-                                                                                  0xFFEF4444,
-                                                                                ),
-                                                                                fontWeight: FontWeight.w500,
-                                                                              ),
-                                                                            ),
-                                                                        ],
-                                                                      ],
-                                                                    ),
-                                                                  ),
-                                                                ),
-
-                                                                /// Status Tag
-                                                                SizedBox(
-                                                                  child: HomeWidget().buildTag(
-                                                                    isOrderFullyCancelled
-                                                                        ? 'Cancelled'
-                                                                        : detail.status[0].toUpperCase() +
-                                                                              detail.status.substring(1).toLowerCase(),
-                                                                    getStatusColor(
-                                                                      isOrderFullyCancelled
-                                                                          ? 'cancelled'
-                                                                          : detail.status,
-                                                                    ),
-                                                                    getStatusBgColor(
-                                                                      isOrderFullyCancelled
-                                                                          ? 'cancelled'
-                                                                          : detail.status,
-                                                                    ),
-                                                                  ),
-                                                                ),
-
-                                                                SizedBox(
-                                                                  width:
-                                                                      detail.status ==
-                                                                              "cancelled" ||
-                                                                          isOrderFullyCancelled
-                                                                      ? 0
-                                                                      : 5,
-                                                                ),
-
-                                                                /// Note Icon
-                                                                SizedBox(
-                                                                  width: 28,
-                                                                  child:
-                                                                      detail.status !=
-                                                                              "cancelled" &&
-                                                                          item.orderStatus.toLowerCase() !=
-                                                                              'completed' &&
-                                                                          !isOrderFullyCancelled
-                                                                      ? InkWell(
-                                                                          onTap: () async {
-                                                                            GlobalFunction.hideKeyboard(
-                                                                              context,
-                                                                            );
-                                                                            if (await GlobalFunction().checkInternetConnection(
-                                                                              context,
-                                                                            )) {
-                                                                              await showModalBottomSheet(
-                                                                                context: context,
-                                                                                isScrollControlled: true,
-                                                                                backgroundColor: Colors.transparent,
-                                                                                builder:
-                                                                                    (
-                                                                                      _,
-                                                                                    ) => _ItemNoteSheet(
-                                                                                      detail: detail,
-                                                                                      orderId: item.orderId,
-                                                                                      homeCtrl: HomeCtrl,
-                                                                                    ),
-                                                                              );
-                                                                            }
-                                                                          },
-                                                                          child: Icon(
-                                                                            Icons.note_alt_outlined,
-                                                                            color: GlobalAppColor.DarkBlueColor.withOpacity(
-                                                                              .6,
-                                                                            ),
-                                                                            size:
-                                                                                20,
-                                                                          ),
-                                                                        )
-                                                                      : SizedBox.shrink(),
-                                                                ),
-
-                                                                SizedBox(
-                                                                  width:
-                                                                      detail.status ==
-                                                                              "cancelled" ||
-                                                                          isOrderFullyCancelled
-                                                                      ? 0
-                                                                      : 5,
-                                                                ),
-
-                                                                /// Cancel Icon
-                                                                SizedBox(
-                                                                  width: 28,
-                                                                  child:
-                                                                      detail.status !=
-                                                                              "cancelled" &&
-                                                                          item.orderStatus.toLowerCase() !=
-                                                                              'completed' &&
-                                                                          !isOrderFullyCancelled
-                                                                      ? InkWell(
-                                                                          onTap: () async {
-                                                                            GlobalFunction.hideKeyboard(
-                                                                              context,
-                                                                            );
-                                                                            if (await GlobalFunction().checkInternetConnection(
-                                                                              context,
-                                                                            )) {
-                                                                              await HomeWidget()._showCancelItemDialog(
-                                                                                context,
-                                                                                HomeCtrl,
-                                                                                detail,
-                                                                                item.orderStatus,
-                                                                              );
-                                                                            }
-                                                                          },
-                                                                          child: Icon(
-                                                                            Symbols.block,
-                                                                            color: GlobalAppColor.RedCode.withOpacity(
-                                                                              .6,
-                                                                            ),
-                                                                            size:
-                                                                                20,
-                                                                          ),
-                                                                        )
-                                                                      : SizedBox.shrink(),
-                                                                ),
-                                                              ],
-                                                            ),
-                                                          ),
-
-                                                          const SizedBox(
-                                                            width: 10,
-                                                          ),
-
-                                                          /// RIGHT SIDE
-                                                          SizedBox(
-                                                            width: 90,
-                                                            child: Column(
-                                                              crossAxisAlignment:
-                                                                  CrossAxisAlignment
-                                                                      .end,
-                                                              children: [
-                                                                if ((isCancelled &&
-                                                                        quantity ==
-                                                                            0) ||
-                                                                    isOrderFullyCancelled)
-                                                                  // Fully cancelled: strikethrough original price
-                                                                  Text(
-                                                                    "SAR ${(unitPrice * detail.originalQty).toStringAsFixed(2)}",
-                                                                    style:
-                                                                        CommonWidget.CommonTitleTextStyle(
-                                                                          color:
-                                                                              GlobalAppColor.HomeLightTextColor,
-                                                                          fontSize:
-                                                                              13,
-                                                                        ).copyWith(
-                                                                          decoration:
-                                                                              TextDecoration.lineThrough,
-                                                                        ),
-                                                                    textAlign:
-                                                                        TextAlign
-                                                                            .right,
-                                                                  )
-                                                                else if (cancelledQty >
-                                                                        0 &&
-                                                                    !isOrderFullyCancelled) ...[
-                                                                  // Partial cancel: strikethrough original + orange current
-                                                                  Text(
-                                                                    "SAR ${(unitPrice * detail.originalQty).toStringAsFixed(2)}",
-                                                                    style:
-                                                                        CommonWidget.CommonTitleTextStyle(
-                                                                          color:
-                                                                              GlobalAppColor.HomeLightTextColor,
-                                                                          fontSize:
-                                                                              11,
-                                                                        ).copyWith(
-                                                                          decoration:
-                                                                              TextDecoration.lineThrough,
-                                                                        ),
-                                                                    textAlign:
-                                                                        TextAlign
-                                                                            .right,
-                                                                  ),
-                                                                  Text(
-                                                                    "SAR ${itemTotal.toStringAsFixed(2)}",
-                                                                    style: CommonWidget.CommonTitleTextStyle(
-                                                                      color: const Color(
-                                                                        0xFFEA580C,
-                                                                      ), // orange-600
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .w600,
-                                                                      fontSize:
-                                                                          14,
-                                                                    ),
-                                                                    textAlign:
-                                                                        TextAlign
-                                                                            .right,
-                                                                  ),
-                                                                ] else
-                                                                  Text(
-                                                                    "SAR ${itemTotal.toStringAsFixed(2)}",
-                                                                    style: CommonWidget.CommonTitleTextStyle(
-                                                                      color: GlobalAppColor
-                                                                          .HomeDarkTextColor,
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .w600,
-                                                                      fontSize:
-                                                                          15,
-                                                                    ),
-                                                                    textAlign:
-                                                                        TextAlign
-                                                                            .right,
-                                                                  ),
-                                                              ],
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
-
-                                                      // ✅ Cancel reason badge (matches web app red badge with reason)
-                                                      if (cancelledQty > 0 &&
-                                                          !isOrderFullyCancelled) ...[
-                                                        const SizedBox(
-                                                          height: 3,
-                                                        ),
-                                                        Container(
-                                                          padding:
-                                                              const EdgeInsets.symmetric(
-                                                                horizontal: 8,
-                                                                vertical: 3,
-                                                              ),
-                                                          decoration: BoxDecoration(
-                                                            color: const Color(
-                                                              0xFFFEF2F2,
-                                                            ),
-                                                            borderRadius:
-                                                                BorderRadius.circular(
-                                                                  4,
-                                                                ),
-                                                          ),
-                                                          child: Row(
-                                                            mainAxisSize:
-                                                                MainAxisSize
-                                                                    .min,
-                                                            children: [
-                                                              const Icon(
-                                                                Icons.block,
-                                                                size: 10,
-                                                                color: Color(
-                                                                  0xFFEF4444,
-                                                                ),
-                                                              ),
-                                                              const SizedBox(
-                                                                width: 4,
-                                                              ),
-                                                              Flexible(
-                                                                child: Text(
-                                                                  detail
-                                                                          .cancelReason
-                                                                          .isNotEmpty
-                                                                      ? '$cancelledQty qty cancelled · ${detail.cancelReason}'
-                                                                      : '$cancelledQty qty cancelled',
-                                                                  style: const TextStyle(
-                                                                    fontSize:
-                                                                        10,
-                                                                    color: Color(
-                                                                      0xFFEF4444,
-                                                                    ),
-                                                                    fontStyle:
-                                                                        FontStyle
-                                                                            .italic,
-                                                                  ),
-                                                                  maxLines: 2,
-                                                                  overflow:
-                                                                      TextOverflow
-                                                                          .ellipsis,
-                                                                ),
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        ),
-                                                      ],
-
-                                                      // ✅ Modifiers indented below item (matches web app linkedModifiers)
-                                                      if (linkedMods
-                                                          .isNotEmpty) ...[
-                                                        const SizedBox(
-                                                          height: 2,
-                                                        ),
-                                                        Padding(
-                                                          padding:
-                                                              const EdgeInsets.only(
-                                                                left: 12.0,
-                                                              ),
-                                                          child: Column(
-                                                            crossAxisAlignment:
-                                                                CrossAxisAlignment
-                                                                    .start,
-                                                            children: linkedMods.map((
-                                                              mod,
-                                                            ) {
-                                                              final modIsCancelled =
-                                                                  mod.status
-                                                                      .toLowerCase() ==
-                                                                  'cancelled';
-                                                              final modPrice =
-                                                                  double.tryParse(
-                                                                    mod.rate.isNotEmpty &&
-                                                                            mod.rate !=
-                                                                                '0'
-                                                                        ? mod.rate
-                                                                        : mod.price,
-                                                                  ) ??
-                                                                  0.0;
-                                                              final modQty =
-                                                                  mod.quantity;
-                                                              final modOrigQty =
-                                                                  mod.originalQty;
-                                                              final modCancelledQty =
-                                                                  modOrigQty -
-                                                                  modQty;
-                                                              final modTotal =
-                                                                  modPrice *
-                                                                  modQty;
-                                                              if (modIsCancelled &&
-                                                                  modQty == 0) {
-                                                                return const SizedBox.shrink();
-                                                              }
-                                                              return Padding(
-                                                                padding:
-                                                                    const EdgeInsets.only(
-                                                                      bottom:
-                                                                          2.0,
-                                                                    ),
-                                                                child: Row(
-                                                                  children: [
-                                                                    const Text(
-                                                                      '+ ',
-                                                                      style: TextStyle(
-                                                                        fontSize:
-                                                                            11,
-                                                                        color: Color(
-                                                                          0xFF6B7280,
-                                                                        ),
-                                                                        fontWeight:
-                                                                            FontWeight.w500,
-                                                                      ),
-                                                                    ),
-                                                                    Expanded(
-                                                                      child: Text(
-                                                                        '${modQty}x ${mod.name != 'N/A' && mod.name.isNotEmpty ? mod.name : (mod.product.mPName != 'N/A' ? mod.product.mPName : (mod.note != 'N/A' ? mod.note : ''))}${modCancelledQty > 0 ? ' ($modCancelledQty cancelled)' : ''}',
-                                                                        style: TextStyle(
-                                                                          fontSize:
-                                                                              11,
-                                                                          color:
-                                                                              modIsCancelled
-                                                                              ? const Color(
-                                                                                  0xFFF97316,
-                                                                                )
-                                                                              : const Color(
-                                                                                  0xFF6B7280,
-                                                                                ),
-                                                                        ),
-                                                                        overflow:
-                                                                            TextOverflow.ellipsis,
-                                                                      ),
-                                                                    ),
-                                                                    Text(
-                                                                      'SAR ${modTotal.toStringAsFixed(2)}',
-                                                                      style: TextStyle(
-                                                                        fontSize:
-                                                                            11,
-                                                                        color:
-                                                                            modIsCancelled
-                                                                            ? const Color(
-                                                                                0xFFF97316,
-                                                                              )
-                                                                            : const Color(
-                                                                                0xFF6B7280,
-                                                                              ),
-                                                                      ),
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                              );
-                                                            }).toList(),
-                                                          ),
-                                                        ),
-                                                      ],
-                                                      // ✅ Modifier indicator from note OR price inflation (items added to existing order via merge flow)
-                                                      // The backend's POST /order-details/ endpoint does not persist the note field,
-                                                      // so the note is always empty for merge-flow items. We fall back to showing
-                                                      // the price difference as a generic add-on indicator.
-                                                      ...() {
-                                                        if (linkedMods
-                                                            .isNotEmpty)
-                                                          return <Widget>[];
-                                                        final rawNote =
-                                                            detail.note;
-                                                        final double itemRate =
-                                                            double.tryParse(
-                                                              detail.price,
-                                                            ) ??
-                                                            0;
-                                                        final double basePrice =
-                                                            double.tryParse(
-                                                              detail
-                                                                  .product
-                                                                  .price,
-                                                            ) ??
-                                                            0;
-
-                                                        // ── Resolve modifier label ──
-                                                        // Priority 1: ||MOD|| note (new format)
-                                                        // Priority 2: plain note with inflated rate (old format)
-                                                        // Priority 3: no note but inflated rate (backend dropped note)
-                                                        List<String> modNames =
-                                                            [];
-                                                        bool useGenericAddon =
-                                                            false;
-
-                                                        if (rawNote != 'N/A' &&
-                                                            rawNote
-                                                                .isNotEmpty) {
-                                                          if (rawNote.contains(
-                                                            '||MOD||',
-                                                          )) {
-                                                            final modPart =
-                                                                rawNote
-                                                                    .split(
-                                                                      '||MOD||',
-                                                                    )
-                                                                    .last;
-                                                            modNames = modPart
-                                                                .split(',')
-                                                                .map(
-                                                                  (s) =>
-                                                                      s.trim(),
-                                                                )
-                                                                .where(
-                                                                  (s) => s
-                                                                      .isNotEmpty,
-                                                                )
-                                                                .toList();
-                                                          } else if (itemRate >
-                                                              basePrice) {
-                                                            final modPart =
-                                                                rawNote
-                                                                    .contains(
-                                                                      ' | ',
-                                                                    )
-                                                                ? rawNote
-                                                                      .split(
-                                                                        ' | ',
-                                                                      )
-                                                                      .last
-                                                                      .trim()
-                                                                : rawNote;
-                                                            if (modPart
-                                                                .isNotEmpty) {
-                                                              modNames = [
-                                                                modPart,
-                                                              ];
-                                                            }
-                                                          }
-                                                        } else if (itemRate >
-                                                            basePrice) {
-                                                          // Backend dropped note — use price inflation indicator
-                                                          useGenericAddon =
-                                                              true;
-                                                        }
-
-                                                        if (modNames.isEmpty &&
-                                                            !useGenericAddon) {
-                                                          return <Widget>[];
-                                                        }
-
-                                                        final double
-                                                        addonPerUnit =
-                                                            itemRate -
-                                                            basePrice;
-
-                                                        return <Widget>[
-                                                          const SizedBox(
-                                                            height: 2,
-                                                          ),
-                                                          Padding(
-                                                            padding:
-                                                                const EdgeInsets.only(
-                                                                  left: 12.0,
-                                                                ),
-                                                            child: Column(
-                                                              crossAxisAlignment:
-                                                                  CrossAxisAlignment
-                                                                      .start,
-                                                              children:
-                                                                  useGenericAddon
-                                                                  ? [
-                                                                      Padding(
-                                                                        padding: const EdgeInsets.only(
-                                                                          bottom:
-                                                                              2.0,
-                                                                        ),
-                                                                        child: Row(
-                                                                          children: [
-                                                                            const Text(
-                                                                              '+ ',
-                                                                              style: TextStyle(
-                                                                                fontSize: 11,
-                                                                                color: Color(
-                                                                                  0xFF6B7280,
-                                                                                ),
-                                                                                fontWeight: FontWeight.w500,
-                                                                              ),
-                                                                            ),
-                                                                            Text(
-                                                                              '${detail.quantity}x add-on  SAR ${(addonPerUnit * detail.quantity).toStringAsFixed(2)}',
-                                                                              style: const TextStyle(
-                                                                                fontSize: 11,
-                                                                                color: Color(
-                                                                                  0xFF6B7280,
-                                                                                ),
-                                                                              ),
-                                                                            ),
-                                                                          ],
-                                                                        ),
-                                                                      ),
-                                                                    ]
-                                                                  : modNames
-                                                                        .map(
-                                                                          (
-                                                                            mName,
-                                                                          ) => Padding(
-                                                                            padding: const EdgeInsets.only(
-                                                                              bottom: 2.0,
-                                                                            ),
-                                                                            child: Row(
-                                                                              children: [
-                                                                                const Text(
-                                                                                  '+ ',
-                                                                                  style: TextStyle(
-                                                                                    fontSize: 11,
-                                                                                    color: Color(
-                                                                                      0xFF6B7280,
-                                                                                    ),
-                                                                                    fontWeight: FontWeight.w500,
-                                                                                  ),
-                                                                                ),
-                                                                                Expanded(
-                                                                                  child: Text(
-                                                                                    '${detail.quantity}x $mName',
-                                                                                    style: const TextStyle(
-                                                                                      fontSize: 11,
-                                                                                      color: Color(
-                                                                                        0xFF6B7280,
-                                                                                      ),
-                                                                                    ),
-                                                                                    overflow: TextOverflow.ellipsis,
-                                                                                  ),
-                                                                                ),
-                                                                              ],
-                                                                            ),
-                                                                          ),
-                                                                        )
-                                                                        .toList(),
-                                                            ),
-                                                          ),
-                                                        ];
-                                                      }(),
-                                                    ],
-                                                  ),
-                                                );
-                                              })
-                                              .toList(),
-                                        ), // closes item rows Column
-                                      ], // end items list children
-                                    ),
-                                  ), // end items Padding
-                                  // ── Financial summary ─────────────────────────
-                                  Padding(
-                                    padding: const EdgeInsets.fromLTRB(
-                                      12,
-                                      2,
-                                      12,
-                                      12,
-                                    ),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        // ── Financial breakdown: tinted container ──
-                                        // Hidden for fully cancelled orders (no breakdown needed)
-                                        if (item.orderStatus.toLowerCase() !=
-                                            'cancelled')
-                                          Container(
-                                            width: double.infinity,
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 10,
-                                              vertical: 8,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: const Color(0xFFF9FAFB),
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                              border: Border.all(
-                                                color: const Color(0xFFE5E7EB),
-                                                width: 1,
-                                              ),
-                                            ),
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                // ✅ Net Amount (pre-tax base) — mirrors web app Financial Summary order
-                                                if (item.displayNetAmount > 0)
-                                                  HomeWidget().buildAmountRow(
-                                                    "Net Amount:",
-                                                    item.displayNetAmount
-                                                        .toStringAsFixed(2),
-                                                    color: const Color(
-                                                      0xFF2563EB,
-                                                    ),
-                                                  ),
-
-                                                // ─── TAX BREAKDOWN SECTION (collapsible — mirrors web %) ─
-                                                _CollapsibleTaxSection(
-                                                  item: item,
-                                                ),
-                                                // ✅ Total Amount (totalAmt from DB, pre-refund) — mirrors web app "Total Amount" row
-                                                HomeWidget().buildAmountRow(
-                                                  "Total Amount:",
-                                                  formatAmount(
-                                                    item.calculatedSubtotal,
-                                                  ),
-                                                ),
-                                                if (item.tableCharge > 0 &&
-                                                    (item.paymentStatus
-                                                                .toLowerCase() ==
-                                                            'paid' ||
-                                                        item.paymentStatus
-                                                                .toLowerCase() ==
-                                                            'partial'))
-                                                  HomeWidget().buildAmountRow(
-                                                    "Table Charge:",
-                                                    item.tableCharge
-                                                        .toStringAsFixed(2),
-                                                  ),
-                                                if (HomeWidget().isValid(
-                                                  item.chargeAmt,
-                                                ))
-                                                  HomeWidget().buildAmountRow(
-                                                    "Other Charges:",
-                                                    (double.tryParse(
-                                                              item.chargeAmt
-                                                                  .toString(),
-                                                            ) ??
-                                                            0.0)
-                                                        .toStringAsFixed(2),
-                                                  ),
-                                                if (HomeWidget().isValid(
-                                                      item.discountPer,
-                                                    ) &&
-                                                    double.tryParse(
-                                                          item.discountPer
-                                                              .toString(),
-                                                        ) !=
-                                                        0)
-                                                  HomeWidget().buildAmountRow(
-                                                    "Discount (${double.tryParse(item.discountPer.toString())?.toStringAsFixed(2) ?? "0.00"}%):",
-                                                    "- ${(double.tryParse(item.discountAmt.toString()) ?? 0.0).toStringAsFixed(2)}",
-                                                    color: GlobalAppColor
-                                                        .AvailableCode,
-                                                  ),
-                                                // ✅ Adjustment: show Addition (yellow) or Deduction (red) with reason
-                                                if (double.tryParse(
-                                                          item.adjustAmt,
-                                                        ) !=
-                                                        null &&
-                                                    (double.tryParse(
-                                                                  item.adjustAmt,
-                                                                ) ??
-                                                                0)
-                                                            .abs() >
-                                                        0.001) ...[
-                                                  Builder(
-                                                    builder: (_) {
-                                                      final adj = double.parse(
-                                                        item.adjustAmt,
-                                                      );
-                                                      final isAddition =
-                                                          adj > 0;
-                                                      final adjLabel =
-                                                          isAddition
-                                                          ? 'Addition'
-                                                          : 'Deduction';
-                                                      final adjColor =
-                                                          isAddition
-                                                          ? const Color(
-                                                              0xFFB45309,
-                                                            ) // amber-700
-                                                          : GlobalAppColor
-                                                                .RedCode;
-                                                      final displayAmt =
-                                                          isAddition
-                                                          ? '+${adj.toStringAsFixed(2)}'
-                                                          : '- ${(-adj).toStringAsFixed(2)}';
-                                                      return Padding(
-                                                        padding:
-                                                            const EdgeInsets.symmetric(
-                                                              vertical: 3,
-                                                            ),
-                                                        child: Row(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .spaceBetween,
-                                                          children: [
-                                                            Flexible(
-                                                              child: Row(
-                                                                children: [
-                                                                  Text(
-                                                                    '$adjLabel:',
-                                                                    style:
-                                                                        CommonWidget.CommonTitleTextStyle(
-                                                                          fontSize:
-                                                                              13,
-                                                                        ).copyWith(
-                                                                          color:
-                                                                              adjColor,
-                                                                          fontWeight:
-                                                                              FontWeight.w500,
-                                                                        ),
-                                                                  ),
-                                                                  if (item
-                                                                      .adjustReason
-                                                                      .isNotEmpty) ...[
-                                                                    const SizedBox(
-                                                                      width: 4,
-                                                                    ),
-                                                                    Flexible(
-                                                                      child: Text(
-                                                                        '(${item.adjustReason})',
-                                                                        style:
-                                                                            CommonWidget.CommonTitleTextStyle(
-                                                                              fontSize: 10,
-                                                                            ).copyWith(
-                                                                              color: Colors.grey.shade500,
-                                                                            ),
-                                                                        overflow:
-                                                                            TextOverflow.ellipsis,
-                                                                        maxLines:
-                                                                            1,
-                                                                      ),
-                                                                    ),
-                                                                  ],
-                                                                ],
-                                                              ),
-                                                            ),
-                                                            Text(
-                                                              displayAmt,
-                                                              style:
-                                                                  CommonWidget.CommonTitleTextStyle(
-                                                                    fontSize:
-                                                                        13,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .w600,
-                                                                  ).copyWith(
-                                                                    color:
-                                                                        adjColor,
-                                                                  ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      );
-                                                    },
-                                                  ),
-                                                ],
-                                                if (item
-                                                        .calculateCancelledAmount() >
-                                                    0)
-                                                  HomeWidget().buildAmountRow(
-                                                    "Cancelled Amount:",
-                                                    "- ${item.calculateCancelledAmount().toStringAsFixed(2)}",
-                                                    color:
-                                                        GlobalAppColor.RedCode,
-                                                  ),
-                                                if (item.calculatedRefund > 0)
-                                                  HomeWidget().buildAmountRow(
-                                                    "Refund Amount:",
-                                                    "${item.calculatedRefund.toStringAsFixed(2)}",
-                                                    color:
-                                                        GlobalAppColor.RedCode,
-                                                  ),
-                                              ], // end breakdown Container Column children
-                                            ), // end breakdown Container Column
-                                          ), // end breakdown Container
-                                        if (item.orderStatus.toLowerCase() !=
-                                            'cancelled')
-                                          const SizedBox(height: 12),
-                                        // ── Grand Total banner ──
-                                        Container(
-                                          width: double.infinity,
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 12,
-                                            vertical: 10,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: const Color(0xFFEFF6FF),
-                                            borderRadius: BorderRadius.circular(
-                                              8,
-                                            ),
-                                            border: Border.all(
-                                              color: const Color(0xFFBFDBFE),
-                                              width: 1,
-                                            ),
-                                          ),
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              const Expanded(
-                                                child: Text(
-                                                  "Grand Total",
-                                                  style: TextStyle(
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.w700,
-                                                    color: Color(0xFF1D4ED8),
-                                                  ),
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                ),
-                                              ),
-                                              Text(
-                                                item.orderStatus
-                                                            .toLowerCase() ==
-                                                        'cancelled'
-                                                    ? 'SAR 0'
-                                                    : 'SAR ${item.formattedGrandTotal}',
-                                                style: const TextStyle(
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.w800,
-                                                  color: Color(0xFF1D4ED8),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        const SizedBox(height: 8),
-                                        item.orderStatus.toLowerCase() ==
-                                                'cancelled'
-                                            ? _CollapsibleCancelledPaymentBreakdown(
-                                                item: item,
-                                              )
-                                            : _CollapsiblePaymentBreakdown(
-                                                item: item,
-                                              ),
-                                        // 🔹 Controls
-                                        const Divider(
-                                          color: Color(0xFFE9EBF0),
-                                          height: 16,
-                                          thickness: 1,
-                                        ),
-                                        Column(
-                                          children: [
-                                            const SizedBox(height: 4),
-
-                                            // ═══════════════════════════════════════
-                                            // ROW 1 — cancel/delete icon + dropdowns
-                                            // Hidden for fully cancelled and completed orders
-                                            // ═══════════════════════════════════════
-                                            if (item.orderStatus
-                                                        .toLowerCase() !=
-                                                    'cancelled' &&
-                                                item.orderStatus
-                                                        .toLowerCase() !=
-                                                    'completed')
-                                              Row(
-                                                children: <Widget>[
-                                                  item.orderStatus == "draft"
-                                                      ? HomeWidget().buildIconButton(
-                                                          icon: Symbols.delete,
-                                                          color: GlobalAppColor
-                                                              .ButtonColor,
-                                                          bgColor: const Color(
-                                                            0xFFFCE7F3,
-                                                          ),
-                                                          onTap: () async {
-                                                            if (await GlobalFunction()
-                                                                .checkInternetConnection(
-                                                                  context,
-                                                                )) {
-                                                              await GlobalFunction.DeleteOrder(
-                                                                context:
-                                                                    context,
-                                                                Msg:
-                                                                    "Do you want to delete this order #${item.orderId}",
-                                                                OrderID: item
-                                                                    .orderId
-                                                                    .toString(),
-                                                              );
-                                                            }
-                                                          },
-                                                        )
-                                                      : HomeWidget().buildIconButton(
-                                                          icon: Symbols.block,
-                                                          color: GlobalAppColor
-                                                              .ButtonColor,
-                                                          bgColor: const Color(
-                                                            0xFFFCE7F3,
-                                                          ),
-                                                          onTap: () async {
-                                                            GlobalFunction.hideKeyboard(
-                                                              context,
-                                                            );
-                                                            if (await GlobalFunction()
-                                                                .checkInternetConnection(
-                                                                  context,
-                                                                )) {
-                                                              await HomeWidget()
-                                                                  ._showCancelOrderDialog(
-                                                                    context,
-                                                                    HomeCtrl,
-                                                                    item,
-                                                                  );
-                                                            }
-                                                          },
-                                                        ),
-                                                  const SizedBox(width: 8),
-                                                  Expanded(
-                                                    child: HomeWidget().buildDropdown(
-                                                      items:
-                                                          HomeCtrl.DropDownOne.map(
-                                                            (e) => e.title!,
-                                                          ).toList(),
-                                                      value: selectedOneValue,
-                                                      onChanged: (v) async {
-                                                        final previousOne = item
-                                                            .selectedDropDownOne;
-                                                        item.selectedDropDownOne =
-                                                            v;
-                                                        HomeCtrl.notifyListeners();
-                                                        final isConnected =
-                                                            await GlobalFunction()
-                                                                .checkInternetConnection(
-                                                                  context,
-                                                                );
-                                                        if (isConnected) {
-                                                          final success =
-                                                              await HomeCtrl.UpdatePriorityOrderStatusService(
-                                                                context,
-                                                                item.orderId
-                                                                    .toString(),
-                                                                item.selectedDropDownOne
-                                                                    .toString(),
-                                                                "OrderStatus",
-                                                              );
-                                                          if (!success) {
-                                                            item.selectedDropDownOne =
-                                                                previousOne;
-                                                            HomeCtrl.notifyListeners();
-                                                          }
-                                                        } else {
-                                                          item.selectedDropDownOne =
-                                                              previousOne;
-                                                          HomeCtrl.notifyListeners();
-                                                        }
-                                                      },
-                                                    ),
-                                                  ),
-                                                  const SizedBox(width: 8),
-                                                  Expanded(
-                                                    child: HomeWidget().buildDropdown(
-                                                      items:
-                                                          HomeCtrl.DropDownTwo.map(
-                                                            (e) => e.title!,
-                                                          ).toList(),
-                                                      value: selectedTwoValue,
-                                                      onChanged: (v) async {
-                                                        final previousTwo = item
-                                                            .selectedDropDownTwo;
-                                                        item.selectedDropDownTwo =
-                                                            v;
-                                                        HomeCtrl.notifyListeners();
-                                                        final isConnected =
-                                                            await GlobalFunction()
-                                                                .checkInternetConnection(
-                                                                  context,
-                                                                );
-                                                        if (isConnected) {
-                                                          final success =
-                                                              await HomeCtrl.UpdatePriorityOrderStatusService(
-                                                                context,
-                                                                item.orderId
-                                                                    .toString(),
-                                                                item.selectedDropDownTwo
-                                                                    .toString(),
-                                                                "priority",
-                                                              );
-                                                          if (!success) {
-                                                            item.selectedDropDownTwo =
-                                                                previousTwo;
-                                                            HomeCtrl.notifyListeners();
-                                                          }
-                                                        } else {
-                                                          item.selectedDropDownTwo =
-                                                              previousTwo;
-                                                          HomeCtrl.notifyListeners();
-                                                        }
-                                                      },
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-
-                                            // ═══════════════════════════════════════
-                                            // ROW 2 — action buttons (Pay Bill /
-                                            //   Partial / Refund / Group)
-                                            // Only rendered when at least one is visible
-                                            // ═══════════════════════════════════════
-                                            Builder(
-                                              builder: (_) {
-                                                final bool isPaid =
-                                                    item.paymentStatus
-                                                        .toLowerCase() ==
-                                                    'paid';
-                                                final bool isCompleted =
-                                                    item.orderStatus
-                                                        .toLowerCase() ==
-                                                    'completed';
-                                                final bool isCancelled =
-                                                    item.orderStatus
-                                                        .toLowerCase() ==
-                                                    'cancelled';
-
-                                                // Fully cancelled: only Print Bill + Reconnect (full-width row)
-                                                if (isCancelled) {
-                                                  return Builder(
-                                                    builder: (context) => Padding(
-                                                      padding:
-                                                          const EdgeInsets.only(
-                                                            top: 8,
-                                                          ),
-                                                      child: Row(
-                                                        children: [
-                                                          Expanded(
-                                                            child: _OrderActionButton(
-                                                              label:
-                                                                  'Print Bill',
-                                                              color:
-                                                                  const Color(
-                                                                    0xFF059669,
-                                                                  ),
-                                                              icon: Icons
-                                                                  .receipt_long,
-                                                              onTap: () async {
-                                                                await _handlePrintBill(
-                                                                  context,
-                                                                  item,
-                                                                );
-                                                              },
-                                                            ),
-                                                          ),
-                                                          const SizedBox(
-                                                            width: 8,
-                                                          ),
-                                                          Expanded(
-                                                            child: _OrderActionButton(
-                                                              label:
-                                                                  'Reconnect',
-                                                              color:
-                                                                  const Color(
-                                                                    0xFF2563EB,
-                                                                  ),
-                                                              icon: Icons.sync,
-                                                              onTap: () async {
-                                                                final printerProvider =
-                                                                    Provider.of<
-                                                                      PrinterIntegrationProvider
-                                                                    >(
-                                                                      context,
-                                                                      listen:
-                                                                          false,
-                                                                    );
-                                                                final success =
-                                                                    await printerProvider
-                                                                        .reconnectPrinter();
-                                                                if (!context
-                                                                    .mounted)
-                                                                  return;
-                                                                ScaffoldMessenger.of(
-                                                                  context,
-                                                                ).showSnackBar(
-                                                                  SnackBar(
-                                                                    content: Text(
-                                                                      success
-                                                                          ? '✅ Printer reconnected'
-                                                                          : '❌ Reconnect failed — check printer is on & on same WiFi',
-                                                                    ),
-                                                                    backgroundColor:
-                                                                        success
-                                                                        ? Colors
-                                                                              .green
-                                                                        : Colors
-                                                                              .red,
-                                                                    duration:
-                                                                        const Duration(
-                                                                          seconds:
-                                                                              3,
-                                                                        ),
-                                                                  ),
-                                                                );
-                                                              },
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  );
-                                                }
-
-                                                final bool showGroup = (() {
-                                                  if (_isPremiumTable(context, item)) return false;
-                                                  if (isPaid ||
-                                                      isCompleted ||
-                                                      isCancelled)
-                                                    return false;
-                                                  if (item.groupId != 0)
-                                                    return false;
-                                                  try {
-                                                    final d = DateTime.parse(
-                                                      item.orderDate.split(
-                                                        ' ',
-                                                      )[0],
-                                                    );
-                                                    final now = DateTime.now();
-                                                    return d.year == now.year &&
-                                                        d.month == now.month &&
-                                                        d.day == now.day;
-                                                  } catch (_) {
-                                                    return false;
-                                                  }
-                                                })();
-
-                                                // No action buttons needed if paid and no group
-                                                final bool hasActions =
-                                                    !isPaid || isPaid;
-                                                if (!hasActions) {
-                                                  return const SizedBox.shrink();
-                                                }
-
-                                                return Padding(
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                        top: 8,
-                                                      ),
-                                                  child: Builder(
-                                                    builder: (context) {
-                                                      final List<Widget>
-                                                      actionButtons = [];
-
-                                                      if (!isPaid) {
-                                                        actionButtons.add(
-                                                          _OrderActionButton(
-                                                            label: "Pay Bill",
-                                                            color: GlobalAppColor
-                                                                .ButtonDarkColor,
-                                                            icon: Icons
-                                                                .receipt_long,
-                                                            onTap: () async {
-                                                              if (await GlobalFunction()
-                                                                  .checkInternetConnection(
-                                                                    context,
-                                                                  )) {
-                                                                await HomeCtrl.getPayBillPaymentMethodsListService(
-                                                                  context,
-                                                                );
-                                                                HomeCtrl.openPanelWithData(
-                                                                  item,
-                                                                );
-                                                                // Async: compute table charge for this order.
-                                                                // Panel opens immediately; charge updates on completion.
-                                                                HomeCtrl.computePayBillTableCharge(
-                                                                  context,
-                                                                  item,
-                                                                );
-                                                              }
-                                                            },
-                                                          ),
-                                                        );
-
-                                                        actionButtons.add(
-                                                          _OrderActionButton(
-                                                            label: "Partial",
-                                                            color: const Color(
-                                                              0xFF2563EB,
-                                                            ),
-                                                            icon: Icons
-                                                                .splitscreen,
-                                                            isLoading: HomeCtrl
-                                                                .isHomeLoader,
-                                                            onTap: () async {
-                                                              if (HomeCtrl
-                                                                  .isHomeLoader) {
-                                                                return;
-                                                              }
-                                                              if (await GlobalFunction()
-                                                                  .checkInternetConnection(
-                                                                    context,
-                                                                  )) {
-                                                                if (HomeCtrl
-                                                                    .PayBillPaymentListing
-                                                                    .isEmpty) {
-                                                                  await HomeCtrl.getPayBillPaymentMethodsListService(
-                                                                    context,
-                                                                  );
-                                                                }
-                                                                _showPartialPaymentDialog(
-                                                                  context,
-                                                                  HomeCtrl,
-                                                                  item,
-                                                                );
-                                                              }
-                                                            },
-                                                          ),
-                                                        );
-                                                      }
-
-                                                      if (showGroup) {
-                                                        actionButtons.add(
-                                                          _OrderActionButton(
-                                                            label: "Group",
-                                                            color: const Color(
-                                                              0xFF7C3AED,
-                                                            ),
-                                                            icon: Icons
-                                                                .group_work,
-                                                            isLoading: HomeCtrl
-                                                                .isHomeLoader,
-                                                            onTap: () {
-                                                              if (!HomeCtrl
-                                                                  .isHomeLoader) {
-                                                                _showGroupOrdersDialog(
-                                                                  context,
-                                                                  HomeCtrl,
-                                                                );
-                                                              }
-                                                            },
-                                                          ),
-                                                        );
-                                                      }
-
-                                                      actionButtons.addAll([
-                                                        _OrderActionButton(
-                                                          label: "Print Bill",
-                                                          color: const Color(
-                                                            0xFF059669,
-                                                          ),
-                                                          icon: Icons
-                                                              .receipt_long,
-                                                          onTap: () async {
-                                                            await _handlePrintBill(
-                                                              context,
-                                                              item,
-                                                            );
-                                                          },
-                                                        ),
-                                                        _OrderActionButton(
-                                                          label: "Print KDS",
-                                                          color: const Color(
-                                                            0xFFF59E0B,
-                                                          ),
-                                                          icon:
-                                                              Icons.restaurant,
-                                                          onTap: () async {
-                                                            await _handlePrintToKDS(
-                                                              context,
-                                                              item,
-                                                            );
-                                                          },
-                                                        ),
-                                                        _OrderActionButton(
-                                                          label: "Adjust",
-                                                          color: const Color(
-                                                            0xFF5C5C8A,
-                                                          ),
-                                                          icon: Icons.tune,
-                                                          onTap: () async {
-                                                            if (HomeCtrl
-                                                                .isHomeLoader) {
-                                                              return;
-                                                            }
-                                                            if (await GlobalFunction()
-                                                                .checkInternetConnection(
-                                                                  context,
-                                                                )) {
-                                                              if (HomeCtrl
-                                                                  .PayBillPaymentListing
-                                                                  .isEmpty) {
-                                                                await HomeCtrl.getPayBillPaymentMethodsListService(
-                                                                  context,
-                                                                );
-                                                              }
-                                                              _showOrderAdjustDialog(
-                                                                context,
-                                                                HomeCtrl,
-                                                                item,
-                                                              );
-                                                            }
-                                                          },
-                                                        ),
-                                                        _OrderActionButton(
-                                                          label: "Reconnect",
-                                                          color: const Color(
-                                                            0xFF2563EB,
-                                                          ),
-                                                          icon: Icons.sync,
-                                                          onTap: () async {
-                                                            final printerProvider =
-                                                                Provider.of<
-                                                                  PrinterIntegrationProvider
-                                                                >(
-                                                                  context,
-                                                                  listen: false,
-                                                                );
-                                                            final success =
-                                                                await printerProvider
-                                                                    .reconnectPrinter();
-                                                            if (!context
-                                                                .mounted)
-                                                              return;
-                                                            ScaffoldMessenger.of(
-                                                              context,
-                                                            ).showSnackBar(
-                                                              SnackBar(
-                                                                content: Text(
-                                                                  success
-                                                                      ? '✅ Printer reconnected'
-                                                                      : '❌ Reconnect failed — check printer is on & on same WiFi',
-                                                                ),
-                                                                backgroundColor:
-                                                                    success
-                                                                    ? Colors
-                                                                          .green
-                                                                    : Colors
-                                                                          .red,
-                                                                duration:
-                                                                    const Duration(
-                                                                      seconds:
-                                                                          3,
-                                                                    ),
-                                                              ),
-                                                            );
-                                                          },
-                                                        ),
-                                                      ]);
-
-                                                      if (actionButtons
-                                                          .isEmpty) {
-                                                        return const SizedBox.shrink();
-                                                      }
-
-                                                      // Full-width 2-column grid: each row stretches buttons
-                                                      // to fill available width for a clean, consistent layout.
-                                                      return Column(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .stretch,
-                                                        mainAxisSize:
-                                                            MainAxisSize.min,
-                                                        children: [
-                                                          for (
-                                                            int i = 0;
-                                                            i <
-                                                                actionButtons
-                                                                    .length;
-                                                            i += 2
-                                                          )
-                                                            Padding(
-                                                              padding:
-                                                                  EdgeInsets.only(
-                                                                    top: i == 0
-                                                                        ? 8
-                                                                        : 6,
-                                                                  ),
-                                                              child: Row(
-                                                                children: [
-                                                                  Expanded(
-                                                                    child:
-                                                                        actionButtons[i],
-                                                                  ),
-                                                                  const SizedBox(
-                                                                    width: 8,
-                                                                  ),
-                                                                  if (i + 1 <
-                                                                      actionButtons
-                                                                          .length)
-                                                                    Expanded(
-                                                                      child:
-                                                                          actionButtons[i +
-                                                                              1],
-                                                                    )
-                                                                  else
-                                                                    const Expanded(
-                                                                      child:
-                                                                          SizedBox(),
-                                                                    ),
-                                                                ],
-                                                              ),
-                                                            ),
-                                                        ],
-                                                      );
-                                                    },
-                                                  ),
-                                                );
-                                              },
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ], // ── close card Column children ──
-                              ), // ── close card Column ──
-                            ), // ── close card SingleChildScrollView ──
-                          ), // ── close card Container ──
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              } else {
-                rowItems.add(const Expanded(child: SizedBox()));
-              }
-              if (i < itemsPerRow - 1) {
-                rowItems.add(const SizedBox(width: 6));
-              }
-            }
-            return IntrinsicHeight(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: rowItems,
-              ),
-            );
-          },
-        );
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).padding.bottom + 100,
+        left: 10,
+        right: 10,
+        top: 6,
+      ),
+      itemCount: data.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 8),
+      itemBuilder: (context, index) {
+        final item = data[index];
+        return _buildOrderListItem(context, item, HomeCtrl);
       },
     );
   }
+
+  //-✅--Order List Item (single row)-------------------------------------------✅-//
+  Widget _buildOrderListItem(
+    BuildContext context,
+    OrderData item,
+    HomeProvider HomeCtrl,
+  ) {
+    final bool hasPreparedItems = item.details.any(
+      (d) => d.status.toLowerCase() == 'prepared',
+    );
+
+        final String timeLabel = () {
+      try {
+        final dt = DateTime.parse(item.orderDate).toLocal();
+        final h = dt.hour > 12 ? dt.hour - 12 : (dt.hour == 0 ? 12 : dt.hour);
+        final ampm = dt.hour >= 12 ? 'PM' : 'AM';
+        final m = dt.minute.toString().padLeft(2, '0');
+        return '$h:$m $ampm';
+      } catch (_) {
+        return '';
+      }
+    }();
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(14),
+      onTap: () {
+        HomeCtrl.selectedOrder = item;
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => OrderDetailPage(HomeCtrl: HomeCtrl, order: item),
+          ),
+        ).then((_) => HomeCtrl.InitializeData(context));
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: GlobalAppColor.WhiteColorCode, // Match theme
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: hasPreparedItems
+                ? const Color(0xFFF9A8D4)
+                : GlobalAppColor.DarkTextColorCode.withOpacity(0.12),
+            width: hasPreparedItems ? 1.5 : 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            // Left: Order number block
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: hasPreparedItems
+                    ? GlobalAppColor.ButtonColor.withOpacity(0.08)
+                    : GlobalAppColor.DarkTextColorCode.withOpacity(0.06),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Center(
+                child: Text(
+                  '#${item.orderNo.toString().padLeft(2, '0')}',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 13,
+                    color: hasPreparedItems
+                        ? GlobalAppColor.ButtonColor
+                        : GlobalAppColor.DarkTextColorCode,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            // Middle: Info
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Row 1: Type pill + Table/Customer
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 7,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFDCFCE7),
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        child: Text(
+                          item.type.toUpperCase(),
+                          style: const TextStyle(
+                            fontSize: 9.5,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF15803D),
+                            letterSpacing: 0.4,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Flexible(
+                        child: Text(
+                          item.tableName != 'N/A' && item.tableName.isNotEmpty
+                              ? 'Table: ${item.tableName}'
+                              : item.customer.isNotEmpty &&
+                                      item.customer != 'N/A'
+                                  ? '👤 ${item.customer}'
+                                  : 'Guest',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.grey.shade600,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 5),
+                  // Row 2: Items + Amount
+                  Row(
+                    children: [
+                      Text(
+                        '${item.details.length} item${item.details.length != 1 ? 's' : ''}',
+                        style: const TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF374151),
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '·',
+                        style: TextStyle(color: Colors.grey.shade400),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'SAR ${item.grandTotal.toStringAsFixed(2)}',
+                        style: const TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF111827),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            // Right: Status pill + time
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                buildTag(
+                  item.orderStatus[0].toUpperCase() +
+                      item.orderStatus.substring(1),
+                  getStatusColor(item.orderStatus),
+                  getStatusBgColor(item.orderStatus),
+                ),
+                if (timeLabel.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    timeLabel,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Colors.grey.shade500,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
 
   //-✅--Responsive Pay Bill Panel-----------------------------------------✅-//
   Widget OPayBillWidget(
@@ -4547,7 +2390,7 @@ class HomeWidget {
       case "preparing":
         return GlobalAppColor.DarkBlueColor;
       case "prepared":
-        return GlobalAppColor.RedCode.withOpacity(.5);
+        return GlobalAppColor.ButtonColor;
       case "served":
         return GlobalAppColor.AvailableCode;
 
@@ -4567,7 +2410,7 @@ class HomeWidget {
       case "preparing":
         return GlobalAppColor.DarkBlueColor.withOpacity(0.15);
       case "prepared":
-        return const Color(0xFFFCE7F3);
+        return GlobalAppColor.ButtonColor.withOpacity(0.12);
       case "served":
         return GlobalAppColor.AvailableCode.withOpacity(0.15);
 
@@ -6738,7 +4581,7 @@ class HomeWidget {
                           child: Text(
                             'Cancel',
                             style: CommonWidget.CommonTitleTextStyle(
-                              color: const Color(0xFF374151),
+                              color: GlobalAppColor.DarkTextColorCode,
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
                             ),
@@ -7986,9 +5829,9 @@ class HomeWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
+        color: GlobalAppColor.BodyBgColorCode,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: GlobalAppColor.DarkTextColorCode.withOpacity(0.08)),
       ),
       child: Theme(
         data: Theme.of(context).copyWith(
@@ -8012,7 +5855,7 @@ class HomeWidget {
                   style: CommonWidget.CommonTitleTextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: const Color(0xFF374151),
+                    color: GlobalAppColor.DarkTextColorCode,
                   ),
                 ),
               ),
@@ -8028,7 +5871,7 @@ class HomeWidget {
             ],
           ),
           children: [
-            const Divider(height: 1, color: Color(0xFFE5E7EB)),
+            Divider(height: 1, color: GlobalAppColor.DarkTextColorCode.withOpacity(0.08)),
             if (payments.isEmpty)
               Padding(
                 padding: const EdgeInsets.all(12),
@@ -8050,7 +5893,7 @@ class HomeWidget {
                       style: CommonWidget.CommonTitleTextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        color: const Color(0xFF374151),
+                        color: GlobalAppColor.DarkTextColorCode,
                       ),
                     ),
                   ],
@@ -8087,7 +5930,7 @@ class HomeWidget {
                                   style: CommonWidget.CommonTitleTextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
-                                    color: const Color(0xFF374151),
+                                    color: GlobalAppColor.DarkTextColorCode,
                                   ),
                                 ),
                                 const SizedBox(height: 1),
@@ -8095,7 +5938,7 @@ class HomeWidget {
                                   "Transaction ID: #${p.orderPayId}",
                                   style: TextStyle(
                                     fontSize: 10,
-                                    color: const Color(0xFF9CA3AF),
+                                    color: GlobalAppColor.DarkTextColorCode.withOpacity(0.5),
                                   ),
                                 ),
                               ],
@@ -8106,7 +5949,7 @@ class HomeWidget {
                             style: CommonWidget.CommonTitleTextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
-                              color: const Color(0xFF374151),
+                              color: GlobalAppColor.DarkTextColorCode,
                             ),
                           ),
                         ],
@@ -10501,7 +8344,7 @@ class _MultiPaymentWidget extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: CommonWidget.CommonTitleTextStyle(
                             fontSize: 12,
-                            color: const Color(0xFF374151),
+                            color: GlobalAppColor.DarkTextColorCode,
                           ),
                         ),
                       ),
@@ -10511,7 +8354,7 @@ class _MultiPaymentWidget extends StatelessWidget {
                         style: CommonWidget.CommonTitleTextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
-                          color: const Color(0xFF111827),
+                          color: GlobalAppColor.DarkTextColorCode,
                         ),
                       ),
                     ],
@@ -10527,7 +8370,7 @@ class _MultiPaymentWidget extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: CommonWidget.CommonTitleTextStyle(
                             fontSize: 12,
-                            color: const Color(0xFF374151),
+                            color: GlobalAppColor.DarkTextColorCode,
                           ),
                         ),
                       ),
@@ -10537,7 +8380,7 @@ class _MultiPaymentWidget extends StatelessWidget {
                         style: CommonWidget.CommonTitleTextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
-                          color: const Color(0xFF111827),
+                          color: GlobalAppColor.DarkTextColorCode,
                         ),
                       ),
                     ],
@@ -10695,7 +8538,7 @@ class _MultiPaymentEntryRowState extends State<_MultiPaymentEntryRow> {
                 style: CommonWidget.CommonTitleTextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: const Color(0xFF374151),
+                  color: GlobalAppColor.DarkTextColorCode,
                 ),
               ),
               if (widget.canDelete && !widget.isLoading)
@@ -11270,6 +9113,1070 @@ class _ItemNoteSheetState extends State<_ItemNoteSheet> {
               : FontWeight.w500,
           color: GlobalAppColor.LightTextColorCode,
         ),
+      ),
+    );
+  }
+}
+//-✅--Order Detail Page--------------------------------------------------✅-//
+/// Full-screen order detail page — opened when user taps an order in the list
+
+//-✅--Order Detail Page--------------------------------------------------✅-//
+/// Full-screen order detail page — exactly matches the web app layout in mobile
+class OrderDetailPage extends StatefulWidget {
+  final HomeProvider HomeCtrl;
+  final OrderData order;
+
+  const OrderDetailPage({
+    super.key,
+    required this.HomeCtrl,
+    required this.order,
+  });
+
+  @override
+  State<OrderDetailPage> createState() => _OrderDetailPageState();
+}
+
+class _OrderDetailPageState extends State<OrderDetailPage> {
+  bool _showTaxDetail = false;
+
+  HomeProvider get HomeCtrl => widget.HomeCtrl;
+  bool _wasPaidAtInit = false;
+
+  OrderData get order {
+    return HomeCtrl.OrderListing.firstWhere(
+      (o) => o.orderId == widget.order.orderId,
+      orElse: () => widget.order,
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _wasPaidAtInit = widget.order.paymentStatus.toLowerCase() == 'paid';
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      HomeCtrl.selectedOrder = order;
+      if (HomeCtrl.PayBillPaymentListing.isEmpty) {
+        HomeCtrl.getPayBillPaymentMethodsListService(context);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final themeCtrl = Provider.of<ThemeProvider>(context); // Watch theme changes
+    final ps = order.paymentStatus.toLowerCase();
+    if (ps == 'paid' && !_wasPaidAtInit) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (Navigator.canPop(context)) {
+          if (HomeCtrl.isPanelOpen) {
+            HomeCtrl.closePanel();
+          }
+          Navigator.pop(context);
+        }
+      });
+    }
+
+    return Consumer<HomeProvider>(
+      builder: (context, homeCtrl, _) {
+        return Stack(
+          children: [
+            Scaffold(
+              backgroundColor: GlobalAppColor.BodyBgColorCode,
+              appBar: AppBar(
+                elevation: 0,
+                backgroundColor: GlobalAppColor.WhiteColorCode,
+                surfaceTintColor: GlobalAppColor.WhiteColorCode,
+                leading: IconButton(
+                  icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
+                  color: GlobalAppColor.DarkTextColorCode,
+                  onPressed: () {
+                    if (homeCtrl.isPanelOpen) {
+                      homeCtrl.closePanel();
+                    }
+                    Navigator.pop(context);
+                  },
+                ),
+                titleSpacing: 0,
+                title: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          'ORDER WORKSPACE',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                            color: GlobalAppColor.DarkTextColorCode.withOpacity(0.6),
+                            letterSpacing: 0.8,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          '#${order.orderNo.toString().padLeft(4, '0')}',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            color: GlobalAppColor.ButtonColor,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Text(
+                      '${order.customer != 'N/A' && order.customer.isNotEmpty ? order.customer : 'Guest Customer'} order',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: GlobalAppColor.DarkTextColorCode,
+                      ),
+                    ),
+                  ],
+                ),
+                actions: [
+                  TextButton.icon(
+                    onPressed: () => _showSummaryPopup(context),
+                    icon: Icon(Icons.analytics_outlined, size: 16, color: GlobalAppColor.ButtonColor),
+                    label: Text(
+                      'Summary',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: GlobalAppColor.ButtonColor,
+                      ),
+                    ),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                    ),
+                  ),
+                ],
+              ),
+              body: ListView(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                children: [
+                  _buildOrderItemsSection(),
+                  const SizedBox(height: 12),
+                  _buildOrderDetailsSection(),
+                  const SizedBox(height: 12),
+                  _buildFinancialSummarySection(),
+                  const SizedBox(height: 12),
+                  _buildPaymentWorkspaceSection(context),
+                  const SizedBox(height: 12),
+                  _buildPaymentActionsSection(context),
+                  const SizedBox(height: 12),
+                ],
+              ),
+            ),
+            HomeWidget().OPayBillWidget(
+              context,
+              homeCtrl.OrderListing,
+              homeCtrl,
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  //----- SECTION 1: Order Items -------------------------------------------//
+  Widget _buildOrderItemsSection() {
+    final activeItems = order.details
+        .where((d) => d.itemType.toLowerCase() != 'modifier')
+        .toList();
+    return _card(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.inventory_2_outlined, size: 18, color: GlobalAppColor.ButtonColor),
+              const SizedBox(width: 8),
+              Text(
+                'Order Items (${activeItems.length})',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: GlobalAppColor.DarkTextColorCode),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          ...activeItems.map((d) => _buildItemRow(d)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildItemRow(OrderDetail d) {
+    final isCancelled = d.status.toLowerCase() == 'cancelled';
+    final qty = d.quantity;
+    final unitPrice = double.tryParse(d.rate) ?? 0.0;
+    final lineTotal = qty * unitPrice;
+    final itemName = d.name != 'N/A' && d.name.isNotEmpty ? d.name : d.product.mPName;
+    final netAmt = double.tryParse(d.netAmt) ?? 0.0;
+    final taxAmt = (double.tryParse(d.subtotal) ?? 0.0) - (double.tryParse(d.netAmt) ?? 0.0);
+
+    Color dotColor;
+    switch (d.status.toLowerCase()) {
+      case 'prepared':
+        dotColor = const Color(0xFF10B981);
+        break;
+      case 'cancelled':
+        dotColor = const Color(0xFFEF4444);
+        break;
+      default:
+        dotColor = const Color(0xFFF59E0B);
+    }
+
+    Color badgeBg;
+    Color badgeText;
+    switch (d.status.toLowerCase()) {
+      case 'prepared':
+        badgeBg = const Color(0xFFDCFCE7);
+        badgeText = const Color(0xFF15803D);
+        break;
+      case 'cancelled':
+        badgeBg = const Color(0xFFFEE2E2);
+        badgeText = const Color(0xFFDC2626);
+        break;
+      default:
+        badgeBg = const Color(0xFFFEF3C7);
+        badgeText = const Color(0xFFD97706);
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: GlobalAppColor.BodyBgColorCode,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: GlobalAppColor.DarkTextColorCode.withOpacity(0.12)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 9, height: 9,
+                decoration: BoxDecoration(shape: BoxShape.circle, color: dotColor),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  itemName,
+                  style: TextStyle(
+                    fontSize: 14.5,
+                    fontWeight: FontWeight.w700,
+                    color: isCancelled ? Colors.grey.shade400 : const Color(0xFF111827),
+                    decoration: isCancelled ? TextDecoration.lineThrough : TextDecoration.none,
+                  ),
+                ),
+              ),
+              const Icon(Icons.block_rounded, size: 15, color: Color(0xFFEF4444)),
+              const SizedBox(width: 8),
+              Text('$qty  ×  ${unitPrice.toStringAsFixed(2)}', style: TextStyle(fontSize: 12.5, color: GlobalAppColor.DarkTextColorCode.withOpacity(0.7))),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(color: badgeBg, borderRadius: BorderRadius.circular(20)),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.inventory_2_outlined, size: 11, color: badgeText),
+                    const SizedBox(width: 3),
+                    Text(
+                      d.status[0].toUpperCase() + d.status.substring(1),
+                      style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600, color: badgeText),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                lineTotal.toStringAsFixed(2),
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: GlobalAppColor.DarkTextColorCode),
+              ),
+            ],
+          ),
+          if (netAmt != 0 || taxAmt != 0) ...[
+            const SizedBox(height: 8),
+            GestureDetector(
+              onTap: () => setState(() => _showTaxDetail = !_showTaxDetail),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: GlobalAppColor.WhiteColorCode,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: GlobalAppColor.DarkTextColorCode.withOpacity(0.12)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Net: ${netAmt.toStringAsFixed(2)}  ·  Tax: ${taxAmt.toStringAsFixed(2)}',
+                      style: TextStyle(fontSize: 11.5, color: GlobalAppColor.DarkTextColorCode.withOpacity(0.7)),
+                    ),
+                    const SizedBox(width: 4),
+                    Icon(
+                      _showTaxDetail ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                      size: 14, color: GlobalAppColor.DarkTextColorCode.withOpacity(0.6),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+          if (d.note.isNotEmpty && d.note != 'N/A' && d.note != 'null') ...[
+            const SizedBox(height: 6),
+            Text('📝 ${d.note}', style: TextStyle(fontSize: 11.5, color: GlobalAppColor.DarkTextColorCode.withOpacity(0.6))),
+          ],
+        ],
+      ),
+    );
+  }
+
+  //----- SECTION 2: Order Details -----------------------------------------//
+  Widget _buildOrderDetailsSection() {
+    final timeStr = () {
+      try {
+        final dt = DateTime.parse(order.orderDate).toLocal();
+        final h = dt.hour > 12 ? dt.hour - 12 : (dt.hour == 0 ? 12 : dt.hour);
+        final ampm = dt.hour >= 12 ? 'PM' : 'AM';
+        return '${h.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')} $ampm';
+      } catch (_) {
+        return '--';
+      }
+    }();
+
+    final dayStr = () {
+      try {
+        final dt = DateTime.parse(order.orderDate).toLocal();
+        final weekday = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'][dt.weekday - 1];
+        final month = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][dt.month - 1];
+        return '$weekday, $month ${dt.day}';
+      } catch (_) {
+        return '--';
+      }
+    }();
+
+    return _card(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.remove_red_eye_outlined, size: 18, color: GlobalAppColor.ButtonColor),
+              const SizedBox(width: 8),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Order Details', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: GlobalAppColor.DarkTextColorCode)),
+                  Text('#${order.orderNo.toString().padLeft(4, '0')}', style: TextStyle(fontSize: 12, color: GlobalAppColor.DarkTextColorCode.withOpacity(0.6))),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(child: _infoCell(label: 'CUSTOMER', value: order.customer != 'N/A' && order.customer.isNotEmpty ? order.customer : 'Guest', sub: 'No mob...')),
+              const SizedBox(width: 8),
+              Expanded(child: _infoCell(label: 'ORDER', value: order.type, sub: 'Regular o...')),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(child: _infoCell(label: 'TABLE', value: order.tableName != 'N/A' && order.tableName.isNotEmpty ? order.tableName : '—', sub: dayStr)),
+              const SizedBox(width: 8),
+              Expanded(child: _infoCell(label: 'TIME', value: timeStr, sub: order.paymentStatus.isNotEmpty ? order.paymentStatus[0].toUpperCase() + order.paymentStatus.substring(1) : 'Unpaid')),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 6,
+            children: [
+              _statusPill('Status: ${order.orderStatus[0].toUpperCase()}${order.orderStatus.substring(1)}'),
+              _statusPill('Payment: ${order.paymentStatus.isNotEmpty ? order.paymentStatus[0].toUpperCase() + order.paymentStatus.substring(1) : 'Unpaid'}'),
+              _statusPill('Priority: ${order.priority[0].toUpperCase()}${order.priority.substring(1)}'),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _infoCell({required String label, required String value, String? sub}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: GlobalAppColor.BodyBgColorCode,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: GlobalAppColor.DarkTextColorCode.withOpacity(0.12)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label, style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.w600, color: GlobalAppColor.DarkTextColorCode.withOpacity(0.6), letterSpacing: 0.7)),
+                const SizedBox(height: 2),
+                Text(value, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: GlobalAppColor.DarkTextColorCode), overflow: TextOverflow.ellipsis),
+              ],
+            ),
+          ),
+          if (sub != null) ...[
+            const SizedBox(width: 4),
+            Text(sub, style: TextStyle(fontSize: 10.5, color: GlobalAppColor.DarkTextColorCode.withOpacity(0.5)), overflow: TextOverflow.ellipsis),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _statusPill(String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: GlobalAppColor.WhiteColorCode,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: GlobalAppColor.DarkTextColorCode.withOpacity(0.12)),
+      ),
+      child: Text(label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: GlobalAppColor.DarkTextColorCode)),
+    );
+  }
+
+  //----- SECTION 3: Financial Summary -------------------------------------//
+  Widget _buildFinancialSummarySection() {
+    final cancelledTotal = order.details
+        .where((d) => d.status.toLowerCase() == 'cancelled')
+        .fold(0.0, (sum, d) => sum + (d.quantity * (double.tryParse(d.rate) ?? 0.0)));
+    final netAmount = order.displayNetAmount;
+    final taxAmount = order.calculatedTaxAmt;
+    final totalAmt = double.tryParse(order.totalAmt) ?? 0.0;
+    final chargeAmt = double.tryParse(order.chargeAmt) ?? 0.0;
+    final grandTotal = order.grandTotal;
+
+    return _card(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.attach_money_rounded, size: 18, color: GlobalAppColor.ButtonColor),
+              const SizedBox(width: 8),
+              Text('Financial Summary', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: GlobalAppColor.DarkTextColorCode)),
+            ],
+          ),
+          const SizedBox(height: 14),
+          _finRow('Cancelled Items', '- ${cancelledTotal.toStringAsFixed(2)}', valueColor: const Color(0xFFEF4444)),
+          _finRow('Net Amount', netAmount.toStringAsFixed(2), valueColor: GlobalAppColor.ButtonColor),
+          const SizedBox(height: 6),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: GlobalAppColor.BodyBgColorCode,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: GlobalAppColor.DarkTextColorCode.withOpacity(0.12)),
+            ),
+            child: Row(
+              children: [
+                Text('% Total Tax', style: TextStyle(fontSize: 13.5, color: GlobalAppColor.DarkTextColorCode.withOpacity(0.7))),
+                const Spacer(),
+                Text(taxAmount.toStringAsFixed(2), style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: GlobalAppColor.DarkTextColorCode)),
+              ],
+            ),
+          ),
+          const SizedBox(height: 10),
+          _finRow('Total Amount', totalAmt.toStringAsFixed(2)),
+          if (chargeAmt > 0) _finRow('Charges', chargeAmt.toStringAsFixed(2)),
+          if ((double.tryParse(order.adjustAmt) ?? 0) != 0)
+            _finRow('Adjustment', '${(double.tryParse(order.adjustAmt) ?? 0) >= 0 ? '+' : ''}${order.adjustAmt}'),
+          Divider(color: Colors.grey.shade200, thickness: 1.5, height: 20),
+          Row(
+            children: [
+              Text('Grand Total', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: GlobalAppColor.DarkTextColorCode)),
+              const Spacer(),
+              Text(grandTotal.toStringAsFixed(2), style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: GlobalAppColor.DarkTextColorCode)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _finRow(String label, String value, {Color? valueColor}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5),
+      child: Row(
+        children: [
+          Text(label, style: TextStyle(fontSize: 13.5, color: GlobalAppColor.DarkTextColorCode.withOpacity(0.7))),
+          const Spacer(),
+          Text(value, style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: valueColor ?? const Color(0xFF374151))),
+        ],
+      ),
+    );
+  }
+
+  //----- SECTION 4: Payment Workspace ------------------------------------//
+  Widget _buildPaymentWorkspaceSection(BuildContext context) {
+    final adjustAmt = double.tryParse(order.adjustAmt) ?? 0;
+    final refundAmt = double.tryParse(order.refundAmt) ?? 0;
+    final paid = order.totalPaidAmount;
+    final remaining = order.remainingBalance;
+    final isFullyPaid = remaining <= 0.01 && paid > 0;
+
+    return _card(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.attach_money_rounded, size: 18, color: Color(0xFF15803D)),
+              const SizedBox(width: 8),
+              Text('Payment Workspace', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: GlobalAppColor.DarkTextColorCode)),
+            ],
+          ),
+          const SizedBox(height: 14),
+          if (!isFullyPaid) ...[
+            Row(
+              children: [
+                Expanded(child: _payInfoCell(label: 'ADJUST AMOUNT', value: adjustAmt == 0 ? 'No adjustment' : 'SAR ${adjustAmt.toStringAsFixed(2)}')),
+                const SizedBox(width: 8),
+                Expanded(child: _payInfoCell(label: 'REFUND AMOUNT', value: refundAmt == 0 ? 'No refund' : 'SAR ${refundAmt.toStringAsFixed(2)}')),
+              ],
+            ),
+            const SizedBox(height: 10),
+          ],
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              color: GlobalAppColor.BodyBgColorCode,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: GlobalAppColor.DarkTextColorCode.withOpacity(0.12)),
+            ),
+            child: Row(
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Paid', style: TextStyle(fontSize: 11, color: GlobalAppColor.DarkTextColorCode.withOpacity(0.6))),
+                    const SizedBox(height: 2),
+                    Text(paid.toStringAsFixed(2), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Color(0xFF10B981))),
+                  ],
+                ),
+                const Spacer(),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text('Remaining', style: TextStyle(fontSize: 11, color: GlobalAppColor.DarkTextColorCode.withOpacity(0.6))),
+                    const SizedBox(height: 2),
+                    Text(remaining.toStringAsFixed(2), style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: GlobalAppColor.ButtonColor)),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+          if (paid > 0) ...[
+            HomeWidget()._buildAlreadyPaidTransactions(context, HomeCtrl),
+            const SizedBox(height: 14),
+          ],
+          if (isFullyPaid)
+            Row(
+              children: [
+                Expanded(
+                  flex: 1,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      HomeCtrl.selectedOrder = order;
+                      HomeCtrl.cancelOrderService(context, order.orderId, '');
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFDC2626),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                      elevation: 0,
+                    ),
+                    child: const Text('Cancel', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  flex: 1,
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      HomeCtrl.selectedOrder = order;
+                      showDialog(context: context, builder: (_) => _BillPrintDialog(order: HomeCtrl.selectedOrder ?? widget.order));
+                    },
+                    icon: const Icon(Icons.print_outlined, size: 15),
+                    label: const Text('Print', style: TextStyle(fontSize: 13)),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: const Color(0xFF374151),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      side: BorderSide(color: GlobalAppColor.DarkTextColorCode.withOpacity(0.12)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                    ),
+                  ),
+                ),
+              ],
+            )
+          else
+            Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (HomeCtrl.PayBillPaymentListing.isEmpty) {
+                        HomeCtrl.getPayBillPaymentMethodsListService(context);
+                      }
+                      HomeCtrl.openPanelWithData(order);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: GlobalAppColor.ButtonColor,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                      elevation: 0,
+                    ),
+                    child: const Text('Pay Bill', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  flex: 3,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      HomeCtrl.selectedOrder = order;
+                      HomeCtrl.cancelOrderService(context, order.orderId, '');
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFDC2626),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                      elevation: 0,
+                    ),
+                    child: const Text('Cancel', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  flex: 2,
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      HomeCtrl.selectedOrder = order;
+                      showDialog(context: context, builder: (_) => _BillPrintDialog(order: HomeCtrl.selectedOrder ?? widget.order));
+                    },
+                    icon: const Icon(Icons.print_outlined, size: 15),
+                    label: const Text('Print', style: TextStyle(fontSize: 13)),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: const Color(0xFF374151),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      side: BorderSide(color: GlobalAppColor.DarkTextColorCode.withOpacity(0.12)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _payInfoCell({required String label, required String value}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: GlobalAppColor.BodyBgColorCode,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: GlobalAppColor.DarkTextColorCode.withOpacity(0.12)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: TextStyle(fontSize: 9, fontWeight: FontWeight.w600, color: GlobalAppColor.DarkTextColorCode.withOpacity(0.6), letterSpacing: 0.7)),
+          const SizedBox(height: 4),
+          Text(value, style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: GlobalAppColor.DarkTextColorCode)),
+        ],
+      ),
+    );
+  }
+
+  //----- SECTION 5: Payment Actions ---------------------------------------//
+  Widget _buildPaymentActionsSection(BuildContext context) {
+    final isCompleted = order.orderStatus.toLowerCase() == 'completed' || order.orderStatus.toLowerCase() == 'cancelled';
+
+    return _card(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Payment Actions', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: GlobalAppColor.DarkTextColorCode)),
+          const SizedBox(height: 14),
+          // Status & Priority dropdowns
+          Row(
+            children: [
+              Expanded(
+                child: _dropdownRow(
+                  prefix: 'Status',
+                  items: HomeCtrl.DropDownOne.map((e) => e.title!).toList(),
+                  value: order.selectedDropDownOne ??
+                      HomeCtrl.DropDownOne.firstWhere(
+                        (e) => e.title!.toLowerCase() == order.orderStatus.toLowerCase(),
+                        orElse: () => HomeCtrl.DropDownOne[0],
+                      ).title!,
+                  onChanged: isCompleted
+                      ? null
+                      : (val) {
+                          if (val != null) {
+                            setState(() {
+                              order.selectedDropDownOne = val;
+                            });
+                            HomeCtrl.UpdatePriorityOrderStatusService(context, order.orderId.toString(), val, 'status');
+                          }
+                        },
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _dropdownRow(
+                  prefix: 'Priority',
+                  items: HomeCtrl.DropDownTwo.map((e) => e.title!).toList(),
+                  value: order.selectedDropDownTwo ??
+                      HomeCtrl.DropDownTwo.firstWhere(
+                        (e) => e.title!.toLowerCase() == order.priority.toLowerCase(),
+                        orElse: () => HomeCtrl.DropDownTwo[0],
+                      ).title!,
+                  onChanged: isCompleted
+                      ? null
+                      : (val) {
+                          if (val != null) {
+                            setState(() {
+                              order.selectedDropDownTwo = val;
+                            });
+                            HomeCtrl.UpdatePriorityOrderStatusService(context, order.orderId.toString(), val, 'priority');
+                          }
+                        },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          // Print | Epson | KDS
+          Row(
+            children: [
+              Expanded(child: _actionBtn(Icons.print_outlined, 'Print', onTap: () {
+                HomeCtrl.selectedOrder = order;
+                showDialog(context: context, builder: (_) => _BillPrintDialog(order: HomeCtrl.selectedOrder ?? widget.order));
+              })),
+              const SizedBox(width: 8),
+              Expanded(child: _actionBtn(Icons.print_outlined, 'Epson', onTap: () {
+                HomeCtrl.selectedOrder = order;
+                showDialog(context: context, builder: (_) => _BillPrintDialog(order: HomeCtrl.selectedOrder ?? widget.order));
+              })),
+              const SizedBox(width: 8),
+              Expanded(child: _actionBtn(Icons.print_outlined, 'KDS', onTap: () {
+                HomeCtrl.selectedOrder = order;
+                showDialog(context: context, builder: (_) => _KdsPrintDialog(order: HomeCtrl.selectedOrder ?? widget.order));
+              })),
+            ],
+          ),
+          const SizedBox(height: 8),
+          // Adjust | Partial Payment
+          Row(
+            children: [
+              Expanded(child: _actionBtn(Icons.tune_rounded, 'Adjust Amount', onTap: () {
+                HomeCtrl.selectedOrder = order;
+                HomeWidget()._showOrderAdjustDialog(context, HomeCtrl, HomeCtrl.selectedOrder ?? widget.order);
+              })),
+              const SizedBox(width: 8),
+              Expanded(child: _actionBtn(Icons.payment_outlined, 'Partial Payment', onTap: () {
+                HomeCtrl.selectedOrder = order;
+                HomeWidget()._showPartialPaymentDialog(context, HomeCtrl, HomeCtrl.selectedOrder ?? widget.order);
+              })),
+            ],
+          ),
+          const SizedBox(height: 8),
+          // Refund | Recalculate
+          Row(
+            children: [
+              Expanded(child: _actionBtn(Icons.currency_exchange_rounded, 'Refund', onTap: () {
+                HomeCtrl.selectedOrder = order;
+                HomeWidget()._showRefundDialog(context, HomeCtrl, HomeCtrl.selectedOrder ?? widget.order);
+              })),
+              const SizedBox(width: 8),
+              Expanded(child: _actionBtn(Icons.refresh_rounded, 'Recalculate', onTap: () {
+                HomeCtrl.selectedOrder = order;
+                HomeCtrl.InitializeData(context);
+              })),
+            ],
+          ),
+          const SizedBox(height: 8),
+          // Group Orders — full width
+          _actionBtn(Icons.group_work_outlined, 'Group Orders', onTap: () {
+            HomeCtrl.selectedOrder = order;
+            HomeWidget()._showGroupOrdersDialog(context, HomeCtrl);
+          }, fullWidth: true),
+        ],
+      ),
+    );
+  }
+
+  Widget _dropdownRow({
+    required String prefix,
+    required List<String> items,
+    required String value,
+    required ValueChanged<String?>? onChanged,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+      decoration: BoxDecoration(
+        color: GlobalAppColor.BodyBgColorCode,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: GlobalAppColor.DarkTextColorCode.withOpacity(0.12)),
+      ),
+      child: Row(
+        children: [
+          Text(prefix, style: TextStyle(fontSize: 11.5, color: GlobalAppColor.DarkTextColorCode.withOpacity(0.6))),
+          Expanded(
+            child: HomeWidget().buildDropdown(
+              items: items,
+              value: value,
+              onChanged: onChanged != null ? (val) => onChanged(val) : null,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _actionBtn(IconData icon, String label, {required VoidCallback onTap, bool fullWidth = false}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: fullWidth ? double.infinity : null,
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+        decoration: BoxDecoration(
+          color: GlobalAppColor.BodyBgColorCode,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: GlobalAppColor.DarkTextColorCode.withOpacity(0.12)),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 15, color: GlobalAppColor.DarkTextColorCode),
+            const SizedBox(width: 6),
+            Text(label, style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: GlobalAppColor.DarkTextColorCode)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  //----- BOTTOM SUMMARY BAR -----------------------------------------------//
+  Widget _buildBottomSummaryBar(BuildContext context) {
+    final activeCount = order.details
+        .where((d) => d.status.toLowerCase() != 'cancelled' && d.itemType.toLowerCase() != 'modifier')
+        .length;
+    final subtotal = double.tryParse(order.totalAmt) ?? 0.0;
+    final discount = double.tryParse(order.discountAmt) ?? 0.0;
+    final tax = order.calculatedTaxAmt;
+    final grand = order.grandTotal;
+    final balance = order.remainingBalance;
+
+    return Container(
+      padding: EdgeInsets.only(left: 12, right: 12, top: 10, bottom: MediaQuery.of(context).padding.bottom + 10),
+      decoration: BoxDecoration(color: GlobalAppColor.WhiteColorCode, border: Border(top: BorderSide(color: GlobalAppColor.DarkTextColorCode.withOpacity(0.12)))),
+      child: Row(
+        children: [
+          _barCell('Item Count', activeCount.toString()),
+          _barCell('Subtotal', subtotal.toStringAsFixed(2)),
+          _barCell('Discount', discount.toStringAsFixed(2), valueColor: const Color(0xFF10B981)),
+          _barCell('Tax', tax.toStringAsFixed(2)),
+          _barCell('Grand Total', grand.toStringAsFixed(2), valueColor: GlobalAppColor.ButtonColor, highlight: true),
+          _barCell('Balance Due', balance.toStringAsFixed(2), valueColor: const Color(0xFFDC2626), bgColor: const Color(0xFFFEF2F2)),
+        ],
+      ),
+    );
+  }
+
+  Widget _barCell(String label, String value, {Color? valueColor, Color? bgColor, bool highlight = false}) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 3),
+        decoration: bgColor != null ? BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(6)) : null,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(label, style: TextStyle(fontSize: 8.5, color: GlobalAppColor.DarkTextColorCode.withOpacity(0.6)), overflow: TextOverflow.ellipsis),
+            const SizedBox(height: 2),
+            Text(value, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: valueColor ?? const Color(0xFF374151)), overflow: TextOverflow.ellipsis),
+          ],
+        ),
+      ),
+    );
+  }
+
+  //----- SHARED CARD WRAPPER -----------------------------------------------//
+  Widget _card({required Widget child}) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: GlobalAppColor.WhiteColorCode,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 2))],
+      ),
+      child: child,
+    );
+  }
+
+  void _showSummaryPopup(BuildContext context) {
+    final activeCount = order.details
+        .where((d) => d.status.toLowerCase() != 'cancelled' && d.itemType.toLowerCase() != 'modifier')
+        .length;
+    final subtotal = double.tryParse(order.totalAmt) ?? 0.0;
+    final discount = double.tryParse(order.discountAmt) ?? 0.0;
+    final tax = order.calculatedTaxAmt;
+    final grand = order.grandTotal;
+    final balance = order.remainingBalance;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext ctx) {
+        return Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          elevation: 12,
+          clipBehavior: Clip.antiAlias,
+          child: Container(
+            width: MediaQuery.of(ctx).size.width > 600 ? 400 : MediaQuery.of(ctx).size.width * 0.85,
+            decoration: BoxDecoration(
+              color: GlobalAppColor.WhiteColorCode,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [GlobalAppColor.ButtonColor, GlobalAppColor.ButtonDarkColor],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                    ),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        alignment: Alignment.center,
+                        child: Icon(Icons.analytics_outlined, color: GlobalAppColor.WhiteColorCode, size: 20),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'Order Summary',
+                              style: CommonWidget.CommonTitleTextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: GlobalAppColor.WhiteColorCode,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Financial details for Order #${order.orderNo.toString().padLeft(4, '0')}',
+                              style: CommonWidget.CommonTitleTextStyle(
+                                fontSize: 11,
+                                color: const Color(0xFFE0E7FF),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.close, color: GlobalAppColor.WhiteColorCode, size: 20),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                        onPressed: () => Navigator.pop(ctx),
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _popupRow('Item Count', activeCount.toString()),
+                      _popupRow('Subtotal', 'SAR ${subtotal.toStringAsFixed(2)}'),
+                      _popupRow('Discount', '- SAR ${discount.toStringAsFixed(2)}', valueColor: const Color(0xFF10B981)),
+                      _popupRow('Tax', 'SAR ${tax.toStringAsFixed(2)}'),
+                      const Divider(height: 24, color: Color(0xFFE2E8F0), thickness: 1),
+                      _popupRow('Grand Total', 'SAR ${grand.toStringAsFixed(2)}', isBold: true, valueColor: GlobalAppColor.ButtonColor),
+                      _popupRow('Balance Due', 'SAR ${balance.toStringAsFixed(2)}', isBold: true, valueColor: const Color(0xFFDC2626)),
+                      const SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: () => Navigator.pop(ctx),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: GlobalAppColor.ButtonColor,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          elevation: 0,
+                        ),
+                        child: const Text('Close Summary', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5)),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _popupRow(String label, String value, {bool isBold = false, Color? valueColor}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5),
+      child: Row(
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: isBold ? FontWeight.w700 : FontWeight.w500,
+              color: const Color(0xFF6B7280),
+            ),
+          ),
+          const Spacer(),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: isBold ? FontWeight.w700 : FontWeight.w600,
+              color: valueColor ?? const Color(0xFF111827),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -689,9 +689,9 @@ class CommonWidget {
     String hintText = "Search by order ID table",
     TextAlign textAlign = TextAlign.left,
     TextAlignVertical textAlignVertical = TextAlignVertical.center,
-    Color cursorColor = Colors.black,
+    Color? cursorColor,
     TextStyle? textStyle,
-    Color fillColor = Colors.white,
+    Color? fillColor,
     bool isDense = true,
     EdgeInsetsGeometry contentPadding = const EdgeInsets.symmetric(
       vertical: 13,
@@ -713,7 +713,7 @@ class CommonWidget {
           keyboardType: keyboardType,
           textAlign: textAlign,
           textAlignVertical: textAlignVertical,
-          cursorColor: cursorColor,
+          cursorColor: cursorColor ?? GlobalAppColor.DarkTextColorCode,
           textCapitalization: TextCapitalization.words,
           style: textStyle ?? CommonWidget.CommonTitleTextStyle(),
           // 🔹 Trigger optional onTap if provided
@@ -730,7 +730,7 @@ class CommonWidget {
               color: GlobalAppColor.DarkTextColorCode.withOpacity(.7),
             ),
             filled: true,
-            fillColor: fillColor,
+            fillColor: fillColor ?? GlobalAppColor.BodyBgColorCode,
             enabledBorder: enabledBorder ?? CommonWidget().buildBorder(),
             focusedBorder: focusedBorder ?? CommonWidget().buildBorder(),
             disabledBorder: disabledBorder ?? CommonWidget().buildBorder(),
@@ -835,13 +835,13 @@ class CommonWidget {
 
     return Container(
       width: MediaQuery.of(context).size.width,
-      height: kToolbarHeight + topPadding,
-      padding: EdgeInsets.only(top: topPadding, left: 14, right: 14),
+      height: kToolbarHeight + topPadding + 34,
+      padding: EdgeInsets.only(top: topPadding + 4, left: 14, right: 14, bottom: 4),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: GlobalAppColor.WhiteColorCode, // Match theme
         border: Border(
           bottom: BorderSide(
-            color: Colors.grey.shade100,
+            color: GlobalAppColor.DarkTextColorCode.withOpacity(0.08),
             width: 1,
           ),
         ),
@@ -855,15 +855,26 @@ class CommonWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  "Welcome back, $displayName 👋",
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: CommonWidget.CommonTitleTextStyle(
-                    fontSize: screenWidth < 360 ? 14 : 16,
-                    fontWeight: FontWeight.bold,
+                  "Welcome back",
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: GlobalAppColor.DarkTextColorCode.withOpacity(0.55),
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: 1),
+                Text(
+                  "$displayName 👋",
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
+                    color: GlobalAppColor.DarkTextColorCode,
+                    height: 1.1,
+                  ),
+                ),
+                const SizedBox(height: 4),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
@@ -909,11 +920,11 @@ class CommonWidget {
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.grey.shade50,
+                    color: GlobalAppColor.BodyBgColorCode,
                   ),
                   child: Icon(
                     Icons.notifications_none_rounded,
-                    color: Colors.grey.shade700,
+                    color: GlobalAppColor.DarkTextColorCode.withOpacity(0.8),
                     size: 20,
                   ),
                 ),

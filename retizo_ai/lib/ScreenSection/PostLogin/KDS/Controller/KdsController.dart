@@ -297,8 +297,9 @@ class KdsProvider with ChangeNotifier {
   /// Fetches orders ready to serve from /kitchen/ready endpoint
   Future<void> GetReadyOrderListService(
     BuildContext context,
-    DateTime selectedDate,
-  ) async {
+    DateTime selectedDate, {
+    bool silent = false,
+  }) async {
     if (!context.mounted) return;
     if (_isReadyFetching) return; // ✅ Prevent duplicate concurrent calls
     _isReadyFetching = true;
@@ -1482,7 +1483,7 @@ class KdsProvider with ChangeNotifier {
         );
       }
       await GetKitchenOrderListService(context, selectedKDSDate);
-      await GetReadyOrderListService(context, selectedKDSDate);
+      await GetReadyOrderListService(context, selectedKDSDate, silent: false);
       SearchKDSController.clear();
       myFocusNodeSearchKDS.unfocus();
     }
@@ -1695,18 +1696,20 @@ class KdsProvider with ChangeNotifier {
   // -----------------------------
   // Updated: InitializeData
   // -----------------------------
-  Future<void> InitializeData(BuildContext context) async {
+  Future<void> InitializeData(BuildContext context, {bool silent = false}) async {
     if (!context.mounted) return;
 
     resetPreparedTracking();
-    setKdsLoading(true);
+    if (!silent) {
+      setKdsLoading(true);
+    }
     KitchenOrderListing = [];
 
     // STEP A: Get fresh kitchen orders (ordered/preparing status)
-    await GetKitchenOrderListService(context, selectedKDSDate);
+    await GetKitchenOrderListService(context, selectedKDSDate, silent: silent);
 
     // STEP A2: Get ready-to-serve orders (prepared status) from /kitchen/ready
-    await GetReadyOrderListService(context, selectedKDSDate);
+    await GetReadyOrderListService(context, selectedKDSDate, silent: silent);
 
     // STEP B: Restore previous timers (and possibly persisted activeOrderId)
     await restoreTimerState();

@@ -171,7 +171,7 @@ class KdsWidget {
       ),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(AppBorderRadius.sm),
-        color: Colors.white,
+        color: GlobalAppColor.WhiteColorCode,
         border: Border.all(
           color: selectedIndex == index
               ? GlobalAppColor
@@ -373,7 +373,7 @@ class KdsWidget {
     return Container(
       margin: EdgeInsets.only(bottom: AppDimensions.md),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: GlobalAppColor.WhiteColorCode,
         borderRadius: AppBorderRadius.card,
         boxShadow: AppShadows.card,
       ),
@@ -387,7 +387,7 @@ class KdsWidget {
               horizontal: AppDimensions.md,
             ),
             decoration: BoxDecoration(
-              color: Color(0xFFE91E63),
+              color: GlobalAppColor.ButtonColor,
               borderRadius: AppBorderRadius.topOnly(radius: AppBorderRadius.md),
             ),
             child: Row(
@@ -2506,7 +2506,7 @@ class KdsWidget {
           child: Container(
             padding: const EdgeInsets.only(left: 8),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: GlobalAppColor.BodyBgColorCode,
               borderRadius: BorderRadius.circular(5),
               border: Border.all(
                 color: GlobalAppColor.DarkTextColorCode.withOpacity(.1),
@@ -2573,6 +2573,7 @@ class KdsWidget {
                     await KdsCtrl.GetReadyOrderListService(
                       context,
                       KdsCtrl.selectedKDSDate,
+                      silent: false,
                     );
                     // API calls
                     if (KdsCtrl.selectedFilterOrderTab == 0) {
@@ -2612,7 +2613,7 @@ class KdsWidget {
                     decoration: BoxDecoration(
                       color: isSameDate(KdsCtrl.selectedKDSDate, DateTime.now())
                           ? GlobalAppColor.ButtonDarkColor
-                          : const Color(0xFFF3F4F6),
+                          : GlobalAppColor.BodyBgColorCode,
                       borderRadius: const BorderRadius.only(
                         topRight: Radius.circular(3),
                         bottomRight: Radius.circular(3),
@@ -2642,7 +2643,7 @@ class KdsWidget {
             hintText: "Select Station",
             iconPadding: 0,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: GlobalAppColor.BodyBgColorCode,
               borderRadius: BorderRadius.circular(6),
               border: Border.all(
                 color: GlobalAppColor.DarkTextColorCode.withOpacity(.1),
@@ -2665,6 +2666,7 @@ class KdsWidget {
                     await KdsCtrl.GetReadyOrderListService(
                       context,
                       KdsCtrl.selectedKDSDate,
+                      silent: false,
                     );
                   },
             hintStyle: CommonWidget.CommonTitleTextStyle(
@@ -2703,7 +2705,7 @@ class KdsWidget {
                   },
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: GlobalAppColor.BodyBgColorCode,
                 borderRadius: BorderRadius.circular(5),
                 border: Border.all(
                   color: GlobalAppColor.DarkTextColorCode.withOpacity(.1),
@@ -2718,6 +2720,7 @@ class KdsWidget {
                       "Refresh",
                       style: CommonWidget.CommonTitleTextStyle(
                         fontWeight: FontWeight.w500,
+                        color: GlobalAppColor.DarkTextColorCode,
                       ),
                     ),
                     const SizedBox(width: 5),
@@ -2731,7 +2734,7 @@ class KdsWidget {
                               color: Colors.grey,
                             ),
                           )
-                        : const Icon(Icons.refresh),
+                        : Icon(Icons.refresh, color: GlobalAppColor.DarkTextColorCode),
                   ],
                 ),
               ),
@@ -2796,9 +2799,9 @@ class KdsWidget {
         return Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: GlobalAppColor.WhiteColorCode,
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: Colors.grey.shade200),
+            border: Border.all(color: GlobalAppColor.DarkTextColorCode.withOpacity(0.08)),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.04),
