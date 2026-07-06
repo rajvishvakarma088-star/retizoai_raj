@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!--
+        Trust system + user-installed CAs for the production backend
+        which runs on a non-standard port (6050).
+        Without this, some Android devices reject the TLS handshake
+        even when the certificate is otherwise valid.
+    -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">rms.cul-ai.com</domain>
+        <trust-anchors>
+            <!-- System (pre-installed) CA certificates -->
+            <certificates src="system"/>
+            <!-- User-installed CA certificates (lets test CAs work too) -->
+            <certificates src="user"/>
+        </trust-anchors>
+    </domain-config>
+    <!-- Default: trust system CAs for all other domains -->
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system"/>
+        </trust-anchors>
+    </base-config>
+</network-security-config>

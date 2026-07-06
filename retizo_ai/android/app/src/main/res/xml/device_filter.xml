@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Epson USB Printer Device Filter -->
+<!-- Allows the app to access Epson printers via USB -->
+<resources>
+    <!-- Epson vendor ID: 1208 (0x04B8) -->
+    <usb-device vendor-id="1208" />
+</resources>

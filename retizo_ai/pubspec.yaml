@@ -1,0 +1,78 @@
+name: culai
+description: "A new Flutter project."
+# The following line prevents the package from being accidentally published to
+# pub.dev using `flutter pub publish`. This is preferred for private packages.
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # The following adds the Cupertino Icons font to your application.
+  # Use with the CupertinoIcons class for iOS style icons.
+  cupertino_icons: any
+  google_fonts: any
+  material_symbols_icons: any
+  font_awesome_flutter: any
+  shared_preferences: any
+  flutter_secure_storage: any
+  intl: any
+  flutter_svg: any
+  dropdown_button2: any
+  responsive_framework: any
+  #-- Permissions for HTTPS------#
+  http: any
+  #-- Permissions for Internet --#
+  cached_network_image: any
+  flutter_cache_manager: any
+  connectivity_plus: ^5.0.0
+  #-- Permissions for Calender --#
+  flutter_datetime_picker_plus: any
+  permission_handler: any
+  provider: any
+  path_provider: any
+  #-- Permissions for Camera ----#
+  app_settings: any
+  #-- Animation--------------- --#
+  flutter_animate: any
+  flutter_staggered_animations: any
+  animate_do: any
+  animated_text_kit: any
+  shimmer: any
+  #-- Printer Integration ---- --#
+  # Official Epson ePOS SDK integration via platform channel (see /android/app/src/main/)
+  # Community fallback packages for broader device support
+  esc_pos_utils: ^1.1.0      # ESC/POS command utilities
+  esc_pos_printer: ^4.1.0    # Network thermal printer support
+  print_bluetooth_thermal: ^1.1.1  # Bluetooth thermal printer fallback
+  qr_flutter: any                   # QR code bitmap generation (ZATCA receipt QR)
+  #-------------------------- --#
+  fluttertoast: any
+  collection: any
+  audioplayers: ^6.6.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^5.0.0
+
+flutter:
+
+  uses-material-design: true
+
+  assets:
+    - assets/
+    - assets/SVG/
+    - assets/Images/
+    - assets/sounds/
+
+fonts:
+  - family: RoobertPRO
+    fonts:
+      - asset: fonts/roobert-pro-regular.ttf

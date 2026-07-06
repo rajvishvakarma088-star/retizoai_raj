@@ -1,3 +1,4 @@
 # Ignore backend/frontend source zip and extracted contents
 Retizo_AI-main.zip
 retizo_ai_source/
+.DS_Store

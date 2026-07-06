@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Epson USB Printer Accessory Filter -->
+<!-- Allows the app to access Epson printers via USB accessory mode -->
+<resources>
+    <!-- Epson manufacturer identifier for accessory mode -->
+    <usb-accessory manufacturer="EPSON" />
+</resources>
