@@ -15,34 +15,20 @@ class HomeScreen extends StatefulWidget {
 class HomeScreenState extends State<HomeScreen>
     with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   Timer? _autoRefreshTimer;
+  bool _isAutoRefreshActive = true;
+  bool _isCardExpanded = true;
 
-  //-✅-------------------------------------------------------------------✅-//
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<HomeProvider>().InitializeData(context);
-
-      // ✅ Check drawer status after initialization
-      _checkDrawerStatus();
-
-      // Note: Printer must be configured manually in Settings
-      // Auto-initialization disabled for testing phase
-    });
-    // ✅ Periodic auto-refresh every 8 seconds — refresh order list + counts + drawer status
+  void _startAutoRefreshTimer() {
+    _autoRefreshTimer?.cancel();
     _autoRefreshTimer = Timer.periodic(const Duration(seconds: 8), (_) {
-      if (!mounted) return;
+      if (!mounted || !_isAutoRefreshActive) return;
       final home = context.read<HomeProvider>();
-      // ✅ Check if a new order was created and full refresh is needed
       if (home.pendingRefresh) {
         home.setPendingRefresh(false);
         home.InitializeData(context);
         return;
       }
-      // ✅ Sync drawer state with server (detects if web closed the drawer)
       _checkDrawerStatus(silent: true);
-      // Refresh order list for current filter + counts (non-destructive)
       final formattedDate =
           "${home.selectedDate.year}-${home.selectedDate.month.toString().padLeft(2, '0')}-${home.selectedDate.day.toString().padLeft(2, '0')}";
       home.getOrderListService(
@@ -53,6 +39,18 @@ class HomeScreenState extends State<HomeScreen>
       );
       home.GetOrderCountService(context);
     });
+  }
+
+  //-✅-------------------------------------------------------------------✅-//
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<HomeProvider>().InitializeData(context);
+      _checkDrawerStatus();
+    });
+    _startAutoRefreshTimer();
   }
 
   //-✅---Check Drawer Status---------------------------------------------✅-//
@@ -93,6 +91,10 @@ class HomeScreenState extends State<HomeScreen>
   //-✅-------------------------------------------------------------------✅-//
   @override
   Widget build(BuildContext context) {
+    // Watch providers to trigger rebuild on language or theme change
+    Provider.of<LanguageProvider>(context);
+    Provider.of<ThemeProvider>(context);
+
     return Consumer<HomeProvider>(
       builder: (context, HomeCtrl, child) {
         final userData = Provider.of<UserInfoProvider>(
@@ -138,142 +140,403 @@ class HomeScreenState extends State<HomeScreen>
                               );
                             }
                           },
-                          onCloseDrawer: () async {
-                            // Show Close Drawer Dialog
-                            await CloseDrawerDialog.show(context);
-
-                            // Refresh order list after closing drawer
-                            if (mounted) {
-                              HomeCtrl.GetOrderCountService(context);
-                            }
-                          },
-                          onOpenDrawer: () async {
-                            await OpenDrawerDialog.show(context);
-                            if (mounted) {
-                              HomeCtrl.GetOrderCountService(context);
-                            }
-                          },
-                          onUndoDrawer: () async {
-                            final drawerCtrl = context
-                                .read<CashDrawerProvider>();
-                            await drawerCtrl.reopenDrawer(context);
-                            if (mounted) {
-                              HomeCtrl.GetOrderCountService(context);
+                          onNotificationTap: () async {
+                            if (await GlobalFunction().checkInternetConnection(context)) {
+                              await HomeCtrl.GetNotificationListService(context);
+                              HomeCtrl.openNotificationPanelWithData();
                             }
                           },
                         ),
 
-                        //--✅--Add-Orders-------------------✅--//
+                        //--✅ Modern unified POS Bar Card ✅--//
+                        //--✅ Modern unified POS Bar Card ✅--//
                         Padding(
-                          padding: EdgeInsets.only(
-                            left: 10,
-                            right: 10,
-                            top: 10,
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: <Widget>[
-                              Text(
-                                "Orders",
-                                style: CommonWidget.CommonTitleTextStyle(
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 18,
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.03),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
                                 ),
+                              ],
+                              border: Border.all(
+                                color: Colors.grey.shade100,
+                                width: 1,
                               ),
-                              Spacer(),
-                              // Printer Settings Button (Testing)
-                              IconButton(
-                                icon: Icon(
-                                  Icons.print_outlined,
-                                  color: GlobalAppColor.DarkBlueColor,
-                                ),
-                                onPressed: HomeCtrl.isHomeLoader
-                                    ? null
-                                    : () {
-                                        Navigator.of(context).push(
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                const PrinterSettingsScreen(),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                // Row 1: Title (left) & Expand Chevron & Search/Drawer (when minimized) or Search Field (when maximized)
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          _isCardExpanded = !_isCardExpanded;
+                                        });
+                                      },
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            Provider.of<LanguageProvider>(context).translate("dashboard.orders"),
+                                            style: CommonWidget.CommonTitleTextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                              color: GlobalAppColor.DarkTextColorCode,
+                                            ),
                                           ),
-                                        );
-                                      },
-                                tooltip: "Printer Settings",
-                              ),
-                              // Manage Order Types Button
-                              IconButton(
-                                icon: Icon(
-                                  Symbols.settings,
-                                  color: GlobalAppColor.DarkBlueColor,
-                                ),
-                                onPressed: HomeCtrl.isHomeLoader
-                                    ? null
-                                    : () async {
-                                        bool isConnected =
-                                            await GlobalFunction()
-                                                .checkInternetConnection(
-                                                  context,
-                                                );
-                                        if (isConnected) {
-                                          await CommonWidget().navigateToScreen(
-                                            context,
-                                            const OrderTypesScreen(),
-                                          );
-                                        }
-                                      },
-                                tooltip: "Manage Order Types",
-                              ),
-                              SizedBox(width: 8),
-                              // Add New Order Button
-                              Consumer<CashDrawerProvider>(
-                                builder: (context, drawerCtrl, _) {
-                                  final canCreate = drawerCtrl.isDrawerOpen;
-                                  return CommonWidget().customElevatedButtonWithIcon(
-                                    backgroundColor:
-                                        GlobalAppColor.ButtonDarkColor,
-                                    title: GlobalFlag.AddNewOrder,
-                                    icon: Symbols.add,
-                                    onPressed:
-                                        (HomeCtrl.isHomeLoader || !canCreate)
-                                        ? () {
-                                            if (!canCreate) {
-                                              GlobalFunction().showError(
-                                                context,
-                                                "Open the cash drawer first to create orders.",
-                                              );
-                                            }
-                                          }
-                                        : () async {
-                                            bool isConnected =
-                                                await GlobalFunction()
-                                                    .checkInternetConnection(
-                                                      context,
-                                                    );
-                                            if (isConnected) {
-                                              Navigator.push(
-                                                context,
-                                                SlideTransitionRoute(
-                                                  page: const AddNewOrder(),
-                                                ),
-                                              ).then((_) {
-                                                if (!mounted) return;
-                                                final home = context
-                                                    .read<HomeProvider>();
-                                                if (home.pendingRefresh) {
-                                                  home.setPendingRefresh(false);
-                                                  home.InitializeData(context);
-                                                }
-                                              });
-                                            }
-                                          },
-                                    padding: EdgeInsets.symmetric(
-                                      vertical: 5,
-                                      horizontal: 12,
+                                          const SizedBox(width: 4),
+                                          Icon(
+                                            _isCardExpanded
+                                                ? Icons.keyboard_arrow_up_rounded
+                                                : Icons.keyboard_arrow_down_rounded,
+                                            color: Colors.grey.shade600,
+                                            size: 20,
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                  );
-                                },
-                              ),
-                            ],
+                                    const SizedBox(width: 10),
+                                    if (_isCardExpanded)
+                                      Expanded(
+                                        child: SizedBox(
+                                          height: 38,
+                                          child: CommonWidget().CustomSearchTextField(
+                                            controller: HomeCtrl.SearchOrderController,
+                                            focusNode: HomeCtrl.myFocusNodeSearchOrder,
+                                            hintText: "Search orders...",
+                                            onChanged: (value) {
+                                              HomeCtrl.SearchFilteredOrders(searchQuery: value);
+                                            },
+                                          ),
+                                        ),
+                                      )
+                                    else
+                                      Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          GestureDetector(
+                                            onTap: () {
+                                              setState(() {
+                                                _isCardExpanded = true;
+                                              });
+                                              Future.delayed(const Duration(milliseconds: 100), () {
+                                                HomeCtrl.myFocusNodeSearchOrder.requestFocus();
+                                              });
+                                            },
+                                            child: Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                              decoration: BoxDecoration(
+                                                color: Colors.grey.shade100,
+                                                borderRadius: BorderRadius.circular(20),
+                                                border: Border.all(color: Colors.grey.shade200, width: 1),
+                                              ),
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Icon(Icons.search_rounded, color: Colors.grey.shade600, size: 16),
+                                                  const SizedBox(width: 4),
+                                                  Text(
+                                                    "Search",
+                                                    style: TextStyle(
+                                                      fontSize: 11,
+                                                      fontWeight: FontWeight.w600,
+                                                      color: Colors.grey.shade700,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Consumer<CashDrawerProvider>(
+                                            builder: (context, drawerCtrl, _) {
+                                              final isOpen = drawerCtrl.isDrawerOpen;
+                                              final hasClosed = !isOpen && drawerCtrl.currentDrawer != null;
+
+                                              final label = isOpen
+                                                  ? "Drawer Open"
+                                                  : hasClosed
+                                                  ? "Drawer Closed"
+                                                  : "Drawer Closed";
+                                              final dotColor = isOpen ? Colors.green : Colors.red;
+                                              final bgColor = isOpen ? Colors.green.shade50 : Colors.red.shade50;
+                                              final textColor = isOpen ? Colors.green.shade800 : Colors.red.shade800;
+                                              final borderColor = isOpen ? Colors.green.shade200 : Colors.red.shade200;
+
+                                              return PopupMenuButton<String>(
+                                                offset: const Offset(0, 44),
+                                                tooltip: "Drawer Action",
+                                                onSelected: (String action) async {
+                                                  if (action == 'close') {
+                                                    await CloseDrawerDialog.show(context);
+                                                  } else if (action == 'open') {
+                                                    await OpenDrawerDialog.show(context);
+                                                  } else if (action == 'undo') {
+                                                    await drawerCtrl.reopenDrawer(context);
+                                                  }
+                                                  HomeCtrl.GetOrderCountService(context);
+                                                },
+                                                itemBuilder: (context) => [
+                                                  if (isOpen)
+                                                    PopupMenuItem(
+                                                      value: 'close',
+                                                      child: Row(
+                                                        children: [
+                                                          Icon(Icons.exit_to_app, color: Colors.red.shade700, size: 18),
+                                                          const SizedBox(width: 8),
+                                                          const Text("Close Drawer"),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  if (!isOpen && !hasClosed)
+                                                    PopupMenuItem(
+                                                      value: 'open',
+                                                      child: Row(
+                                                        children: [
+                                                          Icon(Icons.login, color: GlobalAppColor.ButtonColor, size: 18),
+                                                          const SizedBox(width: 8),
+                                                          const Text("Open Drawer"),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  if (hasClosed)
+                                                    PopupMenuItem(
+                                                      value: 'undo',
+                                                      child: Row(
+                                                        children: [
+                                                          Icon(Icons.undo, color: Colors.green.shade700, size: 18),
+                                                          const SizedBox(width: 8),
+                                                          const Text("Undo Drawer"),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                ],
+                                                child: Container(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                                  decoration: BoxDecoration(
+                                                    color: bgColor,
+                                                    borderRadius: BorderRadius.circular(20),
+                                                    border: Border.all(color: borderColor, width: 1),
+                                                  ),
+                                                  child: Row(
+                                                    mainAxisSize: MainAxisSize.min,
+                                                    children: [
+                                                      Container(
+                                                        width: 6,
+                                                        height: 6,
+                                                        decoration: BoxDecoration(
+                                                          shape: BoxShape.circle,
+                                                          color: dotColor,
+                                                        ),
+                                                      ),
+                                                      const SizedBox(width: 5),
+                                                      Text(
+                                                        label,
+                                                        style: TextStyle(
+                                                          fontSize: 11,
+                                                          fontWeight: FontWeight.bold,
+                                                          color: textColor,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                  ],
+                                ),
+                                if (_isCardExpanded) ...[
+                                  const SizedBox(height: 12),
+                                  // Row 2: Pills (stretching horizontally)
+                                  Column(
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: _buildPillButton(
+                                              context: context,
+                                              icon: Icons.calendar_today_outlined,
+                                              label: "${HomeCtrl.selectedDate.day}-${HomeCtrl.selectedDate.month}-${HomeCtrl.selectedDate.year}",
+                                              onTap: () async {
+                                                if (await GlobalFunction().checkInternetConnection(context)) {
+                                                  await HomeCtrl.selectDate(context);
+                                                }
+                                              },
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Expanded(
+                                            child: _buildPillButton(
+                                              context: context,
+                                              hasDot: true,
+                                              dotColor: _isAutoRefreshActive ? Colors.green : Colors.grey,
+                                              label: "Auto",
+                                              onTap: () {
+                                                setState(() {
+                                                  _isAutoRefreshActive = !_isAutoRefreshActive;
+                                                  if (_isAutoRefreshActive) {
+                                                    _startAutoRefreshTimer();
+                                                  } else {
+                                                    _autoRefreshTimer?.cancel();
+                                                  }
+                                                });
+                                              },
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Expanded(
+                                            child: Consumer<CashDrawerProvider>(
+                                              builder: (context, drawerCtrl, _) {
+                                                final isOpen = drawerCtrl.isDrawerOpen;
+                                                final hasClosed = !isOpen && drawerCtrl.currentDrawer != null;
+
+                                                final label = isOpen
+                                                    ? "Drawer Open"
+                                                    : hasClosed
+                                                    ? "Drawer Closed"
+                                                    : "Drawer Closed";
+
+                                                final dotColor = isOpen ? Colors.green : Colors.red;
+                                                final bgColor = isOpen
+                                                    ? Colors.green.shade50
+                                                    : Colors.red.shade50;
+                                                final textColor = isOpen
+                                                    ? Colors.green.shade800
+                                                    : Colors.red.shade800;
+                                                final borderColor = isOpen
+                                                    ? Colors.green.shade200
+                                                    : Colors.red.shade200;
+
+                                                return PopupMenuButton<String>(
+                                                  offset: const Offset(0, 44),
+                                                  tooltip: "Drawer Action",
+                                                  onSelected: (String action) async {
+                                                    if (action == 'close') {
+                                                      await CloseDrawerDialog.show(context);
+                                                    } else if (action == 'open') {
+                                                      await OpenDrawerDialog.show(context);
+                                                    } else if (action == 'undo') {
+                                                      await drawerCtrl.reopenDrawer(context);
+                                                    }
+                                                    HomeCtrl.GetOrderCountService(context);
+                                                  },
+                                                  itemBuilder: (context) => [
+                                                    if (isOpen)
+                                                      PopupMenuItem(
+                                                        value: 'close',
+                                                        child: Row(
+                                                          children: [
+                                                            Icon(Icons.exit_to_app, color: Colors.red.shade700, size: 18),
+                                                            const SizedBox(width: 8),
+                                                            const Text("Close Drawer"),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    if (!isOpen && !hasClosed)
+                                                      PopupMenuItem(
+                                                        value: 'open',
+                                                        child: Row(
+                                                          children: [
+                                                            Icon(Icons.login, color: GlobalAppColor.ButtonColor, size: 18),
+                                                            const SizedBox(width: 8),
+                                                            const Text("Open Drawer"),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    if (hasClosed)
+                                                      PopupMenuItem(
+                                                        value: 'undo',
+                                                        child: Row(
+                                                          children: [
+                                                            Icon(Icons.undo, color: Colors.green.shade700, size: 18),
+                                                            const SizedBox(width: 8),
+                                                            const Text("Undo Drawer"),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                  ],
+                                                  child: Container(
+                                                    alignment: Alignment.center,
+                                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                                    decoration: BoxDecoration(
+                                                      color: bgColor,
+                                                      borderRadius: BorderRadius.circular(20),
+                                                      border: Border.all(color: borderColor, width: 1),
+                                                    ),
+                                                    child: Row(
+                                                      mainAxisAlignment: MainAxisAlignment.center,
+                                                      mainAxisSize: MainAxisSize.min,
+                                                      children: [
+                                                        Container(
+                                                          width: 7,
+                                                          height: 7,
+                                                          decoration: BoxDecoration(
+                                                            shape: BoxShape.circle,
+                                                            color: dotColor,
+                                                          ),
+                                                        ),
+                                                        const SizedBox(width: 6),
+                                                        Text(
+                                                          label,
+                                                          style: TextStyle(
+                                                            fontSize: 11.5,
+                                                            fontWeight: FontWeight.bold,
+                                                            color: textColor,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: _buildPillButton(
+                                              context: context,
+                                              icon: Icons.notifications_none_rounded,
+                                              label: "Prepared (${HomeCtrl.PreparedCount ?? '0'})",
+                                              onTap: () async {
+                                                if (await GlobalFunction().checkInternetConnection(context)) {
+                                                  await HomeCtrl.GetNotificationListService(context);
+                                                  HomeCtrl.openNotificationPanelWithData();
+                                                }
+                                              },
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Expanded(
+                                            child: _buildPillButton(
+                                              context: context,
+                                              icon: Icons.filter_list_rounded,
+                                              label: "Filters",
+                                              onTap: () {},
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ],
+                            ),
                           ),
                         ),
                         //--✅--View-Orders-------------------✅--//
@@ -421,17 +684,7 @@ class HomeScreenState extends State<HomeScreen>
                             HomeCtrl,
                           ),
                         ),
-                        //--✅--SearchDateWise---------------✅--//
-                        Padding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: AppDimensions.sm,
-                            vertical: AppDimensions.sm,
-                          ),
-                          child: CommonWidget().buildSearchDateWiseRow(
-                            context,
-                            HomeCtrl,
-                          ),
-                        ),
+                        // SearchDateWise row is now unified in the modern POS Bar above
 
                         //--✅--SearchList-------------------✅--//
                         Flexible(
@@ -458,7 +711,7 @@ class HomeScreenState extends State<HomeScreen>
                                           .isEmpty) {
                                         return CommonWidget().NoDataFoundWidget(
                                           context,
-                                          GlobalFlag.NoDataFound,
+                                          Provider.of<LanguageProvider>(context).translate("dashboard.noResult"),
                                           "",
                                         );
                                       }
@@ -496,6 +749,61 @@ class HomeScreenState extends State<HomeScreen>
           ),
         );
       },
+    );
+  }
+
+  Widget _buildPillButton({
+    required BuildContext context,
+    IconData? icon,
+    bool hasDot = false,
+    Color? dotColor,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        alignment: Alignment.center,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: Colors.grey.shade200,
+            width: 1.5,
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (icon != null) ...[
+              Icon(icon, size: 14, color: Colors.grey.shade600),
+              const SizedBox(width: 6),
+            ],
+            if (hasDot) ...[
+              Container(
+                width: 7,
+                height: 7,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: dotColor ?? Colors.grey,
+                ),
+              ),
+              const SizedBox(width: 6),
+            ],
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 11.5,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey.shade800,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

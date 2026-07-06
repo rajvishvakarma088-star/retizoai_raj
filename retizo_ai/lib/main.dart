@@ -32,8 +32,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: CommonProviders(context),
-      child: Consumer2<CheckInternetProvider, BackGroundApiProvider>(
-        builder: (context, CheckInternetCtrl, BackGroundApiCtrl, child) {
+      child: Consumer4<CheckInternetProvider, BackGroundApiProvider, ThemeProvider, LanguageProvider>(
+        builder: (context, CheckInternetCtrl, BackGroundApiCtrl, themeCtrl, langCtrl, child) {
           return MaterialApp(
             builder: (context, child) => ResponsiveBreakpoints.builder(
               breakpoints: [
@@ -44,9 +44,12 @@ class MyApp extends StatelessWidget {
               ],
               child: Builder(
                 builder: (context) {
-                  return MediaQuery(
-                    data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
-                    child: child!,
+                  return Directionality(
+                    textDirection: langCtrl.isRtl ? TextDirection.rtl : TextDirection.ltr,
+                    child: MediaQuery(
+                      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                      child: child!,
+                    ),
                   );
                 },
               ),

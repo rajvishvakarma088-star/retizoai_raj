@@ -333,53 +333,34 @@ class CommonWidget {
   }) {
     return Consumer<HomeProvider>(
       builder: (context, HomeCtrl, child) {
-        // ⚠️ NOTE: PreparingCount / PreparedCount come from the KDS-stats endpoint
-        // which counts individual ITEMS with that status, NOT orders.
-        // The "Preparing" / "Prepared" order-filter tabs call
-        // /filter/orders?status=preparing|prepared which filters by
-        // order_master.order_status. The backend currently does NOT
-        // auto-update order_master.order_status when KDS marks items as
-        // prepared (status_match: false in backend response).
-        // Showing the KDS item-count as a badge on these tabs would falsely
-        // imply there are N matching orders — so the badge is intentionally
-        // suppressed to avoid misleading the user.
-        // Fix required on backend: auto-update order_master.order_status when
-        // all detail items are marked prepared/served via KDS.
-
-        final String displayTitle = title;
+        final langCtrl = Provider.of<LanguageProvider>(context);
+        final String displayTitle = langCtrl.translate("dashboard.${title.toLowerCase()}");
 
         return InkWell(
           onTap: onTap,
           overlayColor: MaterialStateProperty.all(Colors.transparent),
-          borderRadius: BorderRadius.circular(5),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(5),
-              border: Border.all(
-                color: isSelected
-                    ? GlobalAppColor.ButtonDarkColor
-                    : GlobalAppColor.DarkTextColorCode.withOpacity(.1),
-                width: 2,
-              ),
-              color: isSelected ? GlobalAppColor.ButtonDarkColor : Colors.white,
-            ),
-            child: Center(
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  displayTitle,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: CommonWidget.CommonTitleTextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                    color: isSelected
-                        ? GlobalAppColor.WhiteColorCode
-                        : GlobalAppColor.LightTextColorCode,
-                    letterSpacing: 0.5,
-                  ),
+              border: Border(
+                bottom: BorderSide(
+                  color: isSelected
+                      ? GlobalAppColor.ButtonColor
+                      : Colors.transparent,
+                  width: 2.5,
                 ),
+              ),
+            ),
+            child: Text(
+              displayTitle,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: CommonWidget.CommonTitleTextStyle(
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                fontSize: 14,
+                color: isSelected
+                    ? GlobalAppColor.ButtonColor
+                    : Colors.grey.shade600,
               ),
             ),
           ),
@@ -401,76 +382,61 @@ class CommonWidget {
       "Cancelled",
     ];
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        double screenWidth = constraints.maxWidth;
-
-        // 🔹 Responsive width setup
-        double itemWidth = screenWidth >= 1200
-            ? 140
-            : screenWidth >= 800
-            ? 130
-            : 120;
-
-        const double itemHeight = 40;
-
-        return Align(
-          alignment: Alignment.centerLeft,
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            physics: const BouncingScrollPhysics(),
-            child: IntrinsicHeight(
-              child: IntrinsicWidth(
-                child: Row(
-                  children: List.generate(filters.length, (index) {
-                    final title = filters[index];
-                    return Padding(
-                      padding: EdgeInsets.only(
-                        right: index == filters.length - 1 ? 0 : 6,
-                      ),
-                      child: SizedBox(
-                        width: itemWidth,
-                        height: itemHeight,
-                        child: CommonWidget().buildOrderFilterBox(
-                          title: title,
-                          isSelected:
-                              homeCtrl.selectedFilter == title.toLowerCase(),
-                          onTap: () async {
-                            final newValue = title.toLowerCase();
-
-                            // 🔥 पहले से selected है? — बिल्कुल कोई action नहीं
-                            if (homeCtrl.selectedFilter == newValue) return;
-
-                            // Not selected → update
-                            homeCtrl.updateSelectedFilter(newValue);
-
-                            bool isConnected = await GlobalFunction()
-                                .checkInternetConnection(context);
-                            if (!isConnected) return;
-
-                            GlobalFunction.hideKeyboard(context);
-                            homeCtrl.SearchOrderController.clear();
-
-                            // Format date to YYYY-MM-DD
-                            final formattedDate =
-                                "${homeCtrl.selectedDate.year}-${homeCtrl.selectedDate.month.toString().padLeft(2, '0')}-${homeCtrl.selectedDate.day.toString().padLeft(2, '0')}";
-
-                            await homeCtrl.getOrderListService(
-                              context,
-                              homeCtrl.selectedFilter,
-                              formattedDate,
-                            );
-                          },
-                        ),
-                      ),
-                    );
-                  }),
-                ),
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(
+                color: Colors.grey.shade200,
+                width: 1.5,
               ),
             ),
           ),
-        );
-      },
+          child: Row(
+            children: List.generate(filters.length, (index) {
+              final title = filters[index];
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 2),
+                child: CommonWidget().buildOrderFilterBox(
+                  title: title,
+                  isSelected:
+                      homeCtrl.selectedFilter == title.toLowerCase(),
+                  onTap: () async {
+                    final newValue = title.toLowerCase();
+
+                    // 🔥 पहले से selected है? — बिल्कुल कोई action नहीं
+                    if (homeCtrl.selectedFilter == newValue) return;
+
+                    // Not selected → update
+                    homeCtrl.updateSelectedFilter(newValue);
+
+                    bool isConnected = await GlobalFunction()
+                        .checkInternetConnection(context);
+                    if (!isConnected) return;
+
+                    GlobalFunction.hideKeyboard(context);
+                    homeCtrl.SearchOrderController.clear();
+
+                    // Format date to YYYY-MM-DD
+                    final formattedDate =
+                        "${homeCtrl.selectedDate.year}-${homeCtrl.selectedDate.month.toString().padLeft(2, '0')}-${homeCtrl.selectedDate.day.toString().padLeft(2, '0')}";
+
+                    await homeCtrl.getOrderListService(
+                      context,
+                      homeCtrl.selectedFilter,
+                      formattedDate,
+                    );
+                  },
+                ),
+              );
+            }),
+          ),
+        ),
+      ),
     );
   }
 
@@ -636,7 +602,7 @@ class CommonWidget {
                               ),
                             ),
                             child: Text(
-                              "Today",
+                              Provider.of<LanguageProvider>(context).translate("dashboard.today"),
                               style: CommonWidget.CommonTitleTextStyle(
                                 fontWeight: FontWeight.w500,
                                 fontSize: 12,
@@ -755,7 +721,11 @@ class CommonWidget {
           decoration: InputDecoration(
             isDense: isDense,
             contentPadding: contentPadding,
-            hintText: hintText,
+            hintText: Provider.of<LanguageProvider>(context).translate(
+              hintText == "Search by order ID table"
+                  ? "dashboard.searchPlaceholder"
+                  : hintText,
+            ),
             hintStyle: CommonWidget.CommonTitleTextStyle(
               color: GlobalAppColor.DarkTextColorCode.withOpacity(.7),
             ),
@@ -855,128 +825,128 @@ class CommonWidget {
     VoidCallback? onOpenDrawer,
     VoidCallback? onUndoDrawer,
   }) {
-    final userName = context.read<UserInfoProvider>().name ?? '';
-    final displayName = userName.isNotEmpty
-        ? '${userName[0].toUpperCase()}${userName.substring(1)}'
-        : '';
+    final userInfo = Provider.of<UserInfoProvider>(context, listen: false);
+    final displayName = userInfo.name ?? 'Admin';
+    final userRole = userInfo.type ?? 'Branch Admin';
+    final avatarChar = displayName.isNotEmpty ? displayName[0].toUpperCase() : 'A';
 
     final topPadding = MediaQuery.of(context).padding.top;
     final screenWidth = MediaQuery.of(context).size.width;
 
-    // ✅ Responsive text sizing - smaller font on small screens
-    final fontSize = screenWidth < 360 ? 13.0 : 15.0;
-
-    // ✅ For very small screens, show shorter greeting
-    final greeting = screenWidth < 360
-        ? "Welcome $displayName 👋"
-        : "Welcome back $displayName 👋";
-
     return Container(
       width: MediaQuery.of(context).size.width,
       height: kToolbarHeight + topPadding,
-      color: Colors.white,
-      padding: EdgeInsets.only(top: topPadding, left: 10, right: 10),
+      padding: EdgeInsets.only(top: topPadding, left: 14, right: 14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(
+          bottom: BorderSide(
+            color: Colors.grey.shade100,
+            width: 1,
+          ),
+        ),
+      ),
       child: Row(
         children: <Widget>[
+          // ── Left: Greeting + Role Badge ──
           Expanded(
-            child: Text(
-              greeting,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: CommonWidget.CommonTitleTextStyle(fontSize: fontSize),
-            ),
-          ),
-          // drawer action button — always visible, switches label by state
-          Consumer<CashDrawerProvider>(
-            builder: (context, drawerCtrl, _) {
-              final isOpen = drawerCtrl.isDrawerOpen;
-              // Drawer is CLOSED but a session exists today → show Undo
-              final hasClosed = !isOpen && drawerCtrl.currentDrawer != null;
-
-              final String btnLabel = isOpen
-                  ? 'Close Drawer'
-                  : hasClosed
-                  ? 'Undo Drawer'
-                  : 'Open Drawer';
-              final Color btnColor = isOpen
-                  ? const Color(0xFFDC2626)
-                  : hasClosed
-                  ? Colors.green.shade600
-                  : GlobalAppColor.DarkBlueColor;
-              final IconData btnIcon = isOpen
-                  ? Icons.exit_to_app
-                  : hasClosed
-                  ? Icons.undo
-                  : Icons.login;
-              final VoidCallback? onTap = isLoading
-                  ? null
-                  : isOpen
-                  ? onCloseDrawer
-                  : hasClosed
-                  ? onUndoDrawer
-                  : onOpenDrawer;
-
-              // compact icon-only on very small screens to preserve greeting space
-              if (screenWidth < 360) {
-                return Padding(
-                  padding: const EdgeInsets.only(right: 6),
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(8),
-                    onTap: onTap,
-                    child: Container(
-                      padding: const EdgeInsets.all(7),
-                      decoration: BoxDecoration(
-                        color: btnColor.withOpacity(0.12),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: btnColor.withOpacity(0.35),
-                          width: 1,
-                        ),
-                      ),
-                      child: Icon(btnIcon, color: btnColor, size: 20),
-                    ),
-                  ),
-                );
-              }
-
-              // Responsive font + padding: scale up slightly on wider screens
-              final double btnFontSize = screenWidth < 400 ? 11.5 : 13.0;
-              final EdgeInsets btnPadding = screenWidth < 400
-                  ? const EdgeInsets.symmetric(vertical: 9, horizontal: 11)
-                  : const EdgeInsets.symmetric(vertical: 10, horizontal: 14);
-
-              return Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: ElevatedButton.icon(
-                  onPressed: onTap,
-                  icon: Icon(btnIcon, color: Colors.white, size: 15),
-                  label: Text(
-                    btnLabel,
-                    style: CommonWidget.CommonTitleTextStyle(
-                      color: Colors.white,
-                      fontSize: btnFontSize,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.2,
-                    ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: btnColor,
-                    foregroundColor: Colors.white,
-                    padding: btnPadding,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    elevation: 2,
-                    shadowColor: btnColor.withOpacity(0.45),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "Welcome back, $displayName 👋",
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: CommonWidget.CommonTitleTextStyle(
+                    fontSize: screenWidth < 360 ? 14 : 16,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-              );
-            },
+                const SizedBox(height: 2),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: GlobalAppColor.ButtonColor.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: GlobalAppColor.ButtonColor.withOpacity(0.2),
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.shield_outlined,
+                        size: 11,
+                        color: GlobalAppColor.ButtonColor,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        userRole,
+                        style: TextStyle(
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.w600,
+                          color: GlobalAppColor.ButtonColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-          CommonWidget().buildIconButton(
-            context,
-            Symbols.account_circle,
-            isLoading ? null : onLogout,
+
+          // ── Right: Notification Bell ──
+          if (onNotificationTap != null)
+            Padding(
+              padding: const EdgeInsets.only(right: 12),
+              child: InkWell(
+                onTap: isLoading ? null : onNotificationTap,
+                borderRadius: BorderRadius.circular(20),
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.grey.shade50,
+                  ),
+                  child: Icon(
+                    Icons.notifications_none_rounded,
+                    color: Colors.grey.shade700,
+                    size: 20,
+                  ),
+                ),
+              ),
+            ),
+
+          // ── Right: Avatar Initials ──
+          GestureDetector(
+            onTap: () {
+              ProfileDrawer.show(context, onLogout: onLogout);
+            },
+            child: Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: GlobalAppColor.ButtonColor.withOpacity(0.25),
+                  width: 1.5,
+                ),
+                color: GlobalAppColor.ButtonColor.withOpacity(0.08),
+              ),
+              child: Center(
+                child: Text(
+                  avatarChar,
+                  style: TextStyle(
+                    color: GlobalAppColor.ButtonColor,
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
           ),
         ],
       ),

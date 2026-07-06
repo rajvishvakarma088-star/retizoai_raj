@@ -142,7 +142,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
       width: double.infinity,
       height: barHeight + safeBottom,
       padding: EdgeInsets.only(bottom: safeBottom),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: Colors.white,
         boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)],
       ),
@@ -150,13 +150,64 @@ class CustomBottomNavigationBar extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          navItem(
-            context,
-            Icons.shopping_cart,
-            "ORDER",
-            BottomNavProvider.TabOrder,
+          Expanded(
+            child: navItem(
+              context,
+              Icons.shopping_cart,
+              "ORDER",
+              BottomNavProvider.TabOrder,
+            ),
           ),
-          navItem(context, Icons.child_care, "KDS", BottomNavProvider.TabKds),
+          // Center: Add New Order Button
+          GestureDetector(
+            onTap: () async {
+              final drawerCtrl = context.read<CashDrawerProvider>();
+              if (!drawerCtrl.isDrawerOpen) {
+                GlobalFunction().showError(
+                  context,
+                  "Open the cash drawer first to create orders.",
+                );
+                return;
+              }
+              if (await GlobalFunction().checkInternetConnection(context)) {
+                Navigator.push(
+                  context,
+                  SlideTransitionRoute(page: const AddNewOrder()),
+                ).then((_) {
+                  final home = context.read<HomeProvider>();
+                  home.InitializeData(context);
+                });
+              }
+            },
+            child: Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: GlobalAppColor.ButtonColor,
+                boxShadow: [
+                  BoxShadow(
+                    color: GlobalAppColor.ButtonColor.withOpacity(0.35),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.add,
+                color: Colors.white,
+                size: 26,
+              ),
+            ),
+          ),
+          Expanded(
+            child: navItem(
+              context,
+              Icons.child_care,
+              "KDS",
+              BottomNavProvider.TabKds,
+            ),
+          ),
         ],
       ),
     );

@@ -129,7 +129,7 @@ class CashDrawerProvider extends ChangeNotifier {
         context: context,
         headers: authHeaders,
         requireLogin: true,
-        body: {"opening_amt": openingAmount},
+        body: {"opening_amt": double.tryParse(openingAmount) ?? 0.0},
       );
 
       if (responseRaw is! Map<String, dynamic>) {
@@ -204,9 +204,9 @@ class CashDrawerProvider extends ChangeNotifier {
         headers: authHeaders,
         requireLogin: true,
         body: {
-          "cash_in": cashIn,
-          "cash_out": cashOut,
-          "counted_closing_cash": countedClosingCash,
+          "cash_in": double.tryParse(cashIn) ?? 0.0,
+          "cash_out": double.tryParse(cashOut) ?? 0.0,
+          "counted_closing_cash": double.tryParse(countedClosingCash) ?? 0.0,
         },
       );
 
@@ -270,9 +270,9 @@ class CashDrawerProvider extends ChangeNotifier {
         headers: authHeaders,
         requireLogin: true,
         body: {
-          "cash_in": cashIn,
-          "cash_out": cashOut,
-          "counted_closing_cash": countedClosingCash,
+          "cash_in": double.tryParse(cashIn) ?? 0.0,
+          "cash_out": double.tryParse(cashOut) ?? 0.0,
+          "counted_closing_cash": double.tryParse(countedClosingCash) ?? 0.0,
         },
       );
 

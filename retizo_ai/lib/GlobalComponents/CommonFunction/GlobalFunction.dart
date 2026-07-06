@@ -12,6 +12,8 @@ List<SingleChildWidget> CommonProviders(BuildContext context) => [
   ChangeNotifierProvider(create: (context) => HttpServiceProvider()),
   //----✅--LanguageProvider
   ChangeNotifierProvider(create: (context) => LanguageProvider()),
+  //----✅--ThemeProvider
+  ChangeNotifierProvider(create: (context) => ThemeProvider()),
   //----✅--CheckInternetProvider
   ChangeNotifierProvider(create: (context) => CheckInternetProvider()),
   //----✅--SplashProvider

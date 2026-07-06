@@ -82,6 +82,8 @@ export 'package:culai/ScreenSection/PreLogin/LoginScreen/LoginScreen.dart';
 export 'package:culai/ScreenSection/PreLogin/SplashScreen/SplashController.dart';
 export 'package:culai/ScreenSection/PreLogin/SplashScreen/SplashScreen.dart';
 export 'package:culai/services/language_provider.dart';
+export 'package:culai/services/theme_provider.dart';
+export 'package:culai/GlobalComponents/CommonWidget/ProfileDrawer.dart';
 //-✅-------------------------------------------------------------------✅-//
 export 'package:dropdown_button2/dropdown_button2.dart';
 export 'package:flutter/cupertino.dart';
