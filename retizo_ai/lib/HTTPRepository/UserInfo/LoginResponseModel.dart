@@ -46,6 +46,7 @@ class UserModel {
   final String vatNo;
   final String orgPicture; // restaurant/org logo URL path
   final String branchAddress;
+  final String address;
   final String status;
   final String picture; // ⭐ Added
   final String appAccess; // ⭐ Added
@@ -64,6 +65,7 @@ class UserModel {
     this.vatNo = "",
     this.orgPicture = "",
     this.branchAddress = "",
+    this.address = "",
     this.status = "",
     this.picture = "", // ⭐ Added
     this.appAccess = "", // ⭐ Added
@@ -87,6 +89,7 @@ class UserModel {
       vatNo: json['vat_no']?.toString() ?? "",
       orgPicture: json['org_picture']?.toString() ?? "",
       branchAddress: json['branch_address']?.toString() ?? "",
+      address: json['address']?.toString() ?? "",
       status: json['status']?.toString() ?? "",
       appAccess: json['app_access']?.toString() ?? "",
       picture: json['picture']?.toString() ?? GlobalServiceURL.noImage,
@@ -112,6 +115,7 @@ class UserModel {
     'vat_no': vatNo,
     'org_picture': orgPicture,
     'branch_address': branchAddress,
+    'address': address,
     'status': status,
     'app_access': appAccess,
     'picture': picture, // ⭐ Added
@@ -119,6 +123,7 @@ class UserModel {
       (key, value) => MapEntry(key, value.toJson()),
     ),
   };
+
 }
 
 //================ Permission Model =================//

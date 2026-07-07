@@ -113,6 +113,8 @@ class UserInfoProvider with ChangeNotifier {
 
   String? get orgPicture => UserData?.orgPicture;
 
+  String? get address => UserData?.address;
+
   //-- Permission Getter (Easy Access)
   Map<String, PermissionModel>? get permissions => UserData?.permissions;
 
@@ -206,45 +208,65 @@ class UserInfoProvider with ChangeNotifier {
   }
 
   //================== Update Profile ==================//
-  /// Updates name and/or email via PATCH /auth/update-profile.
+  /// Updates name, email, and address via PUT user-specific endpoint.
   /// Returns a map with {success: bool, message: String}.
   Future<Map<String, dynamic>> updateProfile(
     BuildContext context,
     HttpServiceProvider httpCtrl, {
     required String name,
     required String email,
+    required String address,
   }) async {
     try {
       final token = AccessToken ?? "";
       if (token.isEmpty) return {'success': false, 'message': 'Not logged in'};
+      
+      final oId = orgId ?? "";
+      final ouId = orgUserId ?? "";
+      final bId = branchId;
+      String userApiEndpoint;
+      if (bId == null || bId == 0 || bId.toString() == "null") {
+        userApiEndpoint = "${GlobalServiceURL.baseUrl}/organization/$oId/users/$ouId";
+      } else {
+        userApiEndpoint = "${GlobalServiceURL.baseUrl}/organization/$oId/branches/$bId/users/$ouId";
+      }
+
       final authHeaders = APIHelper.buildAuthHeaders(token);
       final result = await httpCtrl.request<Map<String, dynamic>>(
-        method: 'PATCH',
-        url: GlobalServiceURL.UpdateProfileUrl,
+        method: 'PUT',
+        url: userApiEndpoint,
         context: context,
         headers: authHeaders,
-        body: {'name': name, 'email': email},
+        body: {
+          'name': name,
+          'email': email,
+          'address': address,
+        },
       );
-      if (result['success'] == true) {
+      
+      // Check if user object is returned or success is true
+      if (result['user'] != null || result['message'] == "User updated successfully") {
         // Refresh local data
         if (UserData != null) {
           UserData = UserModel.fromJson({
             ...UserData!.toJson(),
             'name': name,
             'email': email,
+            'address': address,
           });
           await SecureStorageService.Write('UserData', UserData!.toJson());
           notifyListeners();
         }
+        return {'success': true, 'message': result['message'] ?? 'Profile updated successfully'};
       }
-      return result;
+      return {'success': false, 'message': result['message'] ?? 'Failed to update profile'};
     } catch (e) {
       return {'success': false, 'message': e.toString()};
     }
   }
 
   //================== Change Password ==================//
-  /// Changes password via POST /auth/change-password.
+  /// Changes password via POST /auth/verify-current-password and PUT user endpoint.
   /// Returns a map with {success: bool, message: String}.
   Future<Map<String, dynamic>> changePassword(
     BuildContext context,
@@ -256,21 +278,55 @@ class UserInfoProvider with ChangeNotifier {
       final token = AccessToken ?? "";
       if (token.isEmpty) return {'success': false, 'message': 'Not logged in'};
       final authHeaders = APIHelper.buildAuthHeaders(token);
-      final result = await httpCtrl.request<Map<String, dynamic>>(
+      
+      // Step 1: Verify current password
+      final verifyResult = await httpCtrl.request<Map<String, dynamic>>(
         method: 'POST',
-        url: GlobalServiceURL.ChangePasswordUrl,
+        url: GlobalServiceURL.VerifyCurrentPasswordUrl,
         context: context,
         headers: authHeaders,
         body: {
-          'current_password': currentPassword,
-          'new_password': newPassword,
+          'currentPassword': currentPassword,
         },
       );
-      return result;
+
+      if (verifyResult['success'] != true) {
+        return {
+          'success': false,
+          'message': verifyResult['message'] ?? 'Current password verification failed'
+        };
+      }
+
+      // Step 2: Update password via PUT to user endpoint
+      final oId = orgId ?? "";
+      final ouId = orgUserId ?? "";
+      final bId = branchId;
+      String userApiEndpoint;
+      if (bId == null || bId == 0 || bId.toString() == "null") {
+        userApiEndpoint = "${GlobalServiceURL.baseUrl}/organization/$oId/users/$ouId";
+      } else {
+        userApiEndpoint = "${GlobalServiceURL.baseUrl}/organization/$oId/branches/$bId/users/$ouId";
+      }
+
+      final result = await httpCtrl.request<Map<String, dynamic>>(
+        method: 'PUT',
+        url: userApiEndpoint,
+        context: context,
+        headers: authHeaders,
+        body: {
+          'password': newPassword,
+        },
+      );
+
+      if (result['user'] != null || result['message'] == "User updated successfully") {
+        return {'success': true, 'message': 'Password updated successfully'};
+      }
+      return {'success': false, 'message': result['message'] ?? 'Failed to update password'};
     } catch (e) {
       return {'success': false, 'message': e.toString()};
     }
   }
+
 
   //================== Logout ==================//
   Future<void> Logout() async {

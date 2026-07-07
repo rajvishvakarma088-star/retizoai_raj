@@ -17,6 +17,8 @@ class ProfilePage extends StatelessWidget {
         TextEditingController(text: userProvider.name ?? '');
     final emailCtrl =
         TextEditingController(text: userProvider.email ?? '');
+    final addressCtrl =
+        TextEditingController(text: userProvider.address ?? '');
     final formKey = GlobalKey<FormState>();
     bool loading = false;
 
@@ -44,35 +46,44 @@ class ProfilePage extends StatelessWidget {
           ),
           content: Form(
             key: formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _DialogField(
-                  controller: nameCtrl,
-                  label: "Full Name",
-                  hint: "Enter your full name",
-                  icon: Icons.person_outline,
-                  validator: (v) =>
-                      (v == null || v.trim().isEmpty)
-                          ? "Name cannot be empty"
-                          : null,
-                ),
-                const SizedBox(height: 14),
-                _DialogField(
-                  controller: emailCtrl,
-                  label: "Email Address",
-                  hint: "Enter your email",
-                  icon: Icons.email_outlined,
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (v) {
-                    if (v == null || v.trim().isEmpty) {
-                      return "Email cannot be empty";
-                    }
-                    if (!v.contains('@')) return "Enter a valid email";
-                    return null;
-                  },
-                ),
-              ],
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _DialogField(
+                    controller: nameCtrl,
+                    label: "Full Name",
+                    hint: "Enter your full name",
+                    icon: Icons.person_outline,
+                    validator: (v) =>
+                        (v == null || v.trim().isEmpty)
+                            ? "Name cannot be empty"
+                            : null,
+                  ),
+                  const SizedBox(height: 14),
+                  _DialogField(
+                    controller: emailCtrl,
+                    label: "Email Address",
+                    hint: "Enter your email",
+                    icon: Icons.email_outlined,
+                    keyboardType: TextInputType.emailAddress,
+                    validator: (v) {
+                      if (v == null || v.trim().isEmpty) {
+                        return "Email cannot be empty";
+                      }
+                      if (!v.contains('@')) return "Enter a valid email";
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 14),
+                  _DialogField(
+                    controller: addressCtrl,
+                    label: "Address",
+                    hint: "Enter your address",
+                    icon: Icons.location_on_outlined,
+                  ),
+                ],
+              ),
             ),
           ),
           actions: [
@@ -100,6 +111,7 @@ class ProfilePage extends StatelessWidget {
                         httpCtrl,
                         name: nameCtrl.text.trim(),
                         email: emailCtrl.text.trim(),
+                        address: addressCtrl.text.trim(),
                       );
                       setState(() => loading = false);
 
@@ -289,6 +301,7 @@ class ProfilePage extends StatelessWidget {
     final branchName = userProvider.branchName ?? '';
     final vatNo = userProvider.vatNo ?? '';
     final branchAddress = userProvider.branchAddress ?? '';
+    final userAddress = userProvider.address ?? '';
     final userStatus = userProvider.status ?? 'active';
     final orgPicture = userProvider.orgPicture ?? '';
     final avatarChar =
@@ -505,7 +518,7 @@ class ProfilePage extends StatelessWidget {
                   const SizedBox(height: 14),
                   _ReadField(
                     label: "Address",
-                    value: branchAddress,
+                    value: userAddress,
                     minLines: 2,
                   ),
                 ],

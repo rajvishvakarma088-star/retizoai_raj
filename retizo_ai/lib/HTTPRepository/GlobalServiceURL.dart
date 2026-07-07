@@ -16,8 +16,7 @@ class GlobalServiceURL {
   //-- Pre-login APIs
   static String preLoginUrl = "$baseUrl/auth/org-login";
   static String AuthMeUrl = "$baseUrl/auth/me";
-  static String UpdateProfileUrl = "$baseUrl/auth/update-profile";
-  static String ChangePasswordUrl = "$baseUrl/auth/change-password";
+  static String VerifyCurrentPasswordUrl = "$baseUrl/auth/verify-current-password";
 
   //-- Post-login Order List APIs
   static String OrderListUrl = "$baseUrl/order-master/";
