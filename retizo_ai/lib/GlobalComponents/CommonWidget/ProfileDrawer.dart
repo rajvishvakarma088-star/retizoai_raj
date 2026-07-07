@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:culai/HTTPRepository/Packages.dart';
 import 'package:culai/GlobalComponents/CommonWidget/ProfilePage.dart';
+import 'package:culai/ScreenSection/PostLogin/Settings/PrinterSettingsScreen.dart';
 
 class ProfileDrawer extends StatelessWidget {
   final VoidCallback? onLogout;
@@ -227,6 +228,65 @@ class ProfileDrawer extends StatelessWidget {
                               _buildLangTab(context, langProvider, 'hi', 'Hindi'),
                               _buildLangTab(context, langProvider, 'ar', 'Arabic'),
                             ],
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+
+                        // Printers
+                        Text(
+                          "Printers",
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: GlobalAppColor.DarkTextColorCode,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        InkWell(
+                          onTap: () {
+                            Navigator.of(context).pop(); // close drawer
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => const PrinterSettingsScreen(),
+                              ),
+                            );
+                          },
+                          borderRadius: BorderRadius.circular(10),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: Colors.transparent,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: Colors.grey.shade300,
+                                width: 1,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.print_outlined,
+                                  color: GlobalAppColor.DarkTextColorCode,
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    "Printer Configuration",
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w500,
+                                      color: GlobalAppColor.DarkTextColorCode,
+                                    ),
+                                  ),
+                                ),
+                                Icon(
+                                  Icons.chevron_right,
+                                  color: Colors.grey.shade400,
+                                  size: 18,
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                         const SizedBox(height: 24),

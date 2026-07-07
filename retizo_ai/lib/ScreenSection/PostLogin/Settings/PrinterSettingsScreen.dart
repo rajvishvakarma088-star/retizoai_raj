@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../../../GlobalComponents/CommonProvider/CommonProvider.dart';
+import '../../../GlobalComponents/Constant/GlobalAppColor.dart';
 import '../../../services/epson_printer_plugin.dart';
 import '../../../services/printer_models.dart';
 import '../KDS/Controller/PrinterIntegrationProvider.dart';
@@ -658,299 +659,313 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen> {
     final deviceProvider = context.watch<PrintingDeviceProvider>();
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: const Color(0xFFF1F5F9),
       appBar: AppBar(
-        title: const Text('Printer Settings'),
-        backgroundColor: const Color(0xFF6366F1),
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.white,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios_new_rounded,
+              color: GlobalAppColor.DarkTextColorCode, size: 20),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: Text(
+          "Printer Settings",
+          style: TextStyle(
+            fontSize: 17,
+            fontWeight: FontWeight.w700,
+            color: GlobalAppColor.DarkTextColorCode,
+          ),
+        ),
         actions: [
           // Auto-print toggle
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Row(
               children: [
-                const Text('Auto-Print', style: TextStyle(fontSize: 14)),
+                Text(
+                  'Auto-Print',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: GlobalAppColor.DarkTextColorCode,
+                  ),
+                ),
                 const SizedBox(width: 8),
                 Switch(
                   value: printerProvider.autoPrintEnabled,
                   onChanged: (value) {
                     printerProvider.autoPrintEnabled = value;
-                    // Force rebuild by calling setState
                     setState(() {});
                   },
-                  activeColor: Colors.white,
+                  activeColor: GlobalAppColor.ButtonColor,
+                  activeTrackColor: GlobalAppColor.ButtonColor.withOpacity(0.4),
+                  inactiveThumbColor: Colors.grey.shade400,
+                  inactiveTrackColor: Colors.grey.shade300,
                 ),
               ],
             ),
           ),
         ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(height: 1, color: const Color(0xFFE5E7EB)),
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Info Section - Printer Purposes
+            // Info Section
             _buildInfoSection(),
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
 
-            // Backend Printing Devices (from /api/printingDevice)
+            // Backend Printing Devices
             _buildBackendDevices(deviceProvider),
-            const SizedBox(height: 20),
+            const SizedBox(height: 14),
 
             // Connection Type Selector
             _buildConnectionTypeSelector(),
-            const SizedBox(height: 20),
+            const SizedBox(height: 14),
 
             // Quick Connect - Manual IP
             _buildManualConnection(),
-            const SizedBox(height: 20),
+            const SizedBox(height: 14),
 
             // KDS Kitchen Printer
             _buildKDSConnection(),
-            const SizedBox(height: 20),
+            const SizedBox(height: 14),
 
             // Discover Printers Button
             _buildDiscoverySection(),
-            const SizedBox(height: 20),
+            const SizedBox(height: 14),
 
             // Discovered Printers
             if (_discoveredPrinters.isNotEmpty) ...[
               _buildDiscoveredPrinters(),
-              const SizedBox(height: 20),
+              const SizedBox(height: 14),
             ],
 
             // Saved Printers
             _buildSavedPrinters(),
+            const SizedBox(height: 24),
           ],
         ),
       ),
     );
   }
 
-  // ── Backend Printing Devices ──────────────────────────────────────────────
-  /// Displays the printing devices returned by GET /api/printingDevice.
-  /// Shows KDS and cashier devices with their status, plus a refresh button.
-  Widget _buildBackendDevices(PrintingDeviceProvider provider) {
-    return Card(
-      elevation: 1,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.deepPurple[100]!),
+  // ── Helper card wrapper ──
+  Widget _buildCard({required Widget child}) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header row
-            Row(
-              children: [
-                Icon(Icons.devices, color: Colors.deepPurple[600]),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'Backend Printing Devices',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.deepPurple[900],
-                    ),
+      child: child,
+    );
+  }
+
+  // ── Backend Printing Devices ──
+  Widget _buildBackendDevices(PrintingDeviceProvider provider) {
+    return _buildCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.devices_other_outlined, color: GlobalAppColor.ButtonColor, size: 20),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Backend Printing Devices',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: GlobalAppColor.DarkTextColorCode,
                   ),
                 ),
-                // Refresh button
-                IconButton(
-                  iconSize: 20,
-                  tooltip: 'Refresh from server',
-                  icon: provider.isLoading
-                      ? SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.deepPurple[600],
-                          ),
-                        )
-                      : Icon(Icons.refresh, color: Colors.deepPurple[600]),
-                  onPressed: provider.isLoading ? null : _refreshDevices,
-                ),
-              ],
-            ),
-            Text(
-              'Auto-detects from /api/printingDevice. KDS[0] is used for auto-printing.',
-              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+              ),
+              IconButton(
+                iconSize: 20,
+                tooltip: 'Refresh from server',
+                icon: provider.isLoading
+                    ? SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: GlobalAppColor.ButtonColor,
+                        ),
+                      )
+                    : Icon(Icons.refresh_rounded, color: GlobalAppColor.ButtonColor),
+                onPressed: provider.isLoading ? null : _refreshDevices,
+              ),
+            ],
+          ),
+          Text(
+            'Auto-detects from /api/printingDevice. KDS[0] is used for auto-printing.',
+            style: TextStyle(fontSize: 12, color: GlobalAppColor.HomeLightTextColor),
+          ),
+          const SizedBox(height: 12),
+
+          if (provider.error != null) ...[
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.red.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.red.shade100),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.warning_amber_rounded, color: Colors.red.shade700, size: 18),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      provider.error!,
+                      style: TextStyle(fontSize: 12, color: Colors.red.shade800),
+                    ),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 12),
+          ],
 
-            // Error banner
-            if (provider.error != null) ...[
-              Container(
-                padding: const EdgeInsets.all(10),
+          if (!provider.isLoading && provider.devices.isEmpty)
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Text(
+                  'No devices loaded yet. Tap refresh to fetch.',
+                  style: TextStyle(fontSize: 13, color: GlobalAppColor.HomeLightTextColor),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+
+          ...provider.devices.map((device) {
+            final isKds = device.isKds;
+            final isPrimaryKds = isKds && provider.primaryKdsDevice?.deviceId == device.deviceId;
+            final badgeColor = isKds ? Colors.orange : Colors.blue;
+            final badgeLabel = isKds ? 'KDS' : 'Cashier';
+
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
                 decoration: BoxDecoration(
-                  color: Colors.red[50],
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.red[200]!),
+                  color: isPrimaryKds
+                      ? GlobalAppColor.ButtonColor.withOpacity(0.06)
+                      : const Color(0xFFF8FAFC),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: isPrimaryKds
+                        ? GlobalAppColor.ButtonColor.withOpacity(0.3)
+                        : const Color(0xFFE2E8F0),
+                  ),
                 ),
                 child: Row(
                   children: [
-                    Icon(
-                      Icons.warning_amber_rounded,
-                      color: Colors.red[700],
-                      size: 18,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
+                    // Type badge
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: badgeColor.shade50,
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: badgeColor.shade200),
+                      ),
                       child: Text(
-                        provider.error!,
-                        style: TextStyle(fontSize: 12, color: Colors.red[800]),
+                        badgeLabel,
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: badgeColor.shade800,
+                        ),
                       ),
                     ),
+                    const SizedBox(width: 10),
+                    // Device info
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  device.deviceName,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: GlobalAppColor.DarkTextColorCode,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              if (isPrimaryKds) ...[
+                                const SizedBox(width: 6),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFDCFCE7),
+                                    borderRadius: BorderRadius.circular(4),
+                                    border: Border.all(color: const Color(0xFF86EFAC)),
+                                  ),
+                                  child: const Text(
+                                    'Auto-print',
+                                    style: TextStyle(
+                                      fontSize: 9,
+                                      color: Color(0xFF16A34A),
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            '${device.ipAddress}  ·  Port ${device.portNumber}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: GlobalAppColor.HomeLightTextColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Status wifi icon
+                    if (isPrimaryKds)
+                      Icon(
+                        provider.kdsConnected ? Icons.wifi_rounded : Icons.wifi_off_rounded,
+                        size: 18,
+                        color: provider.kdsConnected ? const Color(0xFF16A34A) : Colors.grey.shade400,
+                      ),
                   ],
                 ),
               ),
-              const SizedBox(height: 12),
-            ],
-
-            // Empty state
-            if (!provider.isLoading && provider.devices.isEmpty) ...[
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  child: Text(
-                    'No devices loaded yet. Tap refresh to fetch from server.',
-                    style: TextStyle(fontSize: 13, color: Colors.grey[500]),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ),
-            ],
-
-            // Device list
-            ...provider.devices.map((device) {
-              final isKds = device.isKds;
-              final isPrimaryKds =
-                  isKds &&
-                  provider.primaryKdsDevice?.deviceId == device.deviceId;
-              final badgeColor = isKds ? Colors.orange : Colors.blue;
-              final badgeLabel = isKds ? 'KDS' : 'Cashier';
-
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isPrimaryKds ? Colors.orange[50] : Colors.grey[50],
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: isPrimaryKds
-                          ? Colors.orange[200]!
-                          : Colors.grey[300]!,
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      // Type badge
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 3,
-                        ),
-                        decoration: BoxDecoration(
-                          color: badgeColor[100],
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          badgeLabel,
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            color: badgeColor[800],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      // Device info
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    device.deviceName,
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                                if (isPrimaryKds) ...[
-                                  const SizedBox(width: 6),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 6,
-                                      vertical: 2,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.green[100],
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
-                                    child: Text(
-                                      'Auto-print',
-                                      style: TextStyle(
-                                        fontSize: 10,
-                                        color: Colors.green[800],
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ],
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              '${device.ipAddress}  ·  Port ${device.portNumber}',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey[600],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      // KDS connected indicator
-                      if (isPrimaryKds)
-                        Icon(
-                          provider.kdsConnected ? Icons.wifi : Icons.wifi_off,
-                          size: 18,
-                          color: provider.kdsConnected
-                              ? Colors.green
-                              : Colors.grey,
-                        ),
-                    ],
-                  ),
-                ),
-              );
-            }),
-          ],
-        ),
+            );
+          }),
+        ],
       ),
     );
   }
 
-  /// Fetches backend printing devices from /api/printingDevice
-  /// and auto-connects the primary KDS printer.
   void _refreshDevices() {
     if (!mounted) return;
-    final token = Provider.of<UserInfoProvider>(
-      context,
-      listen: false,
-    ).AccessToken;
+    final token = Provider.of<UserInfoProvider>(context, listen: false).AccessToken;
     if (token == null || token.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -963,256 +978,222 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen> {
     context.read<PrintingDeviceProvider>().fetchAndConnect(token);
   }
 
-  /// Info section explaining printer configuration
+  // ── Info Section ──
   Widget _buildInfoSection() {
-    return Card(
-      color: Colors.blue[50],
-      elevation: 0,
-      shape: RoundedRectangleBorder(
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFFEFF6FF),
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.blue[200]!),
+        border: Border.all(color: const Color(0xFFBFDBFE)),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.info_outline, color: Colors.blue[700], size: 22),
-                const SizedBox(width: 8),
-                Text(
-                  'Printer Configuration',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blue[900],
-                  ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.info_outline_rounded, color: GlobalAppColor.ButtonColor, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                'Printer Configuration',
+                style: TextStyle(
+                  fontSize: 14.5,
+                  fontWeight: FontWeight.w700,
+                  color: GlobalAppColor.DarkBlueColor,
                 ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Text(
-              '• Connect your Epson printers via LAN/WiFi (recommended), USB, or Bluetooth\n'
-              '• When printing orders, select whether to print as a Bill or KDS ticket\n'
-              '• Test each printer after configuration to ensure proper connection',
-              style: TextStyle(
-                fontSize: 13,
-                color: Colors.grey[700],
-                height: 1.5,
               ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '• Connect your Epson printers via LAN/WiFi (recommended), USB, or Bluetooth\n'
+            '• When printing orders, select whether to print as a Bill or KDS ticket\n'
+            '• Test each printer after configuration to ensure proper connection',
+            style: TextStyle(
+              fontSize: 12.5,
+              color: GlobalAppColor.HomeLightTextColor,
+              height: 1.45,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  /// Connection type selector (TCP/USB/Bluetooth)
+  // ── Connection Type Selector ──
   Widget _buildConnectionTypeSelector() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Connection Type',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+    return _buildCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Connection Type',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              color: GlobalAppColor.DarkTextColorCode,
             ),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              children: ['TCP', 'USB', 'Bluetooth'].map((type) {
-                final isSelected = _selectedConnectionType == type;
-                final isPrimary = type == 'TCP';
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            children: ['TCP', 'USB', 'Bluetooth'].map((type) {
+              final isSelected = _selectedConnectionType == type;
+              final isPrimary = type == 'TCP';
 
-                return ChoiceChip(
-                  label: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        type == 'TCP'
-                            ? Icons.wifi
-                            : type == 'USB'
-                            ? Icons.usb
-                            : Icons.bluetooth,
-                        size: 16,
-                        color: isSelected ? Colors.white : Colors.grey[700],
-                      ),
-                      const SizedBox(width: 4),
-                      Text(type),
-                      if (isPrimary) ...[
-                        const SizedBox(width: 4),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 4,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? Colors.white24
-                                : Colors.green[100],
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            'Primary',
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: isSelected
-                                  ? Colors.white
-                                  : Colors.green[900],
-                            ),
+              return ChoiceChip(
+                label: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      type == 'TCP'
+                          ? Icons.wifi_rounded
+                          : type == 'USB'
+                              ? Icons.usb_rounded
+                              : Icons.bluetooth_rounded,
+                      size: 15,
+                      color: isSelected ? Colors.white : GlobalAppColor.DarkTextColorCode,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(type),
+                    if (isPrimary) ...[
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                        decoration: BoxDecoration(
+                          color: isSelected ? Colors.white.withOpacity(0.2) : const Color(0xFFDCFCE7),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          'Primary',
+                          style: TextStyle(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w700,
+                            color: isSelected ? Colors.white : const Color(0xFF15803D),
                           ),
                         ),
-                      ],
+                      ),
                     ],
+                  ],
+                ),
+                selected: isSelected,
+                onSelected: (selected) {
+                  if (selected) {
+                    setState(() {
+                      _selectedConnectionType = type;
+                    });
+                  }
+                },
+                selectedColor: GlobalAppColor.ButtonColor,
+                backgroundColor: const Color(0xFFF1F5F9),
+                elevation: 0,
+                pressElevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  side: BorderSide(
+                    color: isSelected ? GlobalAppColor.ButtonColor : const Color(0xFFE2E8F0),
                   ),
-                  selected: isSelected,
-                  onSelected: (selected) {
-                    if (selected) {
-                      setState(() {
-                        _selectedConnectionType = type;
-                      });
-                    }
-                  },
-                  selectedColor: const Color(0xFF6366F1),
-                  labelStyle: TextStyle(
-                    color: isSelected ? Colors.white : Colors.grey[700],
-                  ),
-                );
-              }).toList(),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              _selectedConnectionType == 'TCP'
-                  ? 'LAN/WiFi connection (recommended for restaurant use)'
-                  : _selectedConnectionType == 'USB'
-                  ? 'USB connection (requires printer connected via cable)'
-                  : 'Bluetooth connection (short range, for mobile printing)',
-              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-            ),
-          ],
-        ),
+                ),
+                labelStyle: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: isSelected ? Colors.white : GlobalAppColor.DarkTextColorCode,
+                ),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            _selectedConnectionType == 'TCP'
+                ? 'LAN/WiFi connection (recommended for restaurant use)'
+                : _selectedConnectionType == 'USB'
+                    ? 'USB connection (requires printer connected via cable)'
+                    : 'Bluetooth connection (short range, for mobile printing)',
+            style: TextStyle(fontSize: 12, color: GlobalAppColor.HomeLightTextColor),
+          ),
+        ],
       ),
     );
   }
 
-  /// Manual IP connection section
+  // ── Manual Connection ──
   Widget _buildManualConnection() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.settings_input_antenna, color: Colors.pink[400]),
-                const SizedBox(width: 8),
-                const Text(
-                  'Quick Connect - Manual IP',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+    return _buildCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.settings_input_antenna_rounded, color: Colors.pink.shade600, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                'Quick Connect - Manual IP',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: GlobalAppColor.DarkTextColorCode,
                 ),
-              ],
-            ),
-            const SizedBox(height: 16),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
 
-            // Printer Name
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Printer Name *',
-                  style: TextStyle(fontSize: 12, color: Colors.grey[700]),
-                ),
-                const SizedBox(height: 4),
-                TextField(
-                  controller: _printerNameController,
-                  decoration: InputDecoration(
-                    hintText: 'e.g., EPSON KDS, EPSON CASHIER',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
+          // Printer Name
+          _buildInputFieldLabel('Printer Name *'),
+          const SizedBox(height: 5),
+          _buildTextField(
+            controller: _printerNameController,
+            hint: 'e.g., EPSON KDS, EPSON CASHIER',
+          ),
+          const SizedBox(height: 12),
+
+          Row(
+            children: [
+              // IP Address
+              Expanded(
+                flex: 2,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildInputFieldLabel('IP Address *'),
+                    const SizedBox(height: 5),
+                    _buildTextField(
+                      controller: _ipController,
+                      hint: '192.168.29.115',
+                      keyboardType: TextInputType.number,
                     ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 12,
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+
+              // Port Number
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildInputFieldLabel('Port Number *'),
+                    const SizedBox(height: 5),
+                    _buildTextField(
+                      controller: _portController,
+                      hint: '9100',
+                      keyboardType: TextInputType.number,
                     ),
-                  ),
+                  ],
                 ),
-              ],
-            ),
-            const SizedBox(height: 12),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
 
-            Row(
-              children: [
-                // IP Address
-                Expanded(
-                  flex: 2,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'IP Address *',
-                        style: TextStyle(fontSize: 12, color: Colors.grey[700]),
-                      ),
-                      const SizedBox(height: 4),
-                      TextField(
-                        controller: _ipController,
-                        decoration: InputDecoration(
-                          hintText: '192.168.29.115',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 12,
-                          ),
-                        ),
-                        keyboardType: TextInputType.number,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 12),
-
-                // Port Number
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Port Number *',
-                        style: TextStyle(fontSize: 12, color: Colors.grey[700]),
-                      ),
-                      const SizedBox(height: 4),
-                      TextField(
-                        controller: _portController,
-                        decoration: InputDecoration(
-                          hintText: '9100',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 12,
-                          ),
-                        ),
-                        keyboardType: TextInputType.number,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 12),
-
-            // Connect and Test Buttons
-            Row(
-              children: [
-                Expanded(
-                  flex: 2,
+          // Connect and Test Buttons
+          Row(
+            children: [
+              Expanded(
+                flex: 2,
+                child: SizedBox(
+                  height: 44,
                   child: ElevatedButton.icon(
                     onPressed: _isConnecting ? null : _connectManualIP,
                     icon: _isConnecting
@@ -1224,560 +1205,615 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen> {
                               color: Colors.white,
                             ),
                           )
-                        : const Icon(Icons.check_circle),
-                    label: Text(
-                      _isConnecting ? 'Connecting...' : 'Use This Printer',
-                    ),
+                        : const Icon(Icons.check_circle_outline_rounded, size: 18),
+                    label: Text(_isConnecting ? 'Connecting...' : 'Use This Printer'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF6366F1),
+                      backgroundColor: GlobalAppColor.ButtonColor,
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      textStyle: const TextStyle(fontWeight: FontWeight.w600),
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
-                ElevatedButton.icon(
+              ),
+              const SizedBox(width: 8),
+              SizedBox(
+                height: 44,
+                child: ElevatedButton.icon(
                   onPressed: _isTesting ? null : _testPrint,
-                  icon: const Icon(Icons.print, size: 18),
+                  icon: const Icon(Icons.print_outlined, size: 18),
                   label: const Text('Test'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.pink[400],
+                    backgroundColor: Colors.pink.shade600,
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    textStyle: const TextStyle(fontWeight: FontWeight.w600),
                   ),
-                ),
-              ],
-            ),
-
-            // Connection Error
-            if (_connectionError != null) ...[
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.red[50],
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.red[200]!),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.error_outline, color: Colors.red[700], size: 20),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        _connectionError!,
-                        style: TextStyle(color: Colors.red[700], fontSize: 12),
-                      ),
-                    ),
-                  ],
                 ),
               ),
             ],
+          ),
+
+          // Connection Error
+          if (_connectionError != null) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.red.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.red.shade100),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.error_outline_rounded, color: Colors.red.shade700, size: 18),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _connectionError!,
+                      style: TextStyle(color: Colors.red.shade700, fontSize: 12),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
-        ),
+        ],
       ),
     );
   }
 
-  /// KDS (kitchen) printer connection section
+  // ── KDS Connection ──
   Widget _buildKDSConnection() {
     final isConnected = _connectedKdsIp.isNotEmpty;
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.kitchen, color: Colors.orange[700]),
-                const SizedBox(width: 8),
-                const Text(
-                  'KDS Kitchen Printer',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+    return _buildCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.kitchen_outlined, color: Colors.orange.shade700, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                'KDS Kitchen Printer',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: GlobalAppColor.DarkTextColorCode,
                 ),
-                const SizedBox(width: 8),
-                if (isConnected)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.green[100],
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      'Connected',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: Colors.green[800],
-                        fontWeight: FontWeight.w600,
-                      ),
+              ),
+              const SizedBox(width: 8),
+              if (isConnected)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFDCFCE7),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFF86EFAC)),
+                  ),
+                  child: const Text(
+                    'Connected',
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: Color(0xFF16A34A),
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
-              ],
-            ),
-            const SizedBox(height: 6),
-            Text(
-              'Connect a separate Epson LFC printer (e.g. TM-L100) for kitchen order tickets.',
-              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-            ),
-            const SizedBox(height: 16),
+                ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Connect a separate Epson LFC printer (e.g. TM-L100) for kitchen order tickets.',
+            style: TextStyle(fontSize: 12, color: GlobalAppColor.HomeLightTextColor),
+          ),
+          const SizedBox(height: 14),
 
-            // KDS IP address field
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'KDS Printer IP Address *',
-                  style: TextStyle(fontSize: 12, color: Colors.grey[700]),
-                ),
-                const SizedBox(height: 4),
-                TextField(
-                  controller: _kdsIpController,
-                  decoration: InputDecoration(
-                    hintText: '192.168.29.116',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 12,
-                    ),
-                    suffixIcon: isConnected
-                        ? Icon(Icons.check_circle, color: Colors.green[600])
-                        : null,
+          // KDS IP
+          _buildInputFieldLabel('KDS Printer IP Address *'),
+          const SizedBox(height: 5),
+          _buildTextField(
+            controller: _kdsIpController,
+            hint: '192.168.29.116',
+            keyboardType: TextInputType.number,
+            suffix: isConnected ? const Icon(Icons.check_circle_rounded, color: Color(0xFF16A34A), size: 18) : null,
+          ),
+          const SizedBox(height: 12),
+
+          // Series Selector
+          _buildInputFieldLabel('Printer Series'),
+          const SizedBox(height: 4),
+          Wrap(
+            spacing: 8,
+            children: ['TM_L100', 'TM_L90LFC'].map((s) {
+              final isSelected = _kdsSelectedSeries == s;
+              return ChoiceChip(
+                label: Text(s),
+                selected: isSelected,
+                onSelected: (selected) {
+                  if (selected) {
+                    setState(() => _kdsSelectedSeries = s);
+                  }
+                },
+                selectedColor: Colors.orange.shade700,
+                backgroundColor: const Color(0xFFF1F5F9),
+                elevation: 0,
+                pressElevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  side: BorderSide(
+                    color: isSelected ? Colors.orange.shade700 : const Color(0xFFE2E8F0),
                   ),
-                  keyboardType: TextInputType.number,
                 ),
-              ],
+                labelStyle: TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w600,
+                  color: isSelected ? Colors.white : GlobalAppColor.DarkTextColorCode,
+                ),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 14),
+
+          // Connect button
+          SizedBox(
+            width: double.infinity,
+            height: 44,
+            child: ElevatedButton.icon(
+              onPressed: _isConnectingKds ? null : _connectKDSPrinter,
+              icon: _isConnectingKds
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : Icon(isConnected ? Icons.refresh_rounded : Icons.link_rounded, size: 18),
+              label: Text(
+                _isConnectingKds
+                    ? 'Connecting KDS...'
+                    : isConnected
+                        ? 'Reconnect KDS ($_connectedKdsIp)'
+                        : 'Connect KDS Printer',
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange.shade700,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                textStyle: const TextStyle(fontWeight: FontWeight.w600),
+              ),
             ),
+          ),
+
+          // Error display
+          if (_kdsConnectionError != null) ...[
             const SizedBox(height: 12),
-
-            // Series selector
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Printer Series',
-                  style: TextStyle(fontSize: 12, color: Colors.grey[700]),
-                ),
-                const SizedBox(height: 4),
-                Wrap(
-                  spacing: 8,
-                  children: ['TM_L100', 'TM_L90LFC'].map((s) {
-                    final isSelected = _kdsSelectedSeries == s;
-                    return ChoiceChip(
-                      label: Text(s),
-                      selected: isSelected,
-                      onSelected: (selected) {
-                        if (selected) {
-                          setState(() => _kdsSelectedSeries = s);
-                        }
-                      },
-                      selectedColor: Colors.orange[700],
-                      labelStyle: TextStyle(
-                        color: isSelected ? Colors.white : Colors.grey[700],
-                        fontSize: 13,
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ],
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.red.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.red.shade100),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.error_outline_rounded, color: Colors.red.shade700, size: 18),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _kdsConnectionError!,
+                      style: TextStyle(color: Colors.red.shade700, fontSize: 12),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 16),
+          ],
+        ],
+      ),
+    );
+  }
 
-            // Connect button
+  // ── Discovery Section ──
+  Widget _buildDiscoverySection() {
+    return _buildCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Discover Network Printers',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: GlobalAppColor.DarkTextColorCode,
+                ),
+              ),
+              if (_isDiscovering)
+                TextButton.icon(
+                  onPressed: _stopDiscovery,
+                  icon: const Icon(Icons.stop_rounded, size: 16),
+                  label: const Text('Stop'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.red.shade600,
+                    textStyle: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 10),
+
+          if (_isDiscovering) ...[
+            LinearProgressIndicator(
+              color: GlobalAppColor.ButtonColor,
+              backgroundColor: GlobalAppColor.ButtonColor.withOpacity(0.15),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'Scanning for local printers...',
+              style: TextStyle(fontSize: 12, color: GlobalAppColor.HomeLightTextColor),
+            ),
+          ] else ...[
             SizedBox(
               width: double.infinity,
+              height: 44,
               child: ElevatedButton.icon(
-                onPressed: _isConnectingKds ? null : _connectKDSPrinter,
-                icon: _isConnectingKds
-                    ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : Icon(isConnected ? Icons.refresh : Icons.link),
-                label: Text(
-                  _isConnectingKds
-                      ? 'Connecting KDS...'
-                      : isConnected
-                      ? 'Reconnect KDS ($_connectedKdsIp)'
-                      : 'Connect KDS Printer',
-                ),
+                onPressed: _startDiscovery,
+                icon: const Icon(Icons.search_rounded, size: 18),
+                label: const Text('Scan for Printers'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange[700],
+                  backgroundColor: const Color(0xFF16A34A),
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  textStyle: const TextStyle(fontWeight: FontWeight.w600),
                 ),
               ),
             ),
-
-            // Error display
-            if (_kdsConnectionError != null) ...[
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.red[50],
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.red[200]!),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.error_outline, color: Colors.red[700], size: 20),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        _kdsConnectionError!,
-                        style: TextStyle(color: Colors.red[700], fontSize: 12),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
           ],
-        ),
+
+          if (_discoveryError != null) ...[
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.orange.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.orange.shade100),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.info_outline_rounded, color: Colors.orange.shade700, size: 18),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _discoveryError!,
+                      style: TextStyle(color: Colors.orange.shade900, fontSize: 12),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }
 
-  /// Printer discovery section
-  Widget _buildDiscoverySection() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Discover Printers on Network',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                if (_isDiscovering)
-                  TextButton.icon(
-                    onPressed: _stopDiscovery,
-                    icon: const Icon(Icons.stop, size: 16),
-                    label: const Text('Stop'),
-                    style: TextButton.styleFrom(foregroundColor: Colors.red),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 12),
-
-            if (_isDiscovering) ...[
-              const LinearProgressIndicator(),
-              const SizedBox(height: 12),
-              const Text(
-                'Scanning for printers...',
-                style: TextStyle(fontSize: 12, color: Colors.grey),
-              ),
-            ] else ...[
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: _startDiscovery,
-                  icon: const Icon(Icons.search),
-                  label: const Text('Scan for Printers'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green[600],
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                  ),
-                ),
-              ),
-            ],
-
-            if (_discoveryError != null) ...[
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.orange[50],
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.info_outline, color: Colors.orange[700]),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        _discoveryError!,
-                        style: TextStyle(
-                          color: Colors.orange[900],
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// Discovered printers list
+  // ── Discovered Printers ──
   Widget _buildDiscoveredPrinters() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Discovered Printers (${_discoveredPrinters.length})',
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+    return _buildCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Discovered Printers (${_discoveredPrinters.length})',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              color: GlobalAppColor.DarkTextColorCode,
             ),
-            const SizedBox(height: 12),
+          ),
+          const SizedBox(height: 12),
 
+          ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: _discoveredPrinters.length,
+            separatorBuilder: (context, index) => const Divider(height: 14),
+            itemBuilder: (context, index) {
+              final printer = _discoveredPrinters[index];
+
+              return Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEFF6FF),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(Icons.print_rounded, color: GlobalAppColor.ButtonColor, size: 20),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          printer.deviceName,
+                          style: TextStyle(
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.w600,
+                            color: GlobalAppColor.DarkTextColorCode,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          '${printer.target}  ·  ${printer.deviceType}',
+                          style: TextStyle(
+                            fontSize: 11.5,
+                            color: GlobalAppColor.HomeLightTextColor,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  SizedBox(
+                    height: 32,
+                    child: ElevatedButton.icon(
+                      onPressed: () async {
+                        final connectionType = _normalizeConnectionType(printer.target);
+                        final normalizedTarget = _normalizeTarget(
+                          printer.target,
+                          connectionType: connectionType,
+                        );
+                        final normalizedPort = _extractPortFromTarget(
+                          normalizedTarget,
+                          connectionType,
+                        );
+                        final inferredSeries = _inferSeriesFromName(printer.deviceName);
+
+                        final savedPrinter = SavedPrinter(
+                          name: printer.deviceName,
+                          target: normalizedTarget,
+                          ipAddress: printer.ipAddress ?? _extractHost(normalizedTarget),
+                          port: normalizedPort,
+                          type: connectionType,
+                          series: inferredSeries,
+                        );
+
+                        setState(() {
+                          if (!_savedPrinters.any((p) => p.target == printer.target)) {
+                            _savedPrinters.add(savedPrinter);
+                          }
+                        });
+
+                        await _savePrinters();
+                        await _connectToPrinter(savedPrinter);
+                      },
+                      icon: const Icon(Icons.add_rounded, size: 14),
+                      label: const Text('Add', style: TextStyle(fontSize: 11.5)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF16A34A),
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── Saved Printers ──
+  Widget _buildSavedPrinters() {
+    return _buildCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Saved Printers (${_savedPrinters.length})',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: GlobalAppColor.DarkTextColorCode,
+                ),
+              ),
+              if (_savedPrinters.isNotEmpty)
+                TextButton.icon(
+                  onPressed: _loadSavedPrinters,
+                  icon: const Icon(Icons.refresh_rounded, size: 16),
+                  label: const Text('Refresh'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: GlobalAppColor.ButtonColor,
+                    textStyle: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 10),
+
+          if (_savedPrinters.isEmpty)
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 24),
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.print_disabled_rounded,
+                      size: 40,
+                      color: Colors.grey.shade300,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'No saved printers',
+                      style: TextStyle(color: GlobalAppColor.HomeLightTextColor, fontSize: 13),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Add a printer using manual IP or discovery',
+                      style: TextStyle(fontSize: 11.5, color: Colors.grey.shade400),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          else
             ListView.separated(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: _discoveredPrinters.length,
-              separatorBuilder: (context, index) => const Divider(),
+              itemCount: _savedPrinters.length,
+              separatorBuilder: (context, index) => const SizedBox(height: 10),
               itemBuilder: (context, index) {
-                final printer = _discoveredPrinters[index];
+                final printer = _savedPrinters[index];
+                final isSelected = _selectedPrinter?.target == printer.target;
 
-                return ListTile(
-                  leading: Icon(Icons.print, color: Colors.blue[600]),
-                  title: Text(printer.deviceName),
-                  subtitle: Text('${printer.target} | ${printer.deviceType}'),
-                  trailing: ElevatedButton.icon(
-                    onPressed: () async {
-                      final connectionType = _normalizeConnectionType(
-                        printer.target,
-                      );
-                      final normalizedTarget = _normalizeTarget(
-                        printer.target,
-                        connectionType: connectionType,
-                      );
-                      final normalizedPort = _extractPortFromTarget(
-                        normalizedTarget,
-                        connectionType,
-                      );
-                      final inferredSeries = _inferSeriesFromName(
-                        printer.deviceName,
-                      );
-
-                      final savedPrinter = SavedPrinter(
-                        name: printer.deviceName,
-                        target: normalizedTarget,
-                        ipAddress:
-                            printer.ipAddress ?? _extractHost(normalizedTarget),
-                        port: normalizedPort,
-                        type: connectionType,
-                        series: inferredSeries,
-                      );
-
-                      setState(() {
-                        if (!_savedPrinters.any(
-                          (p) => p.target == printer.target,
-                        )) {
-                          _savedPrinters.add(savedPrinter);
-                        }
-                      });
-
-                      await _savePrinters();
-                      await _connectToPrinter(savedPrinter);
-                    },
-                    icon: const Icon(Icons.add, size: 18),
-                    label: const Text('Add'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green[600],
-                      foregroundColor: Colors.white,
+                return Container(
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? const Color(0xFFDCFCE7).withOpacity(0.3)
+                        : const Color(0xFFF8FAFC),
+                    border: Border.all(
+                      color: isSelected ? const Color(0xFF86EFAC) : const Color(0xFFE2E8F0),
+                      width: 1.2,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: ListTile(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: isSelected ? const Color(0xFFDCFCE7) : Colors.grey.shade200,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Icon(
+                        Icons.print_rounded,
+                        color: isSelected ? const Color(0xFF15803D) : Colors.grey.shade600,
+                        size: 22,
+                      ),
+                    ),
+                    title: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            printer.name,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
+                              color: GlobalAppColor.DarkTextColorCode,
+                            ),
+                          ),
+                        ),
+                        if (isSelected) ...[
+                          const SizedBox(width: 8),
+                          const Icon(
+                            Icons.check_circle_rounded,
+                            color: Color(0xFF16A34A),
+                            size: 16,
+                          ),
+                        ],
+                      ],
+                    ),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 3),
+                        Text(
+                          'IP: ${printer.ipAddress}  ·  Port: ${printer.port}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: GlobalAppColor.HomeLightTextColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (!isSelected)
+                          IconButton(
+                            icon: const Icon(Icons.link_rounded, size: 20),
+                            onPressed: () => _connectToPrinter(printer),
+                            tooltip: 'Connect',
+                            color: const Color(0xFF16A34A),
+                          ),
+                        IconButton(
+                          icon: const Icon(Icons.delete_outline_rounded, size: 20),
+                          onPressed: () => _deletePrinter(printer),
+                          tooltip: 'Delete',
+                          color: Colors.red.shade600,
+                        ),
+                      ],
                     ),
                   ),
                 );
               },
             ),
-          ],
-        ),
+        ],
       ),
     );
   }
 
-  /// Saved printers list
-  Widget _buildSavedPrinters() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Saved Printers (${_savedPrinters.length})',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                if (_savedPrinters.isNotEmpty)
-                  TextButton.icon(
-                    onPressed: _loadSavedPrinters,
-                    icon: const Icon(Icons.refresh, size: 16),
-                    label: const Text('Refresh'),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 12),
+  // ── Clean Helper Input widgets ──
 
-            if (_savedPrinters.isEmpty)
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(32),
-                  child: Column(
-                    children: [
-                      Icon(
-                        Icons.print_disabled,
-                        size: 48,
-                        color: Colors.grey[400],
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'No saved printers',
-                        style: TextStyle(color: Colors.grey[600]),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Add a printer using manual IP or discovery',
-                        style: TextStyle(fontSize: 12, color: Colors.grey[500]),
-                      ),
-                    ],
-                  ),
-                ),
-              )
-            else
-              ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: _savedPrinters.length,
-                separatorBuilder: (context, index) => const Divider(),
-                itemBuilder: (context, index) {
-                  final printer = _savedPrinters[index];
-                  final isSelected = _selectedPrinter?.target == printer.target;
+  Widget _buildInputFieldLabel(String label) {
+    return Text(
+      label,
+      style: TextStyle(
+        fontSize: 12.5,
+        fontWeight: FontWeight.w600,
+        color: GlobalAppColor.DarkTextColorCode,
+      ),
+    );
+  }
 
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    decoration: BoxDecoration(
-                      color: isSelected ? Colors.green[50] : Colors.white,
-                      border: Border.all(
-                        color: isSelected ? Colors.green : Colors.grey[300]!,
-                        width: isSelected ? 2 : 1,
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: isSelected
-                          ? [
-                              BoxShadow(
-                                color: Colors.green.withOpacity(0.2),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
-                              ),
-                            ]
-                          : null,
-                    ),
-                    child: ListTile(
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
-                      leading: Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: Colors.green[100],
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Icon(
-                          Icons.print,
-                          color: Colors.green[700],
-                          size: 24,
-                        ),
-                      ),
-                      title: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              printer.name,
-                              style: TextStyle(
-                                fontWeight: isSelected
-                                    ? FontWeight.bold
-                                    : FontWeight.w600,
-                                fontSize: 15,
-                              ),
-                            ),
-                          ),
-                          if (isSelected) ...[
-                            const SizedBox(width: 8),
-                            Icon(
-                              Icons.check_circle,
-                              color: Colors.green,
-                              size: 18,
-                            ),
-                          ],
-                        ],
-                      ),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(height: 4),
-                          Text(
-                            'IP: ${printer.ipAddress} | Port: ${printer.port}',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                        ],
-                      ),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (!isSelected)
-                            IconButton(
-                              icon: const Icon(Icons.link, size: 20),
-                              onPressed: () => _connectToPrinter(printer),
-                              tooltip: 'Connect',
-                              color: Colors.green[600],
-                            ),
-                          IconButton(
-                            icon: const Icon(Icons.delete, size: 20),
-                            onPressed: () => _deletePrinter(printer),
-                            tooltip: 'Delete',
-                            color: Colors.red[600],
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-          ],
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String hint,
+    TextInputType keyboardType = TextInputType.text,
+    Widget? suffix,
+  }) {
+    return TextFormField(
+      controller: controller,
+      keyboardType: keyboardType,
+      style: TextStyle(fontSize: 13.5, color: GlobalAppColor.DarkTextColorCode),
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: TextStyle(fontSize: 13, color: Colors.grey.shade400),
+        suffixIcon: suffix,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+        filled: true,
+        fillColor: const Color(0xFFF8FAFC),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: GlobalAppColor.ButtonColor, width: 1.5),
         ),
       ),
     );
