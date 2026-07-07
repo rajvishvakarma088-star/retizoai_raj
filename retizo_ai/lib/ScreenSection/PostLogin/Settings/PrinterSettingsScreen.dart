@@ -764,13 +764,10 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        border: Border.all(
+          color: const Color(0xFFE2E8F0),
+          width: 1.2,
+        ),
       ),
       child: child,
     );
@@ -813,6 +810,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen> {
               ),
             ],
           ),
+          const Divider(height: 20, color: Color(0xFFE2E8F0), thickness: 1),
           Text(
             'Auto-detects from /api/printingDevice. KDS[0] is used for auto-printing.',
             style: TextStyle(fontSize: 12, color: GlobalAppColor.HomeLightTextColor),
@@ -1005,7 +1003,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const Divider(height: 18, color: Color(0xFFBFDBFE), thickness: 1),
           Text(
             '• Connect your Epson printers via LAN/WiFi (recommended), USB, or Bluetooth\n'
             '• When printing orders, select whether to print as a Bill or KDS ticket\n'
@@ -1035,7 +1033,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen> {
               color: GlobalAppColor.DarkTextColorCode,
             ),
           ),
-          const SizedBox(height: 12),
+          const Divider(height: 20, color: Color(0xFFE2E8F0), thickness: 1),
           Wrap(
             spacing: 8,
             children: ['TCP', 'USB', 'Bluetooth'].map((type) {
@@ -1137,7 +1135,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          const Divider(height: 20, color: Color(0xFFE2E8F0), thickness: 1),
 
           // Printer Name
           _buildInputFieldLabel('Printer Name *'),
@@ -1304,7 +1302,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen> {
                 ),
             ],
           ),
-          const SizedBox(height: 4),
+          const Divider(height: 20, color: Color(0xFFE2E8F0), thickness: 1),
           Text(
             'Connect a separate Epson LFC printer (e.g. TM-L100) for kitchen order tickets.',
             style: TextStyle(fontSize: 12, color: GlobalAppColor.HomeLightTextColor),
@@ -1448,7 +1446,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen> {
                 ),
             ],
           ),
-          const SizedBox(height: 10),
+          const Divider(height: 20, color: Color(0xFFE2E8F0), thickness: 1),
 
           if (_isDiscovering) ...[
             LinearProgressIndicator(
@@ -1521,7 +1519,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen> {
               color: GlobalAppColor.DarkTextColorCode,
             ),
           ),
-          const SizedBox(height: 12),
+          const Divider(height: 20, color: Color(0xFFE2E8F0), thickness: 1),
 
           ListView.separated(
             shrinkWrap: true,
@@ -1649,7 +1647,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen> {
                 ),
             ],
           ),
-          const SizedBox(height: 10),
+          const Divider(height: 20, color: Color(0xFFE2E8F0), thickness: 1),
 
           if (_savedPrinters.isEmpty)
             Center(
