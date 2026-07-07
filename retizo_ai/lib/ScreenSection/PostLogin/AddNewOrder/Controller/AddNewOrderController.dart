@@ -155,7 +155,7 @@ class AddOrderProvider with ChangeNotifier {
   List<MenuModel> MenuListing = [];
   List<MenuModel> filteredMenuListing = [];
 
-  int get MenusCount => filteredMenuListing.length;
+  int get MenusCount => getFilteredMenuItems().length;
 
   /// 🔹 Stock map: productId → available quantity (from /products-stock API)
   Map<int, int> productStockMap = {};
@@ -680,6 +680,45 @@ class AddOrderProvider with ChangeNotifier {
     }
 
     notifyListeners();
+  }
+
+  // 🔹 Get dynamically filtered menu items list based on Brand, Category and Search controller
+  List<MenuModel> getFilteredMenuItems() {
+    List<MenuModel> list = MenuListing;
+
+    // 1. Filter by Brand if selected
+    if (selectedBrandId != null) {
+      final brandCategoryIds = CategoriesListing
+          .where((cat) => cat.brandid != null && cat.brandid.toString() == selectedBrandId.toString())
+          .map((cat) => cat.mCatId)
+          .toSet();
+      
+      list = list.where((item) => brandCategoryIds.contains(item.mCatId)).toList();
+    }
+
+    // 2. Filter by Category if selected
+    if (selectedCategoryId != null) {
+      list = list.where((item) => item.mCatId == selectedCategoryId).toList();
+    }
+
+    // 3. Filter by Search Query
+    if (SearchMenuController.text.isNotEmpty) {
+      final query = SearchMenuController.text.trim().toLowerCase();
+      list = list.where((item) {
+        final pName = item.mPName?.toLowerCase() ?? '';
+        final pArbName = item.mPArbName?.toLowerCase() ?? '';
+
+        final nameWords = pName.split(RegExp(r'\s+'));
+        final arbWords = pArbName.split(RegExp(r'\s+'));
+
+        final matchesName = pName.startsWith(query) || nameWords.any((word) => word.startsWith(query));
+        final matchesArb = pArbName.startsWith(query) || arbWords.any((word) => word.startsWith(query));
+
+        return matchesName || matchesArb;
+      }).toList();
+    }
+
+    return list;
   }
 
   //--🔹--Order Summary--------------------------------------------------🔹--//

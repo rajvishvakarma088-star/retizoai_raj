@@ -11,80 +11,53 @@ class AddOrderWidget {
   Widget AddNewOrders(BuildContext context, UserInfoProvider UserInfoCtrl) {
     return Consumer2<AddOrderProvider, UserInfoProvider>(
       builder: (context, AddOrderCtrl, UserInfoCtrl, child) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            Text(
-              "Add New Order",
-              style: CommonWidget.CommonTitleTextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 16,
-              ),
+        return HomeWidget().buildDropdown(
+          hintText: "All Brands",
+          iconPadding: 0,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(
+              color: GlobalAppColor.DarkTextColorCode.withOpacity(.1),
+              width: 2,
             ),
-            const SizedBox(height: 6),
-            // 🔹 Row: Organization Info (center) + Back Button (right)
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                // Left side — Organization info
-                Expanded(
-                  child: HomeWidget().buildDropdown(
-                    hintText: "All Brands",
-                    iconPadding: 0,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(
-                        color: GlobalAppColor.DarkTextColorCode.withOpacity(.1),
-                        width: 2,
-                      ),
-                    ),
-                    showTextLeft: true,
-                    showIconRight: true,
-                    items: [
-                      "All Brands", // Default Option 👈
-                      ...AddOrderCtrl.BrandListing.map((e) => e.brandName),
-                    ],
-                    value: AddOrderCtrl.selectedBrandType ?? "All Brands",
-                    onChanged: AddOrderCtrl.isBookingLoader
-                        ? null
-                        : (value) {
-                            AddOrderCtrl.updatedBrand(value);
-
-                            // FIX: Agar "All Brands" choose kiya gaya ho
-                            if (value == "All Brands") {
-                              AddOrderCtrl.selectedBrandId = null;
-                              AddOrderCtrl.filteredCategoriesListing = [];
-                              AddOrderCtrl.setCategory(null);
-                              AddOrderCtrl.notifyListeners();
-                              AddOrderCtrl.selectedCategoryIndex = -1;
-                              return;
-                            }
-                            AddOrderCtrl.selectedCategoryIndex = 0;
-                            AddOrderCtrl.filterCategoriesByBrand(
-                              AddOrderCtrl.selectedBrandId,
-                            );
-                            AddOrderCtrl.setCategory(null);
-                          },
-
-                    hintStyle: CommonWidget.CommonTitleTextStyle(
-                      color: GlobalAppColor.DarkTextColorCode,
-                      fontSize: 13,
-                    ),
-                    itemStyle: CommonWidget.CommonTitleTextStyle(
-                      color: GlobalAppColor.DarkTextColorCode,
-                      fontSize: 13,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 15),
-                // Right side — Back Button
-                CommonWidget().BackWidget(context),
-              ],
-            ),
+          ),
+          showTextLeft: true,
+          showIconRight: true,
+          items: [
+            "All Brands", // Default Option 👈
+            ...AddOrderCtrl.BrandListing.map((e) => e.brandName),
           ],
+          value: AddOrderCtrl.selectedBrandType ?? "All Brands",
+          onChanged: AddOrderCtrl.isBookingLoader
+              ? null
+              : (value) {
+                  AddOrderCtrl.updatedBrand(value);
+
+                  // FIX: Agar "All Brands" choose kiya gaya ho
+                  if (value == "All Brands") {
+                    AddOrderCtrl.selectedBrandId = null;
+                    AddOrderCtrl.filteredCategoriesListing = [];
+                    AddOrderCtrl.setCategory(null);
+                    AddOrderCtrl.notifyListeners();
+                    AddOrderCtrl.selectedCategoryIndex = -1;
+                    return;
+                  }
+                  AddOrderCtrl.selectedCategoryIndex = 0;
+                  AddOrderCtrl.filterCategoriesByBrand(
+                    AddOrderCtrl.selectedBrandId,
+                  );
+                  AddOrderCtrl.setCategory(null);
+                },
+
+          hintStyle: CommonWidget.CommonTitleTextStyle(
+            color: GlobalAppColor.DarkTextColorCode,
+            fontSize: 13,
+          ),
+          itemStyle: CommonWidget.CommonTitleTextStyle(
+            color: GlobalAppColor.DarkTextColorCode,
+            fontSize: 13,
+          ),
         );
       },
     );
@@ -116,22 +89,7 @@ class AddOrderWidget {
               controller: AddOrderCtrl.SearchCategoriesController,
               focusNode: AddOrderCtrl.myFocusNodeCategories,
               onChanged: (value) {
-                // 🔹 Update filteredCategoriesListing based on search query
-                AddOrderCtrl.filteredCategoriesListing =
-                    AddOrderCtrl.CategoriesListing.where(
-                      (cat) =>
-                          cat.mCatName.toLowerCase().contains(
-                            value.toLowerCase(),
-                          ) ||
-                          cat.mCatArbName.toLowerCase().contains(
-                            value.toLowerCase(),
-                          ) ||
-                          cat.status.toLowerCase().contains(
-                            value.toLowerCase(),
-                          ),
-                    ).toList();
-
-                AddOrderCtrl.notifyListeners(); // Refresh UI
+                AddOrderCtrl.notifyListeners(); // Refresh UI to trigger dynamic search filter
               },
             ),
           ),
@@ -152,11 +110,23 @@ class AddOrderWidget {
           return CommonShimmer.CategoryListShimmer(context, 6);
         }
 
-        // 🔹 Filtered data brand & search ke basis par
-        List<CategoryModel> filteredList =
-            AddOrderCtrl.filteredCategoriesListing.isNotEmpty
-            ? AddOrderCtrl.filteredCategoriesListing
-            : data;
+        // 🔹 Calculate the correctly filtered list dynamically based on Brand and Search text
+        List<CategoryModel> baseList = AddOrderCtrl.selectedBrandId != null
+            ? AddOrderCtrl.CategoriesListing.where(
+                (e) => e.brandid != null && e.brandid.toString() == AddOrderCtrl.selectedBrandId.toString(),
+              ).toList()
+            : AddOrderCtrl.CategoriesListing;
+
+        // Apply Search Filter if search query is entered
+        List<CategoryModel> filteredList = baseList;
+        if (AddOrderCtrl.SearchCategoriesController.text.isNotEmpty) {
+          final query = AddOrderCtrl.SearchCategoriesController.text.toLowerCase();
+          filteredList = baseList.where((cat) {
+            return cat.mCatName.toLowerCase().contains(query) ||
+                (cat.mCatArbName != null && cat.mCatArbName.toLowerCase().contains(query)) ||
+                (cat.status != null && cat.status.toLowerCase().contains(query));
+          }).toList();
+        }
 
         // 🔹 Brand Select ho ⇒ "All" button add
         if (AddOrderCtrl.selectedBrandId != null && filteredList.isNotEmpty) {
@@ -186,189 +156,72 @@ class AddOrderWidget {
           );
         }
 
-        return LayoutBuilder(
-          builder: (context, constraints) {
-            final screenWidth = constraints.maxWidth;
-            final orientation = MediaQuery.of(context).orientation;
-            int itemsPerRow;
-
-            /// Small Mobile (≤ 600px)
-            if (screenWidth <= 600) {
-              itemsPerRow = 3;
-            }
-            /// Medium Devices (600 - 999)
-            else if (screenWidth > 600 && screenWidth < 1000) {
-              itemsPerRow = 5;
-            }
-            /// Large Screen / Tablets (≥ 1000px)
-            else {
-              itemsPerRow = 8;
-            }
-
-            /// Force same layout in landscape for mobiles
-            if (orientation == Orientation.landscape && screenWidth <= 600) {
-              itemsPerRow = 4;
-            }
-
-            final rowCount = (filteredList.length / itemsPerRow).ceil();
-
-            return ListView.builder(
-              shrinkWrap: true,
-              physics: const BouncingScrollPhysics(),
-              padding: EdgeInsets.zero,
-              itemCount: rowCount,
-              itemBuilder: (context, rowIndex) {
-                List<Widget> rowItems = [];
-                if (rowIndex >= rowCount) {
-                  return const SizedBox.shrink(); // Out of bounds check
-                }
-
-                for (int i = 0; i < itemsPerRow; i++) {
-                  final itemIndex = rowIndex * itemsPerRow + i;
-
-                  if (itemIndex < filteredList.length) {
-                    final item = filteredList[itemIndex];
-
-                    rowItems.add(
-                      Expanded(
-                        child: AnimationLimiter(
-                          child: CommonWidget().buildStaggeredAnimation(
-                            index: rowIndex,
-                            child: InkWell(
-                              overlayColor: MaterialStateProperty.all(
-                                Colors.transparent,
-                              ),
-                              onTap: () {
-                                if (item.mCatId == -1) {
-                                  // मान लो -1 = "All"
-                                  AddOrderCtrl.setCategory(null);
-                                } else {
-                                  AddOrderCtrl.setCategory(item.mCatId);
-                                }
-
-                                // Optional: UI में selected highlight
-                                AddOrderCtrl.onCategorySelected(
-                                  itemIndex,
-                                  item,
-                                );
-                              },
-                              child: IntrinsicHeight(
-                                child: Container(
-                                  padding: const EdgeInsets.all(10),
-                                  margin: const EdgeInsets.only(
-                                    right: 6,
-                                    bottom: 2,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(5),
-                                    border:
-                                        AddOrderCtrl.selectedCategoryIndex ==
-                                            itemIndex
-                                        ? Border.all(
-                                            color: GlobalAppColor.ButtonColor,
-                                            width: 2,
-                                          )
-                                        : Border.all(
-                                            color:
-                                                GlobalAppColor.WhiteColorCode,
-                                            width: 2,
-                                          ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.grey.shade100,
-                                        blurRadius: 4,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      CommonWidget().RectangleCachedImage(
-                                        context: context,
-                                        imageUrl:
-                                            item.mCatIcon != null &&
-                                                item.mCatIcon.startsWith(
-                                                  "https",
-                                                )
-                                            ? item.mCatIcon
-                                            : "${GlobalServiceURL.ImageBaseUrl}${item.mCatIcon}",
-                                        width: 35,
-                                        height: 35,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.rectangle,
-                                        ),
-                                      ),
-                                      SizedBox(height: 5),
-                                      // Product Name
-                                      Flexible(
-                                        child: Align(
-                                          alignment: Alignment.center,
-                                          child: Text(
-                                            item.mCatName,
-                                            textAlign: TextAlign.center,
-                                            style: CommonWidget.CommonTitleTextStyle(
-                                              height: 1.0,
-                                              color:
-                                                  AddOrderCtrl
-                                                          .selectedCategoryIndex ==
-                                                      itemIndex
-                                                  ? const Color(0xFF1F2937)
-                                                  : GlobalAppColor
-                                                        .DarkTextColorCode.withOpacity(
-                                                      .8,
-                                                    ),
-                                              fontWeight: FontWeight.w500,
-                                              letterSpacing: 0.5,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      // Arabic Name
-                                      Flexible(
-                                        child: Align(
-                                          alignment: Alignment.center,
-                                          child: Text(
-                                            item.mCatArbName,
-                                            textAlign: TextAlign.center,
-                                            style:
-                                                CommonWidget.CommonTitleTextStyle(
-                                                  fontSize: 13,
-                                                  fontWeight: FontWeight.w300,
-                                                ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
+        return SizedBox(
+          height: 48,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            itemCount: filteredList.length,
+            itemBuilder: (context, index) {
+              final item = filteredList[index];
+              final bool isSelected = AddOrderCtrl.selectedCategoryIndex == index;
+              return GestureDetector(
+                onTap: () {
+                  if (item.mCatId == -1) {
+                    AddOrderCtrl.setCategory(null);
+                  } else {
+                    AddOrderCtrl.setCategory(item.mCatId);
+                  }
+                  AddOrderCtrl.onCategorySelected(index, item);
+                },
+                child: Container(
+                  margin: const EdgeInsets.only(right: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: isSelected ? GlobalAppColor.ButtonColor : Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isSelected ? Colors.transparent : Colors.grey.shade300,
+                      width: 1,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.04),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (item.mCatIcon != null && item.mCatIcon.isNotEmpty) ...[
+                        CommonWidget().RectangleCachedImage(
+                          context: context,
+                          imageUrl: item.mCatIcon.startsWith("https")
+                              ? item.mCatIcon
+                              : "${GlobalServiceURL.ImageBaseUrl}${item.mCatIcon}",
+                          width: 20,
+                          height: 20,
+                          decoration: const BoxDecoration(shape: BoxShape.circle),
+                        ),
+                        const SizedBox(width: 8),
+                      ],
+                      Text(
+                        item.mCatName,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                          color: isSelected ? Colors.white : const Color(0xFF374151),
                         ),
                       ),
-                    );
-                  } else {
-                    rowItems.add(const Expanded(child: SizedBox()));
-                  }
-                }
-
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 6),
-                  child: IntrinsicHeight(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: rowItems,
-                    ),
+                    ],
                   ),
-                );
-              },
-            );
-          },
+                ),
+              );
+            },
+          ),
         );
       },
     );
@@ -398,46 +251,6 @@ class AddOrderWidget {
               controller: AddOrderCtrl.SearchMenuController,
               focusNode: AddOrderCtrl.myFocusNodeMenu,
               onChanged: (value) {
-                // 🔹 Use category-filtered list as base
-                List<MenuModel> baseList =
-                    AddOrderCtrl.selectedCategoryId == null
-                    ? AddOrderCtrl
-                          .MenuListing // All
-                    : AddOrderCtrl.MenuListing.where(
-                        (item) =>
-                            item.mCatId == AddOrderCtrl.selectedCategoryId,
-                      ).toList();
-
-                AddOrderCtrl.filteredMenuListing = baseList
-                    .where(
-                      (cat) =>
-                          cat.mPName.toString().toLowerCase().contains(
-                            value.toLowerCase(),
-                          ) ||
-                          cat.mPArbName.toString().toLowerCase().contains(
-                            value.toLowerCase(),
-                          ) ||
-                          cat.price.toString().toLowerCase().contains(
-                            value.toLowerCase(),
-                          ) ||
-                          cat.costingMethod.toString().toLowerCase().contains(
-                            value.toLowerCase(),
-                          ) ||
-                          cat.costPrice.toString().toLowerCase().contains(
-                            value.toLowerCase(),
-                          ) ||
-                          cat.sellingMethod.toString().toLowerCase().contains(
-                            value.toLowerCase(),
-                          ) ||
-                          cat.status.toString().toLowerCase().contains(
-                            value.toLowerCase(),
-                          ) ||
-                          cat.pricingMethod.toString().toLowerCase().contains(
-                            value.toLowerCase(),
-                          ),
-                    )
-                    .toList();
-
                 AddOrderCtrl.notifyListeners();
               },
             ),
@@ -459,7 +272,9 @@ class AddOrderWidget {
           return CommonShimmer.MenuListShimmer(context, 4);
         }
 
-        if (AddOrderCtrl.filteredMenuListing.isEmpty) {
+        final filteredList = AddOrderCtrl.getFilteredMenuItems();
+
+        if (filteredList.isEmpty) {
           return Padding(
             padding: const EdgeInsets.only(bottom: 22.0),
             child: Text(
@@ -494,7 +309,7 @@ class AddOrderWidget {
             }
 
             final rowCount =
-                (AddOrderCtrl.filteredMenuListing.length / itemsPerRow).ceil();
+                (filteredList.length / itemsPerRow).ceil();
 
             return ListView.builder(
               shrinkWrap: true,
@@ -510,8 +325,8 @@ class AddOrderWidget {
                 for (int i = 0; i < itemsPerRow; i++) {
                   final itemIndex = rowIndex * itemsPerRow + i;
 
-                  if (itemIndex < AddOrderCtrl.filteredMenuListing.length) {
-                    final item = AddOrderCtrl.filteredMenuListing[itemIndex];
+                  if (itemIndex < filteredList.length) {
+                    final item = filteredList[itemIndex];
 
                     rowItems.add(
                       Expanded(
@@ -902,6 +717,20 @@ class AddOrderWidget {
     Widget panelContent(bool showCloseButton) {
       return Column(
         children: [
+          if (showCloseButton) ...[
+            const SizedBox(height: 8),
+            Center(
+              child: Container(
+                width: 40,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFD1D5DB),
+                  borderRadius: BorderRadius.circular(2.5),
+                ),
+              ),
+            ),
+            const SizedBox(height: 4),
+          ],
           Container(
             height: kToolbarHeight,
             padding: const EdgeInsets.symmetric(horizontal: 5),
@@ -1319,11 +1148,18 @@ class AddOrderWidget {
                     width: double.infinity,
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(5),
+                      borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: GlobalAppColor.DarkTextColorCode.withOpacity(.1),
-                        width: 2,
+                        color: const Color(0xFFE5E7EB),
+                        width: 1.0,
                       ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.02),
+                          blurRadius: 6,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
                     ),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
@@ -2358,28 +2194,9 @@ class AddOrderWidget {
       );
     }
 
-    return Stack(
-      children: [
-        if (AddOrderCtrl.isOrderSummaryPanelOpen)
-          const ColoredBox(color: Color(0xFFE5E7EB)),
-        AnimatedPositioned(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOutBack,
-          right: AddOrderCtrl.isOrderSummaryPanelOpen ? 0 : -panelWidth,
-          top: 0,
-          bottom: 0,
-          width: panelWidth,
-          child: Material(
-            elevation: 12,
-            color: Colors.white,
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(10),
-              bottomLeft: Radius.circular(10),
-            ),
-            child: panelContent(true),
-          ),
-        ),
-      ],
+    return Container(
+      color: Colors.white,
+      child: panelContent(true),
     );
   }
 }
@@ -2577,12 +2394,12 @@ class _TableSelectionModalState extends State<_TableSelectionModal> {
                 });
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFFEC4899),
+                backgroundColor: GlobalAppColor.ButtonColor,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               ),
               child: Text(
                 'Add to Order',
@@ -2709,12 +2526,12 @@ class _TableSelectionModalState extends State<_TableSelectionModal> {
                             ),
                             decoration: BoxDecoration(
                               color: active
-                                  ? const Color(0xFFEC4899)
+                                  ? GlobalAppColor.ButtonColor
                                   : Colors.white,
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(
                                 color: active
-                                    ? const Color(0xFFEC4899)
+                                    ? GlobalAppColor.ButtonColor
                                     : const Color(0xFFD1D5DB),
                                 width: 1.5,
                               ),
@@ -2772,21 +2589,21 @@ class _TableSelectionModalState extends State<_TableSelectionModal> {
                     return Chip(
                       label: Text(
                         t.tableName,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
-                          color: Color(0xFFBE185D),
+                          color: GlobalAppColor.DarkBlueColor,
                         ),
                       ),
                       onDeleted: () => _toggle(t),
-                      deleteIcon: const Icon(
+                      deleteIcon: Icon(
                         Icons.close,
                         size: 14,
-                        color: Color(0xFFBE185D),
+                        color: GlobalAppColor.DarkBlueColor,
                       ),
-                      backgroundColor: const Color(0xFFFCE7F3),
-                      side: const BorderSide(
-                        color: Color(0xFFEC4899),
+                      backgroundColor: GlobalAppColor.LightBlueColor,
+                      side: BorderSide(
+                        color: GlobalAppColor.ButtonColor,
                         width: 1,
                       ),
                       padding: const EdgeInsets.symmetric(
@@ -2823,7 +2640,7 @@ class _TableSelectionModalState extends State<_TableSelectionModal> {
                           crossAxisCount: crossAxisCount,
                           crossAxisSpacing: 10,
                           mainAxisSpacing: 10,
-                          childAspectRatio: 0.85,
+                          childAspectRatio: 0.78,
                         ),
                         itemCount: filtered.length,
                         itemBuilder: (ctx, i) {
@@ -2840,29 +2657,36 @@ class _TableSelectionModalState extends State<_TableSelectionModal> {
                               duration: const Duration(milliseconds: 150),
                               padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
-                                // ✅ Occupied = gray, Selected = pink, Blocked = gray-50, Available = green
                                 color: isOccupied
-                                    ? const Color(0xFFF3F4F6) // gray-100
+                                    ? const Color(0xFFFEF2F2)
                                     : isBlocked
-                                    ? const Color(0xFFF9FAFB) // gray-50
+                                    ? const Color(0xFFF9FAFB)
                                     : sel
-                                    ? const Color(0xFFFDF2F8) // pink-50
-                                    : const Color(0xFFF0FFF4), // green-50
-                                borderRadius: BorderRadius.circular(10),
+                                    ? const Color(0xFFEFF6FF)
+                                    : Colors.white,
+                                borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
-                                  // ✅ Occupied = red, Selected = pink, Blocked = gray-300, Available = green
                                   color: isOccupied
-                                      ? const Color(0xFFEF4444) // red-500
+                                      ? const Color(0xFFFCA5A5)
                                       : isBlocked
-                                      ? const Color(0xFFD1D5DB) // gray-300
+                                      ? const Color(0xFFE5E7EB)
                                       : sel
-                                      ? const Color(0xFFEC4899) // pink-500
-                                      : const Color(0xFF4ADE80), // green-400
-                                  width: 1.5,
+                                      ? GlobalAppColor.ButtonColor
+                                      : const Color(0xFFE5E7EB),
+                                  width: sel ? 2.0 : 1.0,
                                 ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: sel
+                                        ? GlobalAppColor.ButtonColor.withOpacity(0.08)
+                                        : Colors.black.withOpacity(0.02),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 3),
+                                  ),
+                                ],
                               ),
                               child: Opacity(
-                                opacity: isOccupied ? 0.6 : (isBlocked ? 0.5 : 1.0),
+                                opacity: isBlocked ? 0.5 : 1.0,
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   mainAxisSize: MainAxisSize.min,
@@ -2878,7 +2702,7 @@ class _TableSelectionModalState extends State<_TableSelectionModal> {
                                               fontWeight: FontWeight.w700,
                                               fontSize: 15,
                                               color: isOccupied
-                                                  ? const Color(0xFF6B7280)
+                                                  ? const Color(0xFF991B1B)
                                                   : const Color(0xFF111827),
                                             ),
                                             overflow: TextOverflow.ellipsis,
@@ -2925,7 +2749,7 @@ class _TableSelectionModalState extends State<_TableSelectionModal> {
                                             decoration: BoxDecoration(
                                               color: const Color(
                                                 0xFFDC2626,
-                                              ), // red-600
+                                              ),
                                               borderRadius:
                                                   BorderRadius.circular(4),
                                             ),
@@ -2939,7 +2763,6 @@ class _TableSelectionModalState extends State<_TableSelectionModal> {
                                             ),
                                           ),
                                         const SizedBox(width: 2),
-                                        // Status badge/circle
                                         if (isBlocked)
                                           Container(
                                             width: 20,
@@ -2966,11 +2789,11 @@ class _TableSelectionModalState extends State<_TableSelectionModal> {
                                             decoration: BoxDecoration(
                                               shape: BoxShape.circle,
                                               color: sel
-                                                  ? const Color(0xFFEC4899)
+                                                  ? GlobalAppColor.ButtonColor
                                                   : Colors.transparent,
                                               border: Border.all(
                                                 color: sel
-                                                    ? const Color(0xFFEC4899)
+                                                    ? GlobalAppColor.ButtonColor
                                                     : const Color(0xFF22C55E),
                                                 width: 2,
                                               ),
@@ -2986,7 +2809,6 @@ class _TableSelectionModalState extends State<_TableSelectionModal> {
                                                 : const SizedBox.shrink(),
                                           )
                                         else
-                                          // Red X for occupied
                                           Container(
                                             width: 20,
                                             height: 20,
@@ -2994,7 +2816,7 @@ class _TableSelectionModalState extends State<_TableSelectionModal> {
                                               shape: BoxShape.circle,
                                               color: Color(
                                                 0xFFDC2626,
-                                              ), // red-600
+                                              ),
                                             ),
                                             child: const Center(
                                               child: Icon(
@@ -3006,111 +2828,129 @@ class _TableSelectionModalState extends State<_TableSelectionModal> {
                                           ),
                                       ],
                                     ),
-                                    const SizedBox(height: 4),
-                                    // Always show seats + location (matches web)
-                                    Text(
-                                      'Seats: ${table.seatingCapacity}',
-                                      style: const TextStyle(
-                                        color: Color(0xFF6B7280),
-                                        fontSize: 11,
-                                      ),
+                                    const SizedBox(height: 6),
+                                    Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.people_outline_rounded,
+                                          size: 14,
+                                          color: Color(0xFF6B7280),
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          '${table.seatingCapacity} Seats',
+                                          style: const TextStyle(
+                                            color: Color(0xFF4B5563),
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    Text(
-                                      'Location: ${table.location}',
-                                      style: const TextStyle(
-                                        color: Color(0xFF6B7280),
-                                        fontSize: 11,
-                                      ),
-                                      overflow: TextOverflow.ellipsis,
+                                    const SizedBox(height: 3),
+                                    Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.location_on_outlined,
+                                          size: 14,
+                                          color: Color(0xFF6B7280),
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Expanded(
+                                          child: Text(
+                                            table.location,
+                                            style: const TextStyle(
+                                              color: Color(0xFF4B5563),
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                     if (isPremium &&
                                         table.minimumSpendAmount > 0) ...[
-                                      const SizedBox(height: 3),
+                                      const SizedBox(height: 4),
                                       Text(
                                         '₺ Min. spend: ${table.minimumSpendAmount.toStringAsFixed(2)}',
-                                        style: const TextStyle(
-                                          color: Color(0xFF2563EB),
-                                          fontSize: 11,
+                                        style: TextStyle(
+                                          color: GlobalAppColor.ButtonColor,
+                                          fontSize: 10,
                                           fontWeight: FontWeight.w700,
                                         ),
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                     ] else if (isPremium &&
                                         table.tableChargeAmount > 0) ...[
-                                      const SizedBox(height: 3),
+                                      const SizedBox(height: 4),
                                       Text(
                                         '₺ Table charge: ${table.tableChargeAmount.toStringAsFixed(2)}',
-                                        style: const TextStyle(
-                                          color: Color(0xFF2563EB),
-                                          fontSize: 11,
+                                        style: TextStyle(
+                                          color: GlobalAppColor.ButtonColor,
+                                          fontSize: 10,
                                           fontWeight: FontWeight.w700,
                                         ),
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                     ],
                                     if (isOccupied) ...[
-                                      const SizedBox(height: 2),
-                                      const Text(
-                                        'Currently Occupied',
-                                        style: TextStyle(
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.w600,
-                                          color: Color(0xFFDC2626), // red-600
-                                        ),
-                                      ),
-                                      if (table.occupiedOrderId != null ||
-                                          table.occupiedOrderNumber != null)
-                                        Text(
-                                          'Order #${table.occupiedOrderNumber ?? table.occupiedOrderId}',
-                                          style: const TextStyle(
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w600,
-                                            color: Color(0xFF991B1B), // red-800
+                                      const SizedBox(height: 6),
+                                      Container(
+                                        width: double.infinity,
+                                        padding: const EdgeInsets.all(5),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white.withOpacity(0.8),
+                                          borderRadius: BorderRadius.circular(6),
+                                          border: Border.all(
+                                            color: const Color(0xFFFEE2E2),
+                                            width: 1,
                                           ),
-                                          overflow: TextOverflow.ellipsis,
                                         ),
-                                      if (table.occupiedCustomer != null)
-                                        Text(
-                                          'Customer: ${table.occupiedCustomer}',
-                                          style: const TextStyle(
-                                            fontSize: 10,
-                                            color: Color(
-                                              0xFF6B7280,
-                                            ), // gray-500
-                                          ),
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      if (table.occupiedOrderStatus != null)
-                                        Row(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            const Text(
-                                              'Status: ',
-                                              style: TextStyle(
-                                                fontSize: 10,
-                                                color: Color(0xFF6B7280),
+                                            if (table.occupiedOrderNumber != null || table.occupiedOrderId != null)
+                                              Text(
+                                                'Order #${table.occupiedOrderNumber ?? table.occupiedOrderId}',
+                                                style: const TextStyle(
+                                                  fontSize: 9.5,
+                                                  fontWeight: FontWeight.w700,
+                                                  color: Color(0xFF991B1B),
+                                                ),
+                                                overflow: TextOverflow.ellipsis,
                                               ),
-                                            ),
-                                            Text(
-                                              table.occupiedOrderStatus!,
-                                              style: const TextStyle(
-                                                fontSize: 10,
-                                                color: Color(
-                                                  0xFF2563EB,
-                                                ), // blue-600
-                                                fontWeight: FontWeight.w500,
+                                            if (table.occupiedCustomer != null)
+                                              Text(
+                                                'Guest: ${table.occupiedCustomer}',
+                                                style: const TextStyle(
+                                                  fontSize: 9,
+                                                  color: Color(0xFF4B5563),
+                                                ),
+                                                overflow: TextOverflow.ellipsis,
                                               ),
-                                            ),
+                                            if (table.occupiedOrderStatus != null)
+                                              Row(
+                                                children: [
+                                                  const Text(
+                                                    'Status: ',
+                                                    style: TextStyle(
+                                                      fontSize: 9,
+                                                      color: Color(0xFF6B7280),
+                                                    ),
+                                                  ),
+                                                  Text(
+                                                    table.occupiedOrderStatus!,
+                                                    style: TextStyle(
+                                                      fontSize: 9,
+                                                      color: GlobalAppColor.ButtonColor,
+                                                      fontWeight: FontWeight.w600,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
                                           ],
                                         ),
-                                      const Text(
-                                        'Selecting this table will add items to existing order',
-                                        style: TextStyle(
-                                          fontSize: 9,
-                                          color: Color(0xFF9CA3AF), // gray-400
-                                          fontStyle: FontStyle.italic,
-                                        ),
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
                                       ),
                                     ],
                                     if (isBlocked) ...[
@@ -3192,8 +3032,8 @@ class _TableSelectionModalState extends State<_TableSelectionModal> {
                               context,
                             ).pop(List<OrderTableData>.from(_selected)),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFEC4899),
-                        disabledBackgroundColor: const Color(0xFFF9A8D4),
+                        backgroundColor: GlobalAppColor.ButtonColor,
+                        disabledBackgroundColor: GlobalAppColor.ButtonColor.withOpacity(0.5),
                         padding: const EdgeInsets.symmetric(vertical: 13),
                         elevation: 0,
                         shape: RoundedRectangleBorder(

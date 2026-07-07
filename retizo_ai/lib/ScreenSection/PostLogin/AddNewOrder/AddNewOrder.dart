@@ -71,18 +71,65 @@ class AddNewOrderState extends State<AddNewOrder>
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Custom AppBar
-                          CommonWidget().CustomAppBar(
-                            context: context,
-                            isLoading: AddOrderCtrl.isAddOrderLoader,
-                            onLogout: () async {
-                              if (await GlobalFunction()
-                                  .checkInternetConnection(context)) {
-                                GlobalFunction.LogOutApplication(
-                                  context: context,
-                                );
-                              }
-                            },
+                          // Premium Add New Order Custom Header
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.04),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: SafeArea(
+                              bottom: false,
+                              child: Row(
+                                children: [
+                                  GestureDetector(
+                                    onTap: () {
+                                      if (!AddOrderCtrl.isBookingLoader) {
+                                        Navigator.pop(context);
+                                      }
+                                    },
+                                    child: Container(
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFF3F4F6),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: const Icon(
+                                        Icons.arrow_back_ios_new_rounded,
+                                        size: 18,
+                                        color: Color(0xFF374151),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    "Add New Order",
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: const Color(0xFF1F2937),
+                                    ),
+                                  ),
+                                  if (AddOrderCtrl.isAddOrderLoader) ...[
+                                    const SizedBox(width: 12),
+                                    const SizedBox(
+                                      width: 16,
+                                      height: 16,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.blue,
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
                           ),
 
                           // Content
@@ -95,51 +142,47 @@ class AddNewOrderState extends State<AddNewOrder>
                                       orientation == Orientation.portrait;
 
                                   if (isMobile) {
-                                    // Mobile Layout (Stack + Slide Panel)
+                                    // Mobile Layout (Stack + Bottom Sheet Slide Panel)
                                     return Stack(
                                       children: [
                                         SizedBox(
                                           height: contentHeight,
                                           child: UIWidget(context),
                                         ),
-                                        if (AddOrderCtrl
-                                            .isOrderSummaryPanelOpen)
-                                          AnimatedPositioned(
-                                            duration: const Duration(
-                                              milliseconds: 300,
-                                            ),
-                                            curve: Curves.easeOutBack,
-                                            right:
-                                                AddOrderCtrl
-                                                    .isOrderSummaryPanelOpen
-                                                ? 0
-                                                : -screenWidth * 0.82,
-                                            top: 5,
-                                            bottom: 0,
-                                            width: screenWidth * 0.82 > 450
-                                                ? 450
-                                                : screenWidth * 0.82,
-                                            child: Material(
-                                              elevation: 12,
-                                              color: Colors.white,
-                                              borderRadius:
-                                                  const BorderRadius.only(
-                                                    topLeft: Radius.circular(
-                                                      10,
-                                                    ),
-                                                    bottomLeft: Radius.circular(
-                                                      10,
-                                                    ),
-                                                  ),
-                                              child: AddOrderWidget()
-                                                  .OrderSummaryPanel(
-                                                    context,
-                                                    AddOrderCtrl.MenuListing,
-                                                    AddOrderCtrl,
-                                                    true,
-                                                  ),
+                                        if (AddOrderCtrl.isOrderSummaryPanelOpen)
+                                          Positioned.fill(
+                                            child: GestureDetector(
+                                              onTap: () => AddOrderCtrl.closeOrderSummaryPanel(),
+                                              child: Container(
+                                                color: Colors.black.withOpacity(0.5),
+                                              ),
                                             ),
                                           ),
+                                        AnimatedPositioned(
+                                          duration: const Duration(milliseconds: 300),
+                                          curve: Curves.easeOutCubic,
+                                          left: 0,
+                                          right: 0,
+                                          bottom: AddOrderCtrl.isOrderSummaryPanelOpen
+                                              ? 0
+                                              : -screenHeight * 0.82,
+                                          height: screenHeight * 0.82,
+                                          child: Material(
+                                            elevation: 16,
+                                            color: Colors.white,
+                                            borderRadius: const BorderRadius.only(
+                                              topLeft: Radius.circular(16),
+                                              topRight: Radius.circular(16),
+                                            ),
+                                            child: AddOrderWidget()
+                                                .OrderSummaryPanel(
+                                                  context,
+                                                  AddOrderCtrl.MenuListing,
+                                                  AddOrderCtrl,
+                                                  true,
+                                                ),
+                                          ),
+                                        ),
                                       ],
                                     );
                                   } else {
@@ -203,7 +246,149 @@ class AddNewOrderState extends State<AddNewOrder>
     );
   }
 
-  //-✅---------------------------------------------------------------------✅-//
+  void _showAllCategoriesBottomSheet(BuildContext context, AddOrderProvider AddOrderCtrl) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      isScrollControlled: true,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            List<CategoryModel> categories = AddOrderCtrl.selectedBrandId != null
+                ? AddOrderCtrl.CategoriesListing.where(
+                    (e) => e.brandid != null && e.brandid.toString() == AddOrderCtrl.selectedBrandId.toString(),
+                  ).toList()
+                : AddOrderCtrl.CategoriesListing;
+
+            if (AddOrderCtrl.SearchCategoriesController.text.isNotEmpty) {
+              final query = AddOrderCtrl.SearchCategoriesController.text.toLowerCase();
+              categories = categories.where((cat) {
+                return cat.mCatName.toLowerCase().contains(query) ||
+                    (cat.mCatArbName != null && cat.mCatArbName.toLowerCase().contains(query)) ||
+                    (cat.status != null && cat.status.toLowerCase().contains(query));
+              }).toList();
+            }
+
+            if (AddOrderCtrl.selectedBrandId != null && categories.isNotEmpty) {
+              if (!categories.any((c) => c.mCatId == -1)) {
+                categories = [
+                  CategoryModel(
+                    mCatId: -1,
+                    mCatName: "All",
+                    mCatArbName: "الكل",
+                    mCatIcon: "https://www.pngitem.com/pimgs/m/141-1412195_menu-icon-png-transparent-png.png",
+                    status: '', brandid: '', creationDatetime: '', createdBy: '', modificationDatetime: '', modifiedBy: '', orgId: '',
+                  ),
+                  ...categories,
+                ];
+              }
+            }
+
+            return DraggableScrollableSheet(
+              initialChildSize: 0.6,
+              minChildSize: 0.4,
+              maxChildSize: 0.9,
+              expand: false,
+              builder: (context, scrollController) {
+                return Column(
+                  children: [
+                    Container(
+                      margin: const EdgeInsets.symmetric(vertical: 10),
+                      width: 40,
+                      height: 5,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            "Select Category",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF1F2937),
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.close),
+                            onPressed: () => Navigator.pop(context),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Divider(height: 1),
+                    Expanded(
+                      child: ListView.builder(
+                        controller: scrollController,
+                        physics: const BouncingScrollPhysics(),
+                        itemCount: categories.length,
+                        itemBuilder: (context, index) {
+                          final item = categories[index];
+                          final bool isSelected = AddOrderCtrl.selectedCategoryIndex == index;
+
+                          return ListTile(
+                            leading: Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF3F4F6),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: CommonWidget().RectangleCachedImage(
+                                  context: context,
+                                  imageUrl: item.mCatIcon.startsWith("https")
+                                      ? item.mCatIcon
+                                      : "${GlobalServiceURL.ImageBaseUrl}${item.mCatIcon}",
+                                  width: 40,
+                                  height: 40,
+                                ),
+                              ),
+                            ),
+                            title: Text(
+                              item.mCatName,
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                                color: isSelected ? GlobalAppColor.ButtonColor : const Color(0xFF374151),
+                              ),
+                            ),
+                            trailing: isSelected 
+                                ? Icon(Icons.check_circle, color: GlobalAppColor.ButtonColor)
+                                : null,
+                            onTap: () {
+                              if (item.mCatId == -1) {
+                                AddOrderCtrl.setCategory(null);
+                              } else {
+                                AddOrderCtrl.setCategory(item.mCatId);
+                              }
+                              AddOrderCtrl.onCategorySelected(index, item);
+                              Navigator.pop(context);
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+        );
+      },
+    );
+  }
+
+  //-✅---------------------------------------------------------------------//
   Widget UIWidget(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final bool isMobile = screenWidth < 600;
@@ -241,41 +426,74 @@ class AddNewOrderState extends State<AddNewOrder>
                     const SizedBox(height: 18),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        CommonWidget().PanelTitle(
-                          title: "Categories".toUpperCase(),
-                        ),
-                        Spacer(),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 5,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFE5E7EB),
-                            borderRadius: BorderRadius.circular(
-                              AppBorderRadius.sm,
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            CommonWidget().PanelTitle(
+                              title: "Categories".toUpperCase(),
                             ),
-                          ),
-                          child: Text(
-                            (() {
-                              // 🔹 All Brands Select nahi → Categories list original show → count normal
-                              if (AddOrderCtrl.selectedBrandId == null) {
-                                return "${AddOrderCtrl.CategoriesListing.length} categories";
-                              }
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFE5E7EB),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                (() {
+                                  List<CategoryModel> list = AddOrderCtrl.selectedBrandId != null
+                                      ? AddOrderCtrl.CategoriesListing.where(
+                                          (e) => e.brandid != null && e.brandid.toString() == AddOrderCtrl.selectedBrandId.toString(),
+                                        ).toList()
+                                      : AddOrderCtrl.CategoriesListing;
 
-                              // 🔹 Brand selected and list empty → 0
-                              if (AddOrderCtrl
-                                  .filteredCategoriesListing
-                                  .isEmpty) {
-                                return '0 categories';
-                              }
-
-                              // 🔹 Brand selected → All option include → +1
-                              return "${(AddOrderCtrl.filteredCategoriesListing.length + 1).toString()} categories";
-                            })(),
-                            style: CommonWidget.CommonTitleTextStyle(
-                              fontWeight: FontWeight.w400,
+                                  if (AddOrderCtrl.SearchCategoriesController.text.isNotEmpty) {
+                                    final query = AddOrderCtrl.SearchCategoriesController.text.toLowerCase();
+                                    list = list.where((cat) {
+                                      return cat.mCatName.toLowerCase().contains(query) ||
+                                          (cat.mCatArbName != null && cat.mCatArbName.toLowerCase().contains(query)) ||
+                                          (cat.status != null && cat.status.toLowerCase().contains(query));
+                                    }).toList();
+                                  }
+                                  
+                                  if (AddOrderCtrl.selectedBrandId != null && list.isNotEmpty) {
+                                    return "${list.length + 1}";
+                                  }
+                                  return "${list.length}";
+                                })(),
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xFF4B5563),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        InkWell(
+                          onTap: () => _showAllCategoriesBottomSheet(context, AddOrderCtrl),
+                          borderRadius: BorderRadius.circular(8),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            child: Row(
+                              children: [
+                                Text(
+                                  "View All",
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    color: GlobalAppColor.ButtonColor,
+                                  ),
+                                ),
+                                const SizedBox(width: 2),
+                                Icon(
+                                  Icons.chevron_right_rounded,
+                                  size: 16,
+                                  color: GlobalAppColor.ButtonColor,
+                                ),
+                              ],
                             ),
                           ),
                         ),

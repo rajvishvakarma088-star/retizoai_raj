@@ -107,6 +107,12 @@ class UserInfoProvider with ChangeNotifier {
 
   String? get picture => UserData?.picture; // ⭐ Already added
 
+  String? get vatNo => UserData?.vatNo;
+
+  String? get branchAddress => UserData?.branchAddress;
+
+  String? get orgPicture => UserData?.orgPicture;
+
   //-- Permission Getter (Easy Access)
   Map<String, PermissionModel>? get permissions => UserData?.permissions;
 
@@ -196,6 +202,73 @@ class UserInfoProvider with ChangeNotifier {
       GlobalFunction().debugFunction(
         "⚠️ /auth/me refresh failed (non-fatal): $e",
       );
+    }
+  }
+
+  //================== Update Profile ==================//
+  /// Updates name and/or email via PATCH /auth/update-profile.
+  /// Returns a map with {success: bool, message: String}.
+  Future<Map<String, dynamic>> updateProfile(
+    BuildContext context,
+    HttpServiceProvider httpCtrl, {
+    required String name,
+    required String email,
+  }) async {
+    try {
+      final token = AccessToken ?? "";
+      if (token.isEmpty) return {'success': false, 'message': 'Not logged in'};
+      final authHeaders = APIHelper.buildAuthHeaders(token);
+      final result = await httpCtrl.request<Map<String, dynamic>>(
+        method: 'PATCH',
+        url: GlobalServiceURL.UpdateProfileUrl,
+        context: context,
+        headers: authHeaders,
+        body: {'name': name, 'email': email},
+      );
+      if (result['success'] == true) {
+        // Refresh local data
+        if (UserData != null) {
+          UserData = UserModel.fromJson({
+            ...UserData!.toJson(),
+            'name': name,
+            'email': email,
+          });
+          await SecureStorageService.Write('UserData', UserData!.toJson());
+          notifyListeners();
+        }
+      }
+      return result;
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  //================== Change Password ==================//
+  /// Changes password via POST /auth/change-password.
+  /// Returns a map with {success: bool, message: String}.
+  Future<Map<String, dynamic>> changePassword(
+    BuildContext context,
+    HttpServiceProvider httpCtrl, {
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    try {
+      final token = AccessToken ?? "";
+      if (token.isEmpty) return {'success': false, 'message': 'Not logged in'};
+      final authHeaders = APIHelper.buildAuthHeaders(token);
+      final result = await httpCtrl.request<Map<String, dynamic>>(
+        method: 'POST',
+        url: GlobalServiceURL.ChangePasswordUrl,
+        context: context,
+        headers: authHeaders,
+        body: {
+          'current_password': currentPassword,
+          'new_password': newPassword,
+        },
+      );
+      return result;
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
     }
   }
 

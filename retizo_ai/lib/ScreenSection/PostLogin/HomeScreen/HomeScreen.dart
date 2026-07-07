@@ -25,7 +25,7 @@ class HomeScreenState extends State<HomeScreen>
       final home = context.read<HomeProvider>();
       if (home.pendingRefresh) {
         home.setPendingRefresh(false);
-        home.InitializeData(context);
+        home.InitializeData(context, silent: true);
         return;
       }
       _checkDrawerStatus(silent: true);
@@ -97,7 +97,7 @@ class HomeScreenState extends State<HomeScreen>
       final home = context.read<HomeProvider>();
       if (home.pendingRefresh) {
         home.setPendingRefresh(false);
-        home.InitializeData(context);
+        home.InitializeData(context, silent: true);
       } else {
         home.GetOrderCountService(context);
       }
@@ -132,7 +132,7 @@ class HomeScreenState extends State<HomeScreen>
               // Landscape me left margin ke liye
               right: true,
               // Landscape me right margin ke liye
-              bottom: true,
+              bottom: false,
               // Gesture/navigation bar ke upar content rakhe
               child: SizedBox(
                 width: MediaQuery.of(context).size.width,
@@ -543,7 +543,7 @@ class HomeScreenState extends State<HomeScreen>
                                               context: context,
                                               icon: Icons.filter_list_rounded,
                                               label: "Filters",
-                                              onTap: () {},
+                                              onTap: () => _openFiltersBottomSheet(context, HomeCtrl),
                                             ),
                                           ),
                                         ],
@@ -686,6 +686,17 @@ class HomeScreenState extends State<HomeScreen>
                               )
                             : SizedBox.shrink(),
 
+                        //--✅--Stats Cards------------------✅--//
+                        Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: AppDimensions.sm,
+                          ),
+                          child: _buildNumbersTabsRow(
+                            context,
+                            HomeCtrl,
+                          ),
+                        ),
+
                         //--✅--Filter-----------------------✅--//
                         Padding(
                           padding: EdgeInsets.symmetric(
@@ -816,6 +827,310 @@ class HomeScreenState extends State<HomeScreen>
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildNumbersTabsRow(BuildContext context, HomeProvider HomeCtrl) {
+    final tabs = [
+      {
+        "label": "All Orders",
+        "icon": Icons.inventory_2_outlined,
+        "count": HomeCtrl.countAllOrders,
+      },
+      {
+        "label": "Preparing",
+        "icon": Icons.soup_kitchen_outlined,
+        "count": HomeCtrl.countPreparing,
+      },
+      {
+        "label": "Prepared",
+        "icon": Icons.check_circle_outline_rounded,
+        "count": HomeCtrl.countPrepared,
+      },
+      {
+        "label": "Active",
+        "icon": Icons.watch_later_outlined,
+        "count": HomeCtrl.countActive,
+      },
+      {
+        "label": "Paid Orders",
+        "icon": Icons.monetization_on_outlined,
+        "count": HomeCtrl.countPaidOrders,
+      },
+      {
+        "label": "Total Today",
+        "icon": Icons.receipt_long_outlined,
+        "count": HomeCtrl.countTotalToday,
+      },
+    ];
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        children: tabs.map((tab) {
+          final label = tab["label"] as String;
+          final icon = tab["icon"] as IconData;
+          final count = tab["count"] as int;
+
+          return Container(
+            margin: const EdgeInsets.only(right: 10),
+            padding: const EdgeInsets.all(12),
+            width: 140,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: const Color(0xFFE5E7EB),
+                width: 1.0,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.02),
+                  blurRadius: 6,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: GlobalAppColor.LightBlueColor,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Center(
+                      child: Icon(
+                        icon,
+                        size: 16,
+                        color: GlobalAppColor.ButtonColor,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    count.toString(),
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF111827),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    label,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF6B7280),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
+      ),
+    );
+  }
+
+  void _openFiltersBottomSheet(BuildContext context, HomeProvider HomeCtrl) {
+    String localStatus = HomeCtrl.selectedFilterStatus;
+    String localPriority = HomeCtrl.selectedFilterPriority;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (BuildContext ctx) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setModalState) {
+            final statuses = [
+              {"label": "Current", "value": "current"},
+              {"label": "Draft", "value": "draft"},
+              {"label": "Ordered", "value": "ordered"},
+              {"label": "Preparing", "value": "preparing"},
+              {"label": "Prepared", "value": "prepared"},
+              {"label": "Served", "value": "served"},
+              {"label": "Completed", "value": "completed"},
+            ];
+
+            final priorities = ["All", "Normal", "High", "Urgent"];
+
+            return Padding(
+              padding: EdgeInsets.fromLTRB(16, 16, 16, MediaQuery.of(ctx).padding.bottom + 16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Filters",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF111827),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.of(context).pop(),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    "Order Status",
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF4B5563),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  GridView.count(
+                    crossAxisCount: 2,
+                    childAspectRatio: 3.8,
+                    mainAxisSpacing: 8,
+                    crossAxisSpacing: 8,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    children: statuses.map((status) {
+                      final label = status["label"]!;
+                      final val = status["value"]!;
+                      final isSel = localStatus == val;
+
+                      return GestureDetector(
+                        onTap: () {
+                          setModalState(() {
+                            localStatus = val;
+                          });
+                        },
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 150),
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: isSel ? GlobalAppColor.ButtonColor : Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: isSel ? GlobalAppColor.ButtonColor : const Color(0xFFD1D5DB),
+                              width: 1.5,
+                            ),
+                          ),
+                          child: Text(
+                            label,
+                            style: TextStyle(
+                              color: isSel ? Colors.white : const Color(0xFF374151),
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    "Priority",
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF4B5563),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  GridView.count(
+                    crossAxisCount: 3,
+                    childAspectRatio: 3.0,
+                    mainAxisSpacing: 8,
+                    crossAxisSpacing: 8,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    children: priorities.map((p) {
+                      final isSel = localPriority.toLowerCase() == p.toLowerCase();
+
+                      return GestureDetector(
+                        onTap: () {
+                          setModalState(() {
+                            localPriority = p;
+                          });
+                        },
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 150),
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: isSel ? GlobalAppColor.ButtonColor : Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: isSel ? GlobalAppColor.ButtonColor : const Color(0xFFD1D5DB),
+                              width: 1.5,
+                            ),
+                          ),
+                          child: Text(
+                            p,
+                            style: TextStyle(
+                              color: isSel ? Colors.white : const Color(0xFF374151),
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        Navigator.of(context).pop();
+                        
+                        HomeCtrl.selectedFilterStatus = localStatus;
+                        HomeCtrl.selectedFilter = localStatus;
+                        HomeCtrl.selectedFilterPriority = localPriority;
+                        HomeCtrl.activeNumberTab = "All Orders";
+                        
+                        final formattedDate =
+                            "${HomeCtrl.selectedDate.year}-${HomeCtrl.selectedDate.month.toString().padLeft(2, '0')}-${HomeCtrl.selectedDate.day.toString().padLeft(2, '0')}";
+                        
+                        await HomeCtrl.getOrderListService(
+                          context,
+                          localStatus,
+                          formattedDate,
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: GlobalAppColor.ButtonColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: const Text(
+                        "Apply Filters",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }

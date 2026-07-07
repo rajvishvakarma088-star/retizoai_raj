@@ -1,6 +1,7 @@
+// ignore_for_file: file_names, non_constant_identifier_names, use_build_context_synchronously, deprecated_member_use
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:culai/HTTPRepository/Packages.dart';
+import 'package:culai/GlobalComponents/CommonWidget/ProfilePage.dart';
 
 class ProfileDrawer extends StatelessWidget {
   final VoidCallback? onLogout;
@@ -40,7 +41,9 @@ class ProfileDrawer extends StatelessWidget {
 
     final displayName = userProvider.name ?? 'Admin';
     final userRole = userProvider.type ?? 'Branch Admin';
+    final userEmail = userProvider.email ?? '';
     final avatarChar = displayName.isNotEmpty ? displayName[0].toUpperCase() : 'A';
+    final orgPicture = userProvider.orgPicture ?? '';
 
     return Align(
       alignment: Alignment.centerRight,
@@ -67,51 +70,23 @@ class ProfileDrawer extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // ── Header (Avatar & Profile details) ──
+                // ── Close bar ──
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                  padding: const EdgeInsets.fromLTRB(16, 8, 4, 4),
                   child: Row(
                     children: [
-                      CircleAvatar(
-                        radius: 28,
-                        backgroundColor: GlobalAppColor.ButtonColor,
-                        child: Text(
-                          avatarChar,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                          ),
+                      Text(
+                        "Menu",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: GlobalAppColor.DarkTextColorCode,
                         ),
                       ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              displayName,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: GlobalAppColor.DarkTextColorCode,
-                              ),
-                            ),
-                            const SizedBox(height: 3),
-                            Text(
-                              userRole,
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: GlobalAppColor.LightTextColorCode,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                      const Spacer(),
                       IconButton(
-                        icon: Icon(Icons.close, color: GlobalAppColor.DarkTextColorCode),
+                        icon: Icon(Icons.close,
+                            color: GlobalAppColor.DarkTextColorCode),
                         onPressed: () => Navigator.of(context).pop(),
                       ),
                     ],
@@ -119,13 +94,118 @@ class ProfileDrawer extends StatelessWidget {
                 ),
                 const Divider(height: 1),
 
+                // ── Tappable Profile Section → opens ProfilePage ──
+                InkWell(
+                  onTap: () {
+                    Navigator.of(context).pop(); // close drawer
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => ProfilePage(onLogout: onLogout),
+                      ),
+                    );
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.all(14),
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: GlobalAppColor.BodyBgColorCode,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: GlobalAppColor.ButtonColor.withOpacity(0.15),
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        // Avatar / Org logo
+                        Container(
+                          width: 52,
+                          height: 52,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: GlobalAppColor.ButtonColor.withOpacity(0.1),
+                            border: Border.all(
+                              color: GlobalAppColor.ButtonColor.withOpacity(0.3),
+                              width: 1.5,
+                            ),
+                          ),
+                          child: orgPicture.isNotEmpty
+                              ? ClipOval(
+                                  child: Image.network(orgPicture,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) => Center(
+                                            child: Text(avatarChar,
+                                                style: TextStyle(
+                                                    fontSize: 20,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: GlobalAppColor
+                                                        .ButtonColor)),
+                                          )),
+                                )
+                              : Center(
+                                  child: Text(
+                                    avatarChar,
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: GlobalAppColor.ButtonColor,
+                                    ),
+                                  ),
+                                ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                displayName,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w700,
+                                  color: GlobalAppColor.DarkTextColorCode,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                userRole,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: GlobalAppColor.HomeLightTextColor,
+                                ),
+                              ),
+                              if (userEmail.isNotEmpty) ...[
+                                const SizedBox(height: 2),
+                                Text(
+                                  userEmail,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: GlobalAppColor.HomeLightTextColor,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                        Icon(Icons.chevron_right,
+                            color: GlobalAppColor.ButtonColor, size: 22),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // ── Scrollable Settings ──
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.all(20),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // ── Language Selection Segment ──
+                        // Language
                         Text(
                           "Language",
                           style: TextStyle(
@@ -151,7 +231,7 @@ class ProfileDrawer extends StatelessWidget {
                         ),
                         const SizedBox(height: 24),
 
-                        // ── Theme Selection ──
+                        // Theme
                         Text(
                           "Theme",
                           style: TextStyle(
@@ -173,15 +253,13 @@ class ProfileDrawer extends StatelessWidget {
 
                 const Divider(height: 1),
 
-                // ── Logout Button at Bottom ──
+                // ── Logout ──
                 Padding(
                   padding: const EdgeInsets.all(20),
                   child: ElevatedButton.icon(
                     onPressed: () {
-                      Navigator.of(context).pop(); // close drawer
-                      if (onLogout != null) {
-                        onLogout!();
-                      }
+                      Navigator.of(context).pop();
+                      if (onLogout != null) onLogout!();
                     },
                     icon: const Icon(Icons.logout, color: Colors.white),
                     label: const Text(
@@ -270,7 +348,9 @@ class ProfileDrawer extends StatelessWidget {
             children: [
               Icon(
                 icon,
-                color: isSelected ? GlobalAppColor.ButtonColor : GlobalAppColor.DarkTextColorCode,
+                color: isSelected
+                    ? GlobalAppColor.ButtonColor
+                    : GlobalAppColor.DarkTextColorCode,
                 size: 20,
               ),
               const SizedBox(width: 12),
@@ -280,16 +360,15 @@ class ProfileDrawer extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                    color: isSelected ? GlobalAppColor.ButtonColor : GlobalAppColor.DarkTextColorCode,
+                    color: isSelected
+                        ? GlobalAppColor.ButtonColor
+                        : GlobalAppColor.DarkTextColorCode,
                   ),
                 ),
               ),
               if (isSelected)
-                Icon(
-                  Icons.check_circle,
-                  color: GlobalAppColor.ButtonColor,
-                  size: 18,
-                ),
+                Icon(Icons.check_circle,
+                    color: GlobalAppColor.ButtonColor, size: 18),
             ],
           ),
         ),

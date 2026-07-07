@@ -48,8 +48,56 @@ class HomeProvider with ChangeNotifier {
   void updateSelectedFilter(String value) {
     if (selectedFilter != value) {
       selectedFilter = value;
+      selectedFilterStatus = value;
       notifyListeners();
     }
+  }
+
+  // 🔹 Custom local filters & statistics counts (screenshot 1 & 2)
+  String selectedFilterStatus = "current";
+  String selectedFilterPriority = "All";
+  String activeNumberTab = "All Orders";
+
+  int get countAllOrders => OrderListing.length;
+  int get countPreparing => OrderListing.where((o) => o.orderStatus.toLowerCase() == 'preparing').length;
+  int get countPrepared => OrderListing.where((o) => o.orderStatus.toLowerCase() == 'prepared').length;
+  int get countActive => OrderListing.where((o) =>
+      o.orderStatus.toLowerCase() == 'current' ||
+      o.orderStatus.toLowerCase() == 'active' ||
+      o.orderStatus.toLowerCase() == 'ordered' ||
+      o.orderStatus.toLowerCase() == 'preparing' ||
+      o.orderStatus.toLowerCase() == 'prepared' ||
+      o.orderStatus.toLowerCase() == 'served').length;
+  int get countPaidOrders => OrderListing.where((o) => o.paymentStatus.toLowerCase() == 'paid').length;
+  int get countTotalToday => OrderListing.length;
+
+  void applyLocalFilters() {
+    List<OrderData> temp = List.from(OrderListing);
+
+    // Apply Priority filter
+    if (selectedFilterPriority.toLowerCase() != 'all') {
+      temp = temp.where((order) => order.priority.toLowerCase() == selectedFilterPriority.toLowerCase()).toList();
+    }
+
+    // Apply search query filter if search text is present
+    if (SearchOrderController.text.trim().isNotEmpty) {
+      final query = SearchOrderController.text.trim().toLowerCase();
+      temp = temp.where((order) {
+        final Map<String, dynamic> orderMap = order.toJson();
+        String searchStr = orderMap.entries
+            .where((e) => e.key != 'details')
+            .map((e) => e.value?.toString().toLowerCase() ?? '')
+            .join(' ');
+        final detailProducts = order.details
+            .map((d) => d.product.mPName.toLowerCase())
+            .join(' ');
+        searchStr += ' $detailProducts';
+        return searchStr.contains(query);
+      }).toList();
+    }
+
+    filteredOrderListing = temp;
+    notifyListeners();
   }
 
   void setHomeLoading(bool value) {
@@ -256,7 +304,7 @@ class HomeProvider with ChangeNotifier {
             );
           }
         }
-        filteredOrderListing = List.from(OrderListing);
+        applyLocalFilters();
       } else {
         OrderListing.clear();
         filteredOrderListing.clear();
@@ -441,37 +489,7 @@ class HomeProvider with ChangeNotifier {
       notifyListeners();
       return;
     }
-
-    // 🔹 Step 1: Start with full list
-    filteredOrderListing = List.from(OrderListing);
-
-    if (searchQuery != null && searchQuery.trim().isNotEmpty) {
-      final query = searchQuery.trim().toLowerCase();
-
-      filteredOrderListing = filteredOrderListing.where((order) {
-        // 🔹 Dynamically convert order to map and search
-        final Map<String, dynamic> orderMap = order.toJson();
-
-        // 🔹 Flatten all fields into a single string (except details handled separately)
-        String searchStr = orderMap.entries
-            .where((e) => e.key != 'details') // skip details for now
-            .map((e) => e.value?.toString().toLowerCase() ?? '')
-            .join(' ');
-
-        // 🔹 Include product names from order details
-        final detailProducts = order.details
-            .map((d) => d.product.mPName.toLowerCase())
-            .join(' ');
-
-        searchStr += ' $detailProducts';
-
-        bool match = searchStr.contains(query);
-
-        return match;
-      }).toList();
-    }
-
-    notifyListeners();
+    applyLocalFilters();
   }
 
   //--🔹--PayBillButton--------------------------------------------------🔹--//
@@ -3021,12 +3039,14 @@ class HomeProvider with ChangeNotifier {
   }
 
   //--🔹--InitializeData-------------------------------------------------🔹--//
-  Future<void> InitializeData(BuildContext context) async {
+  Future<void> InitializeData(BuildContext context, {bool silent = false}) async {
     PreparingCount = "0";
     PreparedCount = "0";
     // Reset loading
-    isHomeLoading = true;
-    setHomeLoading(true);
+    if (!silent) {
+      isHomeLoading = true;
+      setHomeLoading(true);
+    }
     // Reload dropdowns
     dropDownOneListing = [];
     await loadDropDownOneList();
@@ -3055,7 +3075,7 @@ class HomeProvider with ChangeNotifier {
         "${selectedDate.year}-${selectedDate.month.toString().padLeft(2, '0')}-${selectedDate.day.toString().padLeft(2, '0')}";
 
     // Fetch orders fresh
-    await getOrderListService(context, selectedFilter, formattedDate);
+    await getOrderListService(context, selectedFilter, formattedDate, silent: silent);
 
     // Load tables list for premium table checks and styling
     try {

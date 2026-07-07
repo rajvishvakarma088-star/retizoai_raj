@@ -15,14 +15,33 @@ class DashBoard extends StatefulWidget {
 class _DashBoardState extends State<DashBoard> with WidgetsBindingObserver {
   Timer? _kdsRefreshTimer;
   final List<Widget> screens = const [HomeScreen(), Kds()];
+  late PageController _pageController;
+  late BottomNavProvider _bottomNavProvider;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
 
+    _bottomNavProvider = Provider.of<BottomNavProvider>(context, listen: false);
+    _bottomNavProvider.addListener(_handleTabChange);
+    _pageController = PageController(initialPage: _bottomNavProvider.SELECTED_INDEX);
+
     // Start background KDS refresh timer
     _startKdsTimer();
+  }
+
+  void _handleTabChange() {
+    if (_pageController.hasClients) {
+      final targetPage = _bottomNavProvider.SELECTED_INDEX;
+      if (_pageController.page?.round() != targetPage) {
+        _pageController.animateToPage(
+          targetPage,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      }
+    }
   }
 
   void _startKdsTimer() {
@@ -56,6 +75,8 @@ class _DashBoardState extends State<DashBoard> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _bottomNavProvider.removeListener(_handleTabChange);
+    _pageController.dispose();
     _kdsRefreshTimer?.cancel();
     super.dispose();
   }
@@ -69,7 +90,7 @@ class _DashBoardState extends State<DashBoard> with WidgetsBindingObserver {
       if (userInfo.appAccess == "kds" || userInfo.appAccess == "both") {
         final kds = context.read<KdsProvider>();
         kds.resetPreparedTracking();
-        kds.GetKitchenOrderListService(context, kds.selectedKDSDate);
+        kds.GetKitchenOrderListService(context, kds.selectedKDSDate, silent: true);
         kds.GetReadyOrderListService(context, kds.selectedKDSDate, silent: true);
         kds.restoreTimerState().then((_) {
           if (kds.activeOrderId != null) {
@@ -108,9 +129,14 @@ class _DashBoardState extends State<DashBoard> with WidgetsBindingObserver {
         return true;
       },
       child: Scaffold(
+        backgroundColor: GlobalAppColor.HomeBgColorCode,
         body: Stack(
           children: [
-            screens[provider.SELECTED_INDEX],
+            PageView(
+              controller: _pageController,
+              physics: const NeverScrollableScrollPhysics(),
+              children: screens,
+            ),
             if (!isLargeScreen)
               Align(
                 alignment: Alignment.bottomCenter,
@@ -223,7 +249,45 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
               });
             },
           ),
-          // 3. KDS Button
+          // 3. Center Create New Order Button (+)
+          Expanded(
+            child: Center(
+              child: Transform.translate(
+                offset: const Offset(0, -8), // Position the button slightly upwards
+                child: GestureDetector(
+                  onTap: () {
+                    CommonWidget().navigateToScreen(context, const AddNewOrder()).then((_) {
+                      if (_homeCtrl.pendingRefresh) {
+                        _homeCtrl.setPendingRefresh(false);
+                        _homeCtrl.InitializeData(context, silent: true);
+                      }
+                    });
+                  },
+                  child: Container(
+                    width: 52, // Slightly larger size
+                    height: 52,
+                    decoration: BoxDecoration(
+                      color: GlobalAppColor.ButtonColor,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: GlobalAppColor.ButtonColor.withOpacity(0.35),
+                          blurRadius: 12,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.add_rounded,
+                      color: Colors.white,
+                      size: 30, // Highlighted icon size
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          // 4. KDS Button
           _navItem(
             context,
             icon: Icons.child_care_rounded,
@@ -232,7 +296,7 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
               provider.changeTab(BottomNavProvider.TabKds);
             },
           ),
-          // 4. Person / Profile Button
+          // 5. Person / Profile Button
           _navItem(
             context,
             icon: Icons.person_rounded,
@@ -304,6 +368,31 @@ class DesktopFloatingNav extends StatelessWidget {
               Icons.shopping_cart,
               "ORDER",
               BottomNavProvider.TabOrder,
+            ),
+            const SizedBox(width: 10),
+            GestureDetector(
+              onTap: () {
+                CommonWidget().navigateToScreen(context, const AddNewOrder()).then((_) {
+                  final homeCtrl = Provider.of<HomeProvider>(context, listen: false);
+                  if (homeCtrl.pendingRefresh) {
+                    homeCtrl.setPendingRefresh(false);
+                    homeCtrl.InitializeData(context, silent: true);
+                  }
+                });
+              },
+              child: Row(
+                children: [
+                  const Icon(Icons.add_circle_outline_rounded, color: Colors.blue),
+                  const SizedBox(width: 5),
+                  Text(
+                    "NEW ORDER",
+                    style: TextStyle(
+                      color: Colors.blue,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(width: 10),
             desktopNavItem(

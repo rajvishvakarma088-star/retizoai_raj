@@ -2461,7 +2461,12 @@ class HomeWidget {
     final double screenWidth = MediaQuery.of(context).size.width;
     final double screenHeight = MediaQuery.of(context).size.height;
     final bool isPortrait = screenHeight >= screenWidth;
+    final bool isMobile = screenWidth < 750;
 
+    // --- Mobile: Bottom Sheet sizing ---
+    final double panelHeight = screenHeight * 0.78;
+
+    // --- Tablet/Desktop: Side Panel sizing ---
     double panelWidth;
     if (screenWidth >= 1200) {
       panelWidth = screenWidth * 0.25;
@@ -2470,288 +2475,216 @@ class HomeWidget {
     } else {
       panelWidth = screenWidth * 0.8;
     }
-
-    // Max width for web
     panelWidth = panelWidth > 500 ? 500 : panelWidth;
+
+    // Shared header widget builder
+    Widget headerBar = Container(
+      height: kToolbarHeight,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      color: GlobalAppColor.WhiteColorCode,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              Icon(Icons.notifications, color: GlobalAppColor.ButtonDarkColor, size: 20),
+              const SizedBox(width: 5),
+              Text(
+                "Prepared Items",
+                style: CommonWidget.CommonTitleTextStyle(
+                  fontSize: isPortrait ? 18 : 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(width: 5),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: GlobalAppColor.BodyBgColorCode,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  HomeCtrl.PreparedCount ?? '0',
+                  style: CommonWidget.CommonTitleTextStyle(color: GlobalAppColor.ButtonColor),
+                ),
+              ),
+            ],
+          ),
+          IconButton(
+            icon: Icon(Icons.close, color: GlobalAppColor.DarkTextColorCode.withOpacity(.6)),
+            onPressed: () => HomeCtrl.closeNotificationPanel(),
+          ),
+        ],
+      ),
+    );
+
+    // Shared item list
+    Widget itemList = (HomeCtrl.NotificationListing != null && HomeCtrl.NotificationListing.isNotEmpty)
+        ? ListView.builder(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            physics: const BouncingScrollPhysics(),
+            itemCount: HomeCtrl.NotificationListing.length,
+            itemBuilder: (context, index) {
+              final item = HomeCtrl.NotificationListing[index];
+              return Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: GlobalAppColor.WhiteColorCode,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: GlobalAppColor.ButtonColor.withOpacity(.5)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.check_circle_outline, size: 22, color: Colors.pink),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Wrap(
+                            spacing: 6,
+                            runSpacing: 4,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            children: [
+                              Text("#${item.orderId}", style: CommonWidget.CommonTitleTextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                              _tag("Table ${item.tableId}", Colors.pink.shade50, Colors.pink.shade400),
+                              _tag(item.priority, Colors.orange.shade50, Colors.orange.shade500),
+                            ],
+                          ),
+                        ),
+                        Text(
+                          GlobalFunction().formatTime(item.preparedAt.toString()),
+                          style: CommonWidget.CommonTitleTextStyle(fontSize: 13, color: GlobalAppColor.HomeLightTextColor),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      item.customerName.isNotEmpty ? item.customerName : 'Guest',
+                      style: CommonWidget.CommonTitleTextStyle(fontSize: 13, color: GlobalAppColor.HomeLightTextColor),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: Wrap(
+                            spacing: 8,
+                            runSpacing: 4,
+                            children: [
+                              Text("${item.quantity}x ${item.itemName}", style: CommonWidget.CommonTitleTextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
+                              _tag("Station ${item.stationId}", Colors.blue.shade50, Colors.blue.shade600),
+                            ],
+                          ),
+                        ),
+                        InkWell(
+                          onTap: HomeCtrl.isHomeLoader
+                              ? null
+                              : () async {
+                                  final isConnected = await GlobalFunction().checkInternetConnection(context);
+                                  if (isConnected) {
+                                    await HomeCtrl.OrderServedService(context, "served", item.itemId.toString());
+                                  }
+                                },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(color: Colors.green.shade50, borderRadius: BorderRadius.circular(6)),
+                            child: Text("Mark Served", style: CommonWidget.CommonTitleTextStyle(fontSize: 13, color: Colors.green.shade600, fontWeight: FontWeight.w500)),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            },
+          )
+        : Center(
+            child: Text("No Prepared Items Found", style: CommonWidget.CommonTitleTextStyle(fontSize: 16, color: GlobalAppColor.HomeLightTextColor)),
+          );
 
     return Stack(
       children: [
         // 🔒 Overlay
         if (HomeCtrl.isNotificationPanelOpen)
-          AbsorbPointer(
-            absorbing: true,
-            child: Container(color: Colors.black45),
-          ),
+          isMobile
+              ? GestureDetector(
+                  onTap: () => HomeCtrl.closeNotificationPanel(),
+                  child: Container(color: Colors.black45),
+                )
+              : AbsorbPointer(
+                  absorbing: true,
+                  child: Container(color: Colors.black45),
+                ),
 
-        // 2️⃣ Side panel
-        AnimatedPositioned(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOutBack,
-          right: HomeCtrl.isNotificationPanelOpen ? 0 : -panelWidth,
-          top: MediaQuery.of(context).padding.top,
-          bottom: screenWidth > 900 ? 0 : (60.0 + MediaQuery.of(context).padding.bottom),
-          width: panelWidth,
-          child: Material(
-            elevation: 16,
-            color: Colors.white,
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(5),
-              bottomLeft: Radius.circular(5),
-            ),
-            child: Column(
-              children: [
-                SizedBox(height: 5),
-                // Header
-                Container(
-                  height: kToolbarHeight,
-                  padding: EdgeInsets.symmetric(horizontal: 12),
-                  color: GlobalAppColor.WhiteColorCode,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: <Widget>[
-                          Icon(
-                            Icons.notifications,
-                            color: GlobalAppColor.ButtonDarkColor,
-                            size: 20,
-                          ),
-                          SizedBox(width: 5),
-                          Text(
-                            "Prepared Items",
-                            style: CommonWidget.CommonTitleTextStyle(
-                              fontSize: isPortrait ? 18 : 16,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          SizedBox(width: 5),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 3,
-                            ),
-                            decoration: BoxDecoration(
-                              color: GlobalAppColor.BodyBgColorCode,
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              HomeCtrl.PreparedCount ?? '0',
-                              style: CommonWidget.CommonTitleTextStyle(
-                                color: GlobalAppColor.ButtonColor,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      IconButton(
-                        icon: Icon(
-                          Icons.close,
-                          color: GlobalAppColor.DarkTextColorCode.withOpacity(
-                            .6,
-                          ),
-                        ),
-                        onPressed: () => HomeCtrl.closeNotificationPanel(),
-                      ),
-                    ],
+        // 📐 Mobile — bottom-to-up sheet
+        if (isMobile)
+          AnimatedPositioned(
+            duration: const Duration(milliseconds: 320),
+            curve: Curves.easeOutCubic,
+            left: 0,
+            right: 0,
+            bottom: HomeCtrl.isNotificationPanelOpen ? 0 : -panelHeight,
+            height: panelHeight,
+            child: Material(
+              elevation: 24,
+              color: Colors.white,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
+              child: Column(
+                children: [
+                  const SizedBox(height: 10),
+                  // Drag handle
+                  Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFD1D5DB),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
-                ),
-                CommonWidget().DividerWidget(),
-
-                // Scrollable content
-                Expanded(
-                  child:
-                      (HomeCtrl.NotificationListing != null &&
-                          HomeCtrl.NotificationListing.isNotEmpty)
-                      ? ListView.builder(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 8,
-                          ),
-                          physics: const BouncingScrollPhysics(),
-                          itemCount: HomeCtrl.NotificationListing.length,
-                          itemBuilder: (context, index) {
-                            final item = HomeCtrl.NotificationListing[index];
-
-                            return Container(
-                              margin: const EdgeInsets.only(bottom: 12),
-                              padding: const EdgeInsets.all(14),
-                              decoration: BoxDecoration(
-                                color: GlobalAppColor.WhiteColorCode,
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(
-                                  color: GlobalAppColor.ButtonColor.withOpacity(
-                                    .5,
-                                  ),
-                                ),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // ---------- TOP ROW ----------
-                                  Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      const Icon(
-                                        Icons.check_circle_outline,
-                                        size: 22,
-                                        color: Colors.pink,
-                                      ),
-
-                                      const SizedBox(width: 6),
-
-                                      Expanded(
-                                        child: Wrap(
-                                          spacing: 6,
-                                          runSpacing: 4,
-                                          crossAxisAlignment:
-                                              WrapCrossAlignment.center,
-                                          children: [
-                                            Text(
-                                              "#${item.orderId}",
-                                              style:
-                                                  CommonWidget.CommonTitleTextStyle(
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.w600,
-                                                  ),
-                                            ),
-
-                                            _tag(
-                                              "Table ${item.tableId}",
-                                              Colors.pink.shade50,
-                                              Colors.pink.shade400,
-                                            ),
-
-                                            _tag(
-                                              item.priority,
-                                              Colors.orange.shade50,
-                                              Colors.orange.shade500,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-
-                                      Text(
-                                        GlobalFunction().formatTime(
-                                          item.preparedAt.toString(),
-                                        ),
-                                        style:
-                                            CommonWidget.CommonTitleTextStyle(
-                                              fontSize: 13,
-                                              color: GlobalAppColor
-                                                  .HomeLightTextColor,
-                                            ),
-                                      ),
-                                    ],
-                                  ),
-
-                                  const SizedBox(height: 5),
-
-                                  Text(
-                                    item.customerName.isNotEmpty
-                                        ? item.customerName
-                                        : 'Guest',
-                                    style: CommonWidget.CommonTitleTextStyle(
-                                      fontSize: 13,
-                                      color: GlobalAppColor.HomeLightTextColor,
-                                    ),
-                                  ),
-
-                                  // ---------- BOTTOM ROW ----------
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      Expanded(
-                                        child: Wrap(
-                                          spacing: 8,
-                                          runSpacing: 4,
-                                          children: [
-                                            Text(
-                                              "${item.quantity}x ${item.itemName}",
-                                              style:
-                                                  CommonWidget.CommonTitleTextStyle(
-                                                    fontSize: 15,
-                                                    fontWeight: FontWeight.w500,
-                                                  ),
-                                            ),
-
-                                            _tag(
-                                              "Station ${item.stationId}",
-                                              Colors.blue.shade50,
-                                              Colors.blue.shade600,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-
-                                      InkWell(
-                                        onTap: HomeCtrl.isHomeLoader
-                                            ? null
-                                            : () async {
-                                                final isConnected =
-                                                    await GlobalFunction()
-                                                        .checkInternetConnection(
-                                                          context,
-                                                        );
-                                                if (isConnected) {
-                                                  await HomeCtrl.OrderServedService(
-                                                    context,
-                                                    "served",
-                                                    item.itemId.toString(),
-                                                  );
-                                                }
-                                              },
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 12,
-                                            vertical: 6,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: Colors.green.shade50,
-                                            borderRadius: BorderRadius.circular(
-                                              6,
-                                            ),
-                                          ),
-                                          child: Text(
-                                            "Mark Served",
-                                            style:
-                                                CommonWidget.CommonTitleTextStyle(
-                                                  fontSize: 13,
-                                                  color: Colors.green.shade600,
-                                                  fontWeight: FontWeight.w500,
-                                                ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        )
-                      : Center(
-                          child: Text(
-                            "No Prepared Items Found",
-                            style: CommonWidget.CommonTitleTextStyle(
-                              fontSize: 16,
-                              color: GlobalAppColor.HomeLightTextColor,
-                            ),
-                          ),
-                        ),
-                ),
-
-                Platform.isIOS ? SizedBox(height: 15) : SizedBox(height: 5),
-              ],
+                  const SizedBox(height: 6),
+                  headerBar,
+                  CommonWidget().DividerWidget(),
+                  Expanded(child: itemList),
+                  Platform.isIOS ? const SizedBox(height: 15) : const SizedBox(height: 5),
+                ],
+              ),
+            ),
+          )
+        else
+          // 📐 Desktop/Tablet — side panel
+          AnimatedPositioned(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOutBack,
+            right: HomeCtrl.isNotificationPanelOpen ? 0 : -panelWidth,
+            top: MediaQuery.of(context).padding.top,
+            bottom: screenWidth > 900 ? 0 : (60.0 + MediaQuery.of(context).padding.bottom),
+            width: panelWidth,
+            child: Material(
+              elevation: 16,
+              color: Colors.white,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(5),
+                bottomLeft: Radius.circular(5),
+              ),
+              child: Column(
+                children: [
+                  const SizedBox(height: 5),
+                  headerBar,
+                  CommonWidget().DividerWidget(),
+                  Expanded(child: itemList),
+                  Platform.isIOS ? const SizedBox(height: 15) : const SizedBox(height: 5),
+                ],
+              ),
             ),
           ),
-        ),
       ],
     );
   }

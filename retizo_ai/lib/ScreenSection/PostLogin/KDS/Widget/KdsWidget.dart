@@ -684,10 +684,12 @@ class KdsWidget {
                                               await KdsCtrl.GetKitchenOrderListService(
                                                 ctx,
                                                 KdsCtrl.selectedKDSDate,
+                                                silent: true,
                                               );
                                               await KdsCtrl.GetReadyOrderListService(
                                                 ctx,
                                                 KdsCtrl.selectedKDSDate,
+                                                silent: true,
                                               );
                                             }
 
@@ -989,12 +991,14 @@ class KdsWidget {
                                             await KdsCtrl.GetKitchenOrderListService(
                                               ctx,
                                               KdsCtrl.selectedKDSDate,
+                                              silent: true,
                                             );
                                           }
                                           if (ctx.mounted) {
                                             await KdsCtrl.GetReadyOrderListService(
                                               ctx,
                                               KdsCtrl.selectedKDSDate,
+                                              silent: true,
                                             );
                                           }
 
@@ -1177,6 +1181,7 @@ class KdsWidget {
                                                           ctx,
                                                           KdsCtrl
                                                               .selectedKDSDate,
+                                                          silent: true,
                                                         );
                                                       }
 
@@ -1356,6 +1361,7 @@ class KdsWidget {
                                                           ctx,
                                                           KdsCtrl
                                                               .selectedKDSDate,
+                                                          silent: true,
                                                         );
                                                       }
 
@@ -1481,11 +1487,13 @@ class KdsWidget {
                                                           ctx,
                                                           KdsCtrl
                                                               .selectedKDSDate,
+                                                          silent: true,
                                                         );
                                                         await KdsCtrl.GetReadyOrderListService(
                                                           ctx,
                                                           KdsCtrl
                                                               .selectedKDSDate,
+                                                          silent: true,
                                                         );
                                                       }
 
@@ -1859,10 +1867,12 @@ class KdsWidget {
                                               await KdsCtrl.GetReadyOrderListService(
                                                 ctx,
                                                 KdsCtrl.selectedKDSDate,
+                                                silent: true,
                                               );
                                               await KdsCtrl.GetKitchenOrderListService(
                                                 ctx,
                                                 KdsCtrl.selectedKDSDate,
+                                                silent: true,
                                               );
                                             }
 
@@ -2073,6 +2083,7 @@ class KdsWidget {
                                             await KdsCtrl.GetReadyOrderListService(
                                               ctx,
                                               KdsCtrl.selectedKDSDate,
+                                              silent: true,
                                             );
                                           }
 
@@ -2274,6 +2285,7 @@ class KdsWidget {
                                                               ctx,
                                                               KdsCtrl
                                                                   .selectedKDSDate,
+                                                              silent: true,
                                                             );
                                                           }
                                                           if (ctx.mounted) {
@@ -2281,6 +2293,7 @@ class KdsWidget {
                                                               ctx,
                                                               KdsCtrl
                                                                   .selectedKDSDate,
+                                                              silent: true,
                                                             );
                                                           }
                                                           if (ctx.mounted) {
@@ -2392,6 +2405,7 @@ class KdsWidget {
                                                               ctx,
                                                               KdsCtrl
                                                                   .selectedKDSDate,
+                                                              silent: true,
                                                             );
                                                           }
                                                           if (ctx.mounted) {
