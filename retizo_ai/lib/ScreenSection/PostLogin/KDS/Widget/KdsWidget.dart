@@ -494,7 +494,7 @@ class KdsWidget {
                   ),
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: GlobalAppColor.WhiteColorCode,
                       borderRadius: BorderRadius.circular(AppBorderRadius.sm),
                       border: Border.all(
                         // ✅ Priority-based border (urgent=red, high=orange, normal=blue)
@@ -1201,7 +1201,7 @@ class KdsWidget {
                                                       vertical: 6,
                                                     ),
                                                 decoration: BoxDecoration(
-                                                  color: Colors.white,
+                                                  color: GlobalAppColor.WhiteColorCode,
                                                   borderRadius:
                                                       BorderRadius.circular(6),
                                                   border: Border.all(
@@ -1653,7 +1653,7 @@ class KdsWidget {
                   ),
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: GlobalAppColor.WhiteColorCode,
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
                         color: const Color(0xFF16A34A).withOpacity(.4),

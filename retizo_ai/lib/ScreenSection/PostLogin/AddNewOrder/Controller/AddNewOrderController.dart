@@ -4053,6 +4053,7 @@ class AddOrderProvider with ChangeNotifier {
           'price': itemPrice,
           'note': item['note'] ?? '',
           'm_p_name': product['m_p_name'] ?? menuItem.mPName ?? '',
+          'm_p_arb_name': product['m_p_arb_name'] ?? menuItem.mPArbName ?? '',
           'm_product_icon':
               product['m_product_icon'] ?? menuItem.mProductIcon ?? '',
           // ✅ CRITICAL: tax_group must be carried into selectedItems so that

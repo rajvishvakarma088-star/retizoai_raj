@@ -808,7 +808,7 @@ class CommonWidget {
       softWrap: false,
       textAlign: TextAlign.left,
       style: CommonWidget.CommonTitleTextStyle(
-        color: const Color(0xFF1F2937),
+        color: GlobalAppColor.DarkTextColorCode,
         fontWeight: FontWeight.w500,
         fontSize: 15,
       ),
@@ -972,10 +972,10 @@ class CommonWidget {
     String hintText = "Search Categories...",
     TextAlign textAlign = TextAlign.left,
     TextAlignVertical textAlignVertical = TextAlignVertical.center,
-    Color cursorColor = Colors.black,
+    Color? cursorColor,
     TextStyle? textStyle,
     TextStyle? hintStyle,
-    Color fillColor = Colors.white,
+    Color? fillColor,
     bool isDense = true,
     EdgeInsetsGeometry contentPadding = const EdgeInsets.symmetric(
       vertical: 12, // slightly tighter
@@ -1004,7 +1004,7 @@ class CommonWidget {
           keyboardType: keyboardType,
           textAlign: textAlign,
           textAlignVertical: textAlignVertical,
-          cursorColor: cursorColor,
+          cursorColor: cursorColor ?? GlobalAppColor.DarkTextColorCode,
           textCapitalization: TextCapitalization.words,
           style: textStyle ?? CommonWidget.CommonTitleTextStyle(),
           inputFormatters: inputFormatters,
@@ -1020,7 +1020,7 @@ class CommonWidget {
                   color: GlobalAppColor.DarkTextColorCode.withOpacity(.7),
                 ),
             filled: true,
-            fillColor: fillColor,
+            fillColor: fillColor ?? GlobalAppColor.WhiteColorCode,
             enabledBorder: enabledBorder ?? CommonWidget().buildBorder(),
             focusedBorder: focusedBorder ?? CommonWidget().buildBorder(),
             disabledBorder: disabledBorder ?? CommonWidget().buildBorder(),
@@ -1157,7 +1157,7 @@ class CommonWidget {
             child: Text(
               "Menu Items",
               style: CommonWidget.CommonTitleTextStyle(
-                color: Colors.grey[700],
+                color: GlobalAppColor.LightTextColorCode,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -1243,16 +1243,16 @@ class CommonWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             decoration: BoxDecoration(
-              color: const Color(0xFFE5E7EB),
+              color: GlobalAppColor.WhiteColorCode,
               borderRadius: BorderRadius.circular(6),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(
+                Icon(
                   Icons.arrow_back_ios_new_rounded,
                   size: 16,
-                  color: Colors.black87,
+                  color: GlobalAppColor.DarkTextColorCode,
                 ),
                 const SizedBox(width: 5),
                 Text(
@@ -1260,7 +1260,7 @@ class CommonWidget {
                   style: CommonWidget.CommonTitleTextStyle(
                     fontWeight: FontWeight.w500,
                     fontSize: 14,
-                    color: Colors.black87,
+                    color: GlobalAppColor.DarkTextColorCode,
                   ),
                 ),
               ],

@@ -34,6 +34,7 @@ class _DiscountInputFieldState extends State<DiscountInputField> {
       barrierDismissible: false,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDlg) => AlertDialog(
+          backgroundColor: GlobalAppColor.WhiteColorCode,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
@@ -232,7 +233,7 @@ class _DiscountInputFieldState extends State<DiscountInputField> {
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 8),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: GlobalAppColor.WhiteColorCode,
             borderRadius: BorderRadius.circular(5),
             border: Border.all(
               color: GlobalAppColor.DarkTextColorCode.withOpacity(.1),

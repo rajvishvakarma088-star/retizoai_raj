@@ -659,9 +659,9 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen> {
     final deviceProvider = context.watch<PrintingDeviceProvider>();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF1F5F9),
+      backgroundColor: GlobalAppColor.BodyBgColorCode,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: GlobalAppColor.WhiteColorCode,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
@@ -709,7 +709,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen> {
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: const Color(0xFFE5E7EB)),
+          child: Container(height: 1, color: GlobalAppColor.LightTextColorCode.withOpacity(0.15)),
         ),
       ),
       body: SingleChildScrollView(
@@ -762,10 +762,10 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: GlobalAppColor.WhiteColorCode,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: const Color(0xFFE2E8F0),
+          color: GlobalAppColor.LightTextColorCode.withOpacity(0.15),
           width: 1.2,
         ),
       ),
@@ -866,12 +866,12 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen> {
                 decoration: BoxDecoration(
                   color: isPrimaryKds
                       ? GlobalAppColor.ButtonColor.withOpacity(0.06)
-                      : const Color(0xFFF8FAFC),
+                      : GlobalAppColor.BodyBgColorCode,
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
                     color: isPrimaryKds
                         ? GlobalAppColor.ButtonColor.withOpacity(0.3)
-                        : const Color(0xFFE2E8F0),
+                        : GlobalAppColor.LightTextColorCode.withOpacity(0.15),
                   ),
                 ),
                 child: Row(
@@ -1688,9 +1688,9 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen> {
                   decoration: BoxDecoration(
                     color: isSelected
                         ? const Color(0xFFDCFCE7).withOpacity(0.3)
-                        : const Color(0xFFF8FAFC),
+                        : GlobalAppColor.BodyBgColorCode,
                     border: Border.all(
-                      color: isSelected ? const Color(0xFF86EFAC) : const Color(0xFFE2E8F0),
+                      color: isSelected ? const Color(0xFF86EFAC) : GlobalAppColor.LightTextColorCode.withOpacity(0.15),
                       width: 1.2,
                     ),
                     borderRadius: BorderRadius.circular(12),
@@ -1700,7 +1700,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen> {
                     leading: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: isSelected ? const Color(0xFFDCFCE7) : Colors.grey.shade200,
+                        color: isSelected ? const Color(0xFFDCFCE7) : GlobalAppColor.LightTextColorCode.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Icon(
@@ -1800,14 +1800,14 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen> {
         suffixIcon: suffix,
         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
         filled: true,
-        fillColor: const Color(0xFFF8FAFC),
+        fillColor: GlobalAppColor.BodyBgColorCode,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+          borderSide: BorderSide(color: GlobalAppColor.LightTextColorCode.withOpacity(0.15)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+          borderSide: BorderSide(color: GlobalAppColor.LightTextColorCode.withOpacity(0.15)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),

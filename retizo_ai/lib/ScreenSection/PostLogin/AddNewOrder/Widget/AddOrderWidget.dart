@@ -15,7 +15,7 @@ class AddOrderWidget {
           hintText: "All Brands",
           iconPadding: 0,
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: GlobalAppColor.WhiteColorCode,
             borderRadius: BorderRadius.circular(6),
             border: Border.all(
               color: GlobalAppColor.DarkTextColorCode.withOpacity(.1),
@@ -179,10 +179,10 @@ class AddOrderWidget {
                   margin: const EdgeInsets.only(right: 10),
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
-                    color: isSelected ? GlobalAppColor.ButtonColor : Colors.white,
+                    color: isSelected ? GlobalAppColor.ButtonColor : GlobalAppColor.WhiteColorCode,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: isSelected ? Colors.transparent : Colors.grey.shade300,
+                      color: isSelected ? Colors.transparent : GlobalAppColor.LightTextColorCode.withOpacity(0.2),
                       width: 1,
                     ),
                     boxShadow: [
@@ -213,7 +213,7 @@ class AddOrderWidget {
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                          color: isSelected ? Colors.white : const Color(0xFF374151),
+                          color: isSelected ? Colors.white : GlobalAppColor.DarkTextColorCode,
                         ),
                       ),
                     ],
@@ -348,11 +348,11 @@ class AddOrderWidget {
                                     bottom: 3,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: Colors.white,
+                                    color: GlobalAppColor.WhiteColorCode,
                                     borderRadius: BorderRadius.circular(5),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.grey.shade100,
+                                        color: Colors.black.withOpacity(0.04),
                                         blurRadius: 4,
                                         offset: const Offset(0, 2),
                                       ),
@@ -379,9 +379,7 @@ class AddOrderWidget {
                                               textAlign: TextAlign.center,
                                               style:
                                                   CommonWidget.CommonTitleTextStyle(
-                                                    color: const Color(
-                                                      0xFF1F2937,
-                                                    ),
+                                                    color: GlobalAppColor.DarkTextColorCode,
                                                     fontWeight: FontWeight.w500,
                                                     height: 1.2,
                                                     letterSpacing: 0.5,
@@ -400,6 +398,7 @@ class AddOrderWidget {
                                                   CommonWidget.CommonTitleTextStyle(
                                                     fontSize: 13,
                                                     fontWeight: FontWeight.w300,
+                                                    color: GlobalAppColor.DarkTextColorCode.withOpacity(0.7),
                                                   ),
                                             ),
                                           ),
@@ -521,9 +520,10 @@ class AddOrderWidget {
                                                   ),
                                               child: Text(
                                                 "${AddOrderCtrl.itemQuantity[item.mProdId] ?? 0}",
-                                                style: const TextStyle(
+                                                style: TextStyle(
                                                   fontWeight: FontWeight.bold,
                                                   fontSize: 12,
+                                                  color: GlobalAppColor.DarkTextColorCode,
                                                 ),
                                               ),
                                             ),
@@ -783,7 +783,7 @@ class AddOrderWidget {
                                     : "Select Type",
                                 iconPadding: 0,
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
+                                  color: GlobalAppColor.WhiteColorCode,
                                   borderRadius: BorderRadius.circular(6),
                                   border: Border.all(
                                     color: GlobalAppColor
@@ -931,8 +931,8 @@ class AddOrderWidget {
                                   horizontal: 12,
                                   vertical: 10,
                                 ),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
+                                                               decoration: BoxDecoration(
+                                  color: GlobalAppColor.WhiteColorCode,
                                   borderRadius: BorderRadius.circular(6),
                                   border: Border.all(
                                     color: GlobalAppColor
@@ -1105,7 +1105,7 @@ class AddOrderWidget {
                           padding: const EdgeInsets.only(top: 8.0),
                           child: Container(
                             decoration: BoxDecoration(
-                              color: const Color(0xFFF0FDF4),
+                              color: Provider.of<ThemeProvider>(context, listen: false).currentTheme == 'dark' ? const Color(0xFF064E3B) : const Color(0xFFF0FDF4),
                               borderRadius: BorderRadius.circular(5),
                               border: Border.all(
                                 color: Colors.green,
@@ -1129,7 +1129,7 @@ class AddOrderWidget {
                                       "${(AddOrderCtrl.CustomerMobile != null && AddOrderCtrl.CustomerMobile != '0' && AddOrderCtrl.CustomerMobile!.trim().isNotEmpty) ? '(${AddOrderCtrl.CustomerMobile})' : ''}"
                                       "${(AddOrderCtrl.CustomerDiscount != null && AddOrderCtrl.CustomerDiscount!.isNotEmpty && (int.tryParse(AddOrderCtrl.CustomerDiscount!) ?? 0) > 0) ? " • ${AddOrderCtrl.CustomerDiscount}% Default Discount" : ""}",
                                       style: CommonWidget.CommonTitleTextStyle(
-                                        color: const Color(0xFF166534),
+                                        color: Provider.of<ThemeProvider>(context, listen: false).currentTheme == 'dark' ? const Color(0xFFD1FAE5) : const Color(0xFF166534),
                                         height: 1.2,
                                       ),
                                       overflow: TextOverflow.visible,
@@ -1147,10 +1147,10 @@ class AddOrderWidget {
                   Container(
                     width: double.infinity,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: GlobalAppColor.WhiteColorCode,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: const Color(0xFFE5E7EB),
+                        color: GlobalAppColor.LightTextColorCode.withOpacity(0.15),
                         width: 1.0,
                       ),
                       boxShadow: [
@@ -1223,14 +1223,27 @@ class AddOrderWidget {
                                             // 🔹 Item name + quantity
                                             Expanded(
                                               flex: 2,
-                                              child: Text(
-                                                "$name x $qty",
-                                                overflow: TextOverflow.ellipsis,
-                                                style:
-                                                    CommonWidget.CommonTitleTextStyle(
-                                                      color: GlobalAppColor
-                                                          .DarkTextColorCode,
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    "$name x $qty",
+                                                    overflow: TextOverflow.ellipsis,
+                                                    style:
+                                                        CommonWidget.CommonTitleTextStyle(
+                                                          color: GlobalAppColor
+                                                              .DarkTextColorCode,
+                                                        ),
+                                                  ),
+                                                  Text(
+                                                    item['m_p_arb_name'] ?? '',
+                                                    style: CommonWidget.CommonTitleTextStyle(
+                                                      fontSize: 13,
+                                                      fontWeight: FontWeight.w300,
+                                                      color: GlobalAppColor.DarkTextColorCode.withOpacity(0.7),
                                                     ),
+                                                  ),
+                                                ],
                                               ),
                                             ),
 
@@ -1676,7 +1689,7 @@ class AddOrderWidget {
                                       : 'Select Payment',
                                   iconPadding: 0,
                                   decoration: BoxDecoration(
-                                    color: Colors.white,
+                                    color: GlobalAppColor.WhiteColorCode,
                                     borderRadius: BorderRadius.circular(6),
                                     border: Border.all(
                                       color: GlobalAppColor
@@ -1731,7 +1744,7 @@ class AddOrderWidget {
                     Container(
                       width: double.infinity,
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: GlobalAppColor.WhiteColorCode,
                         borderRadius: BorderRadius.circular(5),
                         border: Border.all(
                           color: GlobalAppColor.DarkTextColorCode.withOpacity(
@@ -1997,7 +2010,7 @@ class AddOrderWidget {
                   SizedBox(height: 3),
                   HomeWidget().buildDropdown(
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: GlobalAppColor.WhiteColorCode,
                       borderRadius: BorderRadius.circular(6),
                       border: Border.all(
                         color: GlobalAppColor.DarkTextColorCode.withOpacity(.1),
@@ -2036,7 +2049,7 @@ class AddOrderWidget {
                     height: 60, // ✅ Fixed height
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: GlobalAppColor.WhiteColorCode,
                       borderRadius: BorderRadius.circular(6),
                       border: Border.all(
                         color: GlobalAppColor.DarkTextColorCode.withOpacity(.1),
@@ -2189,13 +2202,13 @@ class AddOrderWidget {
     if (!isMobile) {
       return Container(
         width: panelWidth,
-        color: Colors.white,
+        color: GlobalAppColor.WhiteColorCode,
         child: panelContent(false),
       );
     }
 
     return Container(
-      color: Colors.white,
+      color: GlobalAppColor.WhiteColorCode,
       child: panelContent(true),
     );
   }
@@ -2465,7 +2478,7 @@ class _TableSelectionModalState extends State<_TableSelectionModal> {
     final crossAxisCount = screenW < 480 ? 2 : 3;
 
     return Dialog(
-      backgroundColor: Colors.white,
+      backgroundColor: GlobalAppColor.WhiteColorCode,
       insetPadding: EdgeInsets.symmetric(
         horizontal: screenW < 600 ? 12.0 : 40.0,
         vertical: 24.0,
@@ -2488,14 +2501,14 @@ class _TableSelectionModalState extends State<_TableSelectionModal> {
                     style: CommonWidget.CommonTitleTextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 18,
-                      color: const Color(0xFF111827),
+                      color: GlobalAppColor.DarkTextColorCode,
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.close,
                       size: 22,
-                      color: Color(0xFF6B7280),
+                      color: GlobalAppColor.LightTextColorCode,
                     ),
                     onPressed: () => Navigator.of(context).pop(null),
                     padding: EdgeInsets.zero,
@@ -2527,12 +2540,12 @@ class _TableSelectionModalState extends State<_TableSelectionModal> {
                             decoration: BoxDecoration(
                               color: active
                                   ? GlobalAppColor.ButtonColor
-                                  : Colors.white,
+                                  : GlobalAppColor.WhiteColorCode,
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(
                                 color: active
                                     ? GlobalAppColor.ButtonColor
-                                    : const Color(0xFFD1D5DB),
+                                    : GlobalAppColor.LightTextColorCode.withOpacity(0.3),
                                 width: 1.5,
                               ),
                             ),
@@ -2541,7 +2554,7 @@ class _TableSelectionModalState extends State<_TableSelectionModal> {
                               style: TextStyle(
                                 color: active
                                     ? Colors.white
-                                    : const Color(0xFF374151),
+                                    : GlobalAppColor.DarkTextColorCode,
                                 fontWeight: FontWeight.w500,
                                 fontSize: 13,
                               ),
@@ -2569,8 +2582,8 @@ class _TableSelectionModalState extends State<_TableSelectionModal> {
                   ),
                   Text(
                     'Selected: ${_selected.length} ${_selected.length == 1 ? 'table' : 'tables'}',
-                    style: const TextStyle(
-                      color: Color(0xFF6B7280),
+                    style: TextStyle(
+                      color: GlobalAppColor.LightTextColorCode,
                       fontSize: 12,
                     ),
                   ),
@@ -2626,7 +2639,7 @@ class _TableSelectionModalState extends State<_TableSelectionModal> {
                         child: Text(
                           'No tables available',
                           style: CommonWidget.CommonTitleTextStyle(
-                            color: const Color(0xFF9CA3AF),
+                            color: GlobalAppColor.LightTextColorCode,
                           ),
                         ),
                       ),
@@ -2658,21 +2671,21 @@ class _TableSelectionModalState extends State<_TableSelectionModal> {
                               padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
                                 color: isOccupied
-                                    ? const Color(0xFFFEF2F2)
+                                    ? (Provider.of<ThemeProvider>(context, listen: false).currentTheme == 'dark' ? const Color(0xFF7F1D1D) : const Color(0xFFFEF2F2))
                                     : isBlocked
-                                    ? const Color(0xFFF9FAFB)
+                                    ? (Provider.of<ThemeProvider>(context, listen: false).currentTheme == 'dark' ? const Color(0xFF1E293B) : const Color(0xFFF9FAFB))
                                     : sel
-                                    ? const Color(0xFFEFF6FF)
-                                    : Colors.white,
+                                    ? (Provider.of<ThemeProvider>(context, listen: false).currentTheme == 'dark' ? const Color(0xFF1E1E38) : const Color(0xFFEFF6FF))
+                                    : GlobalAppColor.WhiteColorCode,
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
                                   color: isOccupied
                                       ? const Color(0xFFFCA5A5)
                                       : isBlocked
-                                      ? const Color(0xFFE5E7EB)
+                                      ? (Provider.of<ThemeProvider>(context, listen: false).currentTheme == 'dark' ? const Color(0xFF334155) : const Color(0xFFE5E7EB))
                                       : sel
                                       ? GlobalAppColor.ButtonColor
-                                      : const Color(0xFFE5E7EB),
+                                      : GlobalAppColor.LightTextColorCode.withOpacity(0.15),
                                   width: sel ? 2.0 : 1.0,
                                 ),
                                 boxShadow: [
@@ -2702,8 +2715,8 @@ class _TableSelectionModalState extends State<_TableSelectionModal> {
                                               fontWeight: FontWeight.w700,
                                               fontSize: 15,
                                               color: isOccupied
-                                                  ? const Color(0xFF991B1B)
-                                                  : const Color(0xFF111827),
+                                                  ? (Provider.of<ThemeProvider>(context, listen: false).currentTheme == 'dark' ? const Color(0xFFFECACA) : const Color(0xFF991B1B))
+                                                  : GlobalAppColor.DarkTextColorCode,
                                             ),
                                             overflow: TextOverflow.ellipsis,
                                           ),
@@ -2831,16 +2844,16 @@ class _TableSelectionModalState extends State<_TableSelectionModal> {
                                     const SizedBox(height: 6),
                                     Row(
                                       children: [
-                                        const Icon(
+                                        Icon(
                                           Icons.people_outline_rounded,
                                           size: 14,
-                                          color: Color(0xFF6B7280),
+                                          color: GlobalAppColor.LightTextColorCode,
                                         ),
                                         const SizedBox(width: 4),
                                         Text(
                                           '${table.seatingCapacity} Seats',
-                                          style: const TextStyle(
-                                            color: Color(0xFF4B5563),
+                                          style: TextStyle(
+                                            color: GlobalAppColor.LightTextColorCode,
                                             fontSize: 11,
                                             fontWeight: FontWeight.w500,
                                           ),
@@ -2850,17 +2863,17 @@ class _TableSelectionModalState extends State<_TableSelectionModal> {
                                     const SizedBox(height: 3),
                                     Row(
                                       children: [
-                                        const Icon(
+                                        Icon(
                                           Icons.location_on_outlined,
                                           size: 14,
-                                          color: Color(0xFF6B7280),
+                                          color: GlobalAppColor.LightTextColorCode,
                                         ),
                                         const SizedBox(width: 4),
                                         Expanded(
                                           child: Text(
                                             table.location,
-                                            style: const TextStyle(
-                                              color: Color(0xFF4B5563),
+                                            style: TextStyle(
+                                              color: GlobalAppColor.LightTextColorCode,
                                               fontSize: 11,
                                               fontWeight: FontWeight.w500,
                                             ),
@@ -2900,10 +2913,10 @@ class _TableSelectionModalState extends State<_TableSelectionModal> {
                                         width: double.infinity,
                                         padding: const EdgeInsets.all(5),
                                         decoration: BoxDecoration(
-                                          color: Colors.white.withOpacity(0.8),
+                                          color: GlobalAppColor.WhiteColorCode.withOpacity(0.8),
                                           borderRadius: BorderRadius.circular(6),
                                           border: Border.all(
-                                            color: const Color(0xFFFEE2E2),
+                                            color: const Color(0xFFFEE2E2).withOpacity(0.3),
                                             width: 1,
                                           ),
                                         ),
@@ -2913,19 +2926,19 @@ class _TableSelectionModalState extends State<_TableSelectionModal> {
                                             if (table.occupiedOrderNumber != null || table.occupiedOrderId != null)
                                               Text(
                                                 'Order #${table.occupiedOrderNumber ?? table.occupiedOrderId}',
-                                                style: const TextStyle(
+                                                style: TextStyle(
                                                   fontSize: 9.5,
                                                   fontWeight: FontWeight.w700,
-                                                  color: Color(0xFF991B1B),
+                                                  color: Provider.of<ThemeProvider>(context, listen: false).currentTheme == 'dark' ? const Color(0xFFFECACA) : const Color(0xFF991B1B),
                                                 ),
                                                 overflow: TextOverflow.ellipsis,
                                               ),
                                             if (table.occupiedCustomer != null)
                                               Text(
                                                 'Guest: ${table.occupiedCustomer}',
-                                                style: const TextStyle(
+                                                style: TextStyle(
                                                   fontSize: 9,
-                                                  color: Color(0xFF4B5563),
+                                                  color: GlobalAppColor.LightTextColorCode,
                                                 ),
                                                 overflow: TextOverflow.ellipsis,
                                               ),
@@ -2995,7 +3008,7 @@ class _TableSelectionModalState extends State<_TableSelectionModal> {
                     ),
             ),
 
-            const Divider(height: 1, thickness: 1, color: Color(0xFFF3F4F6)),
+            Divider(height: 1, thickness: 1, color: GlobalAppColor.LightTextColorCode.withOpacity(0.15)),
 
             // ── Action buttons ───────────────────────────────────────────
             Padding(
@@ -3007,7 +3020,7 @@ class _TableSelectionModalState extends State<_TableSelectionModal> {
                       onPressed: () => Navigator.of(context).pop(null),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 13),
-                        side: const BorderSide(color: Color(0xFFD1D5DB)),
+                        side: BorderSide(color: GlobalAppColor.LightTextColorCode.withOpacity(0.3)),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -3015,7 +3028,7 @@ class _TableSelectionModalState extends State<_TableSelectionModal> {
                       child: const Text(
                         'Cancel',
                         style: TextStyle(
-                          color: Color(0xFF374151),
+                          color: Colors.grey,
                           fontWeight: FontWeight.w500,
                           fontSize: 14,
                         ),

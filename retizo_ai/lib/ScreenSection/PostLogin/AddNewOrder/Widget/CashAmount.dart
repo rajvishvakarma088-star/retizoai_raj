@@ -17,9 +17,9 @@ class CashAmount extends StatelessWidget {
         });
 
         return Container(
-          padding: EdgeInsets.symmetric(horizontal: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 8),
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.black26),
+            border: Border.all(color: GlobalAppColor.LightTextColorCode.withOpacity(0.25)),
             borderRadius: BorderRadius.circular(5),
           ),
           child: Row(
@@ -28,6 +28,7 @@ class CashAmount extends StatelessWidget {
                 child: TextField(
                   controller: p1.controller,
                   keyboardType: TextInputType.number,
+                  style: TextStyle(color: GlobalAppColor.DarkTextColorCode),
                   inputFormatters: [
                     FilteringTextInputFormatter.digitsOnly, // only numbers
                     LengthLimitingTextInputFormatter(3), // max 3 digits
@@ -36,6 +37,7 @@ class CashAmount extends StatelessWidget {
                   decoration: InputDecoration(
                     border: InputBorder.none,
                     hintText: hintText,
+                    hintStyle: TextStyle(color: GlobalAppColor.LightTextColorCode.withOpacity(0.5)),
                   ),
                 ),
               ),
@@ -44,11 +46,11 @@ class CashAmount extends StatelessWidget {
                 children: [
                   InkWell(
                     onTap: () => p1.increment(),
-                    child: Icon(Icons.arrow_drop_up),
+                    child: Icon(Icons.arrow_drop_up, color: GlobalAppColor.LightTextColorCode),
                   ),
                   InkWell(
                     onTap: () => p1.decrement(),
-                    child: Icon(Icons.arrow_drop_down),
+                    child: Icon(Icons.arrow_drop_down, color: GlobalAppColor.LightTextColorCode),
                   ),
                 ],
               ),
@@ -75,9 +77,9 @@ class CardAmount extends StatelessWidget {
         });
 
         return Container(
-          padding: EdgeInsets.symmetric(horizontal: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 8),
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.black26),
+            border: Border.all(color: GlobalAppColor.LightTextColorCode.withOpacity(0.25)),
             borderRadius: BorderRadius.circular(5),
           ),
           child: Row(
@@ -86,6 +88,7 @@ class CardAmount extends StatelessWidget {
                 child: TextField(
                   controller: p2.controller,
                   keyboardType: TextInputType.number,
+                  style: TextStyle(color: GlobalAppColor.DarkTextColorCode),
                   onChanged: (v) => p2.manualInput(v),
                   inputFormatters: [
                     FilteringTextInputFormatter.digitsOnly, // only numbers
@@ -94,6 +97,7 @@ class CardAmount extends StatelessWidget {
                   decoration: InputDecoration(
                     border: InputBorder.none,
                     hintText: hintText,
+                    hintStyle: TextStyle(color: GlobalAppColor.LightTextColorCode.withOpacity(0.5)),
                   ),
                 ),
               ),
@@ -102,11 +106,11 @@ class CardAmount extends StatelessWidget {
                 children: [
                   InkWell(
                     onTap: () => p2.increment(),
-                    child: Icon(Icons.arrow_drop_up),
+                    child: Icon(Icons.arrow_drop_up, color: GlobalAppColor.LightTextColorCode),
                   ),
                   InkWell(
                     onTap: () => p2.decrement(),
-                    child: Icon(Icons.arrow_drop_down),
+                    child: Icon(Icons.arrow_drop_down, color: GlobalAppColor.LightTextColorCode),
                   ),
                 ],
               ),
@@ -143,9 +147,9 @@ class PayBillCashAmount extends StatelessWidget {
         });
 
         return Container(
-          padding: EdgeInsets.symmetric(horizontal: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 8),
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.black26),
+            border: Border.all(color: GlobalAppColor.LightTextColorCode.withOpacity(0.25)),
             borderRadius: BorderRadius.circular(5),
           ),
           child: Row(
@@ -154,6 +158,7 @@ class PayBillCashAmount extends StatelessWidget {
                 child: TextField(
                   controller: p1.controller,
                   keyboardType: TextInputType.number,
+                  style: TextStyle(color: GlobalAppColor.DarkTextColorCode),
                   inputFormatters: [
                     FilteringTextInputFormatter.digitsOnly,
                     LengthLimitingTextInputFormatter(7),
@@ -162,6 +167,7 @@ class PayBillCashAmount extends StatelessWidget {
                   decoration: InputDecoration(
                     border: InputBorder.none,
                     hintText: hintText,
+                    hintStyle: TextStyle(color: GlobalAppColor.LightTextColorCode.withOpacity(0.5)),
                   ),
                 ),
               ),
@@ -169,11 +175,11 @@ class PayBillCashAmount extends StatelessWidget {
                 children: [
                   InkWell(
                     onTap: () => p1.increment(),
-                    child: Icon(Icons.arrow_drop_up),
+                    child: Icon(Icons.arrow_drop_up, color: GlobalAppColor.LightTextColorCode),
                   ),
                   InkWell(
                     onTap: () => p1.decrement(),
-                    child: Icon(Icons.arrow_drop_down),
+                    child: Icon(Icons.arrow_drop_down, color: GlobalAppColor.LightTextColorCode),
                   ),
                 ],
               ),
@@ -210,9 +216,9 @@ class PayBillCardAmount extends StatelessWidget {
         });
 
         return Container(
-          padding: EdgeInsets.symmetric(horizontal: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 8),
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.black26),
+            border: Border.all(color: GlobalAppColor.LightTextColorCode.withOpacity(0.25)),
             borderRadius: BorderRadius.circular(5),
           ),
           child: Row(
@@ -221,6 +227,7 @@ class PayBillCardAmount extends StatelessWidget {
                 child: TextField(
                   controller: p2.controller,
                   keyboardType: TextInputType.number,
+                  style: TextStyle(color: GlobalAppColor.DarkTextColorCode),
                   inputFormatters: [
                     FilteringTextInputFormatter.digitsOnly,
                     LengthLimitingTextInputFormatter(7),
@@ -229,6 +236,7 @@ class PayBillCardAmount extends StatelessWidget {
                   decoration: InputDecoration(
                     border: InputBorder.none,
                     hintText: hintText,
+                    hintStyle: TextStyle(color: GlobalAppColor.LightTextColorCode.withOpacity(0.5)),
                   ),
                 ),
               ),
@@ -236,11 +244,11 @@ class PayBillCardAmount extends StatelessWidget {
                 children: [
                   InkWell(
                     onTap: () => p2.increment(),
-                    child: Icon(Icons.arrow_drop_up),
+                    child: Icon(Icons.arrow_drop_up, color: GlobalAppColor.LightTextColorCode),
                   ),
                   InkWell(
                     onTap: () => p2.decrement(),
-                    child: Icon(Icons.arrow_drop_down),
+                    child: Icon(Icons.arrow_drop_down, color: GlobalAppColor.LightTextColorCode),
                   ),
                 ],
               ),

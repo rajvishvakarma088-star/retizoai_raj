@@ -27,6 +27,7 @@ class ProfilePage extends StatelessWidget {
       barrierDismissible: false,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setState) => AlertDialog(
+          backgroundColor: GlobalAppColor.WhiteColorCode,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           title: Row(
@@ -165,6 +166,7 @@ class ProfilePage extends StatelessWidget {
       barrierDismissible: false,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setState) => AlertDialog(
+          backgroundColor: GlobalAppColor.WhiteColorCode,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           title: Row(
@@ -309,9 +311,9 @@ class ProfilePage extends StatelessWidget {
     final bool isActive = userStatus.toLowerCase() == 'active';
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF1F5F9),
+      backgroundColor: GlobalAppColor.HomeBgColorCode,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: GlobalAppColor.WhiteColorCode,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
@@ -329,7 +331,7 @@ class ProfilePage extends StatelessWidget {
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: const Color(0xFFE5E7EB)),
+          child: Container(height: 1, color: GlobalAppColor.LightTextColorCode.withOpacity(0.15)),
         ),
       ),
       body: SingleChildScrollView(
@@ -401,9 +403,9 @@ class ProfilePage extends StatelessWidget {
                         height: 62,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Colors.grey.shade100,
+                          color: GlobalAppColor.BodyBgColorCode,
                           border: Border.all(
-                              color: Colors.grey.shade300, width: 1.5),
+                              color: GlobalAppColor.LightTextColorCode.withOpacity(0.2), width: 1.5),
                         ),
                         child: orgPicture.isNotEmpty
                             ? ClipOval(
@@ -560,7 +562,7 @@ class _Card extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: GlobalAppColor.WhiteColorCode,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -748,9 +750,9 @@ class _ReadField extends StatelessWidget {
           padding: EdgeInsets.symmetric(
               horizontal: 14, vertical: minLines > 1 ? 14 : 13),
           decoration: BoxDecoration(
-            color: const Color(0xFFF8FAFC),
+            color: GlobalAppColor.BodyBgColorCode,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
+            border: Border.all(color: GlobalAppColor.LightTextColorCode.withOpacity(0.2), width: 1),
           ),
           child: Text(
             value.isEmpty ? '—' : value,
@@ -814,14 +816,14 @@ class _DialogField extends StatelessWidget {
             contentPadding: const EdgeInsets.symmetric(
                 horizontal: 14, vertical: 12),
             filled: true,
-            fillColor: const Color(0xFFF8FAFC),
+            fillColor: GlobalAppColor.BodyBgColorCode,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+              borderSide: BorderSide(color: GlobalAppColor.LightTextColorCode.withOpacity(0.2)),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+              borderSide: BorderSide(color: GlobalAppColor.LightTextColorCode.withOpacity(0.2)),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
@@ -892,14 +894,14 @@ class _PasswordField extends StatelessWidget {
             contentPadding: const EdgeInsets.symmetric(
                 horizontal: 14, vertical: 12),
             filled: true,
-            fillColor: const Color(0xFFF8FAFC),
+            fillColor: GlobalAppColor.BodyBgColorCode,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+              borderSide: BorderSide(color: GlobalAppColor.LightTextColorCode.withOpacity(0.2)),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+              borderSide: BorderSide(color: GlobalAppColor.LightTextColorCode.withOpacity(0.2)),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),

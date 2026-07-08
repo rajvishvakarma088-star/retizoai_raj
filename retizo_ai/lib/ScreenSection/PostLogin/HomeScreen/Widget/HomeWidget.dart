@@ -908,7 +908,7 @@ class HomeWidget {
           width: panelWidth,
           child: Material(
             elevation: 16,
-            color: Colors.white,
+            color: GlobalAppColor.WhiteColorCode,
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(5),
               bottomLeft: Radius.circular(5),
@@ -1031,6 +1031,15 @@ class HomeWidget {
                                               letterSpacing: 0.5,
                                             ),
                                           ),
+                                          Text(
+                                            "ORDER SUMMARY",
+                                            style: CommonWidget.CommonTitleTextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w800,
+                                              color: GlobalAppColor.DarkTextColorCode,
+                                              letterSpacing: 0.5,
+                                            ),
+                                          ),
                                           if (isPremium) ...[
                                             const SizedBox(width: 4),
                                             const Icon(
@@ -1092,9 +1101,9 @@ class HomeWidget {
                           Container(
                             margin: const EdgeInsets.only(bottom: 16),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: GlobalAppColor.WhiteColorCode,
                             borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: const Color(0xFFF1F5F9), width: 1.5),
+                            border: Border.all(color: GlobalAppColor.LightTextColorCode.withOpacity(0.15), width: 1.5),
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black.withOpacity(0.015),
@@ -1112,7 +1121,7 @@ class HomeWidget {
                                 style: CommonWidget.CommonTitleTextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w800,
-                                  color: const Color(0xFF475569),
+                                  color: GlobalAppColor.DarkTextColorCode,
                                   letterSpacing: 0.5,
                                 ),
                               ),
@@ -1152,41 +1161,41 @@ class HomeWidget {
                                       String displaySubtitle = name;
                                       Color activeColor = const Color(0xFF3B82F6);
                                       Color bgLight = const Color(0xFFEFF6FF);
-                                      Color textColor = const Color(0xFF1E293B);
-                                      Color subtitleColor = const Color(0xFF64748B);
-                                      Widget iconWidget = const Icon(Icons.payment_outlined, size: 20, color: Color(0xFF64748B));
+                                      Color textColor = GlobalAppColor.DarkTextColorCode;
+                                      Color subtitleColor = GlobalAppColor.LightTextColorCode;
+                                      Widget iconWidget = Icon(Icons.payment_outlined, size: 20, color: GlobalAppColor.LightTextColorCode);
 
                                       if (isCash) {
                                         displayTitle = "Cash";
                                         displaySubtitle = "Cash";
                                         activeColor = const Color(0xFF10B981);
-                                        bgLight = const Color(0xFFECFDF5);
-                                        textColor = isSelected ? const Color(0xFF065F46) : const Color(0xFF1E293B);
-                                        subtitleColor = isSelected ? const Color(0xFF047857) : const Color(0xFF64748B);
+                                        bgLight = const Color(0xFF10B981).withOpacity(0.15);
+                                        textColor = isSelected ? const Color(0xFF10B981) : GlobalAppColor.DarkTextColorCode;
+                                        subtitleColor = isSelected ? const Color(0xFF10B981).withOpacity(0.8) : GlobalAppColor.LightTextColorCode;
                                         iconWidget = Icon(
                                           Icons.account_balance_wallet_outlined,
                                           size: 20,
-                                          color: isSelected ? const Color(0xFF10B981) : const Color(0xFF64748B),
+                                          color: isSelected ? const Color(0xFF10B981) : GlobalAppColor.LightTextColorCode,
                                         );
                                       } else if (isCard) {
                                         displayTitle = "Card";
                                         displaySubtitle = "Card";
                                         activeColor = const Color(0xFF8B5CF6);
-                                        bgLight = const Color(0xFFF5F3FF);
-                                        textColor = isSelected ? const Color(0xFF5B21B6) : const Color(0xFF1E293B);
-                                        subtitleColor = isSelected ? const Color(0xFF6D28D9) : const Color(0xFF64748B);
+                                        bgLight = const Color(0xFF8B5CF6).withOpacity(0.15);
+                                        textColor = isSelected ? const Color(0xFF8B5CF6) : GlobalAppColor.DarkTextColorCode;
+                                        subtitleColor = isSelected ? const Color(0xFF8B5CF6).withOpacity(0.8) : GlobalAppColor.LightTextColorCode;
                                         iconWidget = Icon(
                                           Icons.credit_card_outlined,
                                           size: 20,
-                                          color: isSelected ? const Color(0xFF8B5CF6) : const Color(0xFF64748B),
+                                          color: isSelected ? const Color(0xFF8B5CF6) : GlobalAppColor.LightTextColorCode,
                                         );
                                       } else if (isSplit) {
                                         displayTitle = "Split Payment";
                                         displaySubtitle = "Split Payment";
                                         activeColor = const Color(0xFFEAB308);
-                                        bgLight = const Color(0xFFFEFCE8);
-                                        textColor = isSelected ? const Color(0xFF854D0E) : const Color(0xFF1E293B);
-                                        subtitleColor = isSelected ? const Color(0xFFA16207) : const Color(0xFF64748B);
+                                        bgLight = const Color(0xFFEAB308).withOpacity(0.15);
+                                        textColor = isSelected ? const Color(0xFFEAB308) : GlobalAppColor.DarkTextColorCode;
+                                        subtitleColor = isSelected ? const Color(0xFFEAB308).withOpacity(0.8) : GlobalAppColor.LightTextColorCode;
                                         // Beautiful custom division symbol widget (÷)
                                         iconWidget = Column(
                                           mainAxisSize: MainAxisSize.min,
@@ -1196,7 +1205,7 @@ class HomeWidget {
                                               width: 3.5,
                                               height: 3.5,
                                               decoration: BoxDecoration(
-                                                color: isSelected ? activeColor : const Color(0xFF64748B),
+                                                color: isSelected ? activeColor : GlobalAppColor.LightTextColorCode,
                                                 shape: BoxShape.circle,
                                               ),
                                             ),
@@ -1204,14 +1213,14 @@ class HomeWidget {
                                             Container(
                                               width: 10,
                                               height: 1.5,
-                                              color: isSelected ? activeColor : const Color(0xFF64748B),
+                                              color: isSelected ? activeColor : GlobalAppColor.LightTextColorCode,
                                             ),
                                             const SizedBox(height: 2),
                                             Container(
                                               width: 3.5,
                                               height: 3.5,
                                               decoration: BoxDecoration(
-                                                color: isSelected ? activeColor : const Color(0xFF64748B),
+                                                color: isSelected ? activeColor : GlobalAppColor.LightTextColorCode,
                                                 shape: BoxShape.circle,
                                               ),
                                             ),
@@ -1221,25 +1230,25 @@ class HomeWidget {
                                         displayTitle = "MADA";
                                         displaySubtitle = "بطاقة خصم";
                                         activeColor = const Color(0xFF06B6D4);
-                                        bgLight = const Color(0xFFECFEFF);
-                                        textColor = isSelected ? const Color(0xFF164E63) : const Color(0xFF1E293B);
-                                        subtitleColor = isSelected ? const Color(0xFF155E75) : const Color(0xFF64748B);
+                                        bgLight = const Color(0xFF06B6D4).withOpacity(0.15);
+                                        textColor = isSelected ? const Color(0xFF06B6D4) : GlobalAppColor.DarkTextColorCode;
+                                        subtitleColor = isSelected ? const Color(0xFF06B6D4).withOpacity(0.8) : GlobalAppColor.LightTextColorCode;
                                         iconWidget = Icon(
                                           Icons.credit_card_outlined,
                                           size: 20,
-                                          color: isSelected ? const Color(0xFF06B6D4) : const Color(0xFF64748B),
+                                          color: isSelected ? const Color(0xFF06B6D4) : GlobalAppColor.LightTextColorCode,
                                         );
                                       } else if (isMulti) {
                                         displayTitle = "MULTI";
                                         displaySubtitle = "Multi Payment";
                                         activeColor = const Color(0xFF3B82F6);
-                                        bgLight = const Color(0xFFEFF6FF);
-                                        textColor = isSelected ? const Color(0xFF1E3A8A) : const Color(0xFF1E293B);
-                                        subtitleColor = isSelected ? const Color(0xFF1D4ED8) : const Color(0xFF64748B);
+                                        bgLight = const Color(0xFF3B82F6).withOpacity(0.15);
+                                        textColor = isSelected ? const Color(0xFF3B82F6) : GlobalAppColor.DarkTextColorCode;
+                                        subtitleColor = isSelected ? const Color(0xFF3B82F6).withOpacity(0.8) : GlobalAppColor.LightTextColorCode;
                                         iconWidget = Icon(
                                           Icons.local_atm_outlined,
                                           size: 20,
-                                          color: isSelected ? const Color(0xFF3B82F6) : const Color(0xFF64748B),
+                                          color: isSelected ? const Color(0xFF3B82F6) : GlobalAppColor.LightTextColorCode,
                                         );
                                       }
 
@@ -1262,10 +1271,10 @@ class HomeWidget {
                                         child: AnimatedContainer(
                                           duration: const Duration(milliseconds: 150),
                                           decoration: BoxDecoration(
-                                            color: isSelected ? bgLight : const Color(0xFFF8FAFC),
+                                            color: isSelected ? bgLight : GlobalAppColor.BodyBgColorCode,
                                             borderRadius: BorderRadius.circular(12),
                                             border: Border.all(
-                                              color: isSelected ? activeColor : const Color(0xFFE2E8F0),
+                                              color: isSelected ? activeColor : GlobalAppColor.LightTextColorCode.withOpacity(0.15),
                                               width: isSelected ? 1.5 : 1.0,
                                             ),
                                           ),
@@ -1497,10 +1506,10 @@ class HomeWidget {
                 // Bottom fixed buttons (Pay + Pay & Mark Completed)
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
+                  decoration: BoxDecoration(
+                    color: GlobalAppColor.WhiteColorCode,
                     border: Border(
-                      top: BorderSide(color: Color(0xFFF1F5F9), width: 1.5),
+                      top: BorderSide(color: GlobalAppColor.LightTextColorCode.withOpacity(0.15), width: 1.5),
                     ),
                   ),
                   child: Builder(
@@ -1921,9 +1930,9 @@ class HomeWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: GlobalAppColor.WhiteColorCode,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFF1F5F9), width: 1.5),
+        border: Border.all(color: GlobalAppColor.LightTextColorCode.withOpacity(0.15), width: 1.5),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.015),
@@ -1952,8 +1961,8 @@ class HomeWidget {
           _buildSummaryRow(
             label: "Items Total",
             amount: origSubtotal.toStringAsFixed(2),
-            labelColor: const Color(0xFF64748B),
-            amountColor: const Color(0xFF334155),
+            labelColor: GlobalAppColor.LightTextColorCode,
+            amountColor: GlobalAppColor.DarkTextColorCode,
           ),
           const SizedBox(height: 12),
 
@@ -2055,8 +2064,8 @@ class HomeWidget {
           _buildSummaryRow(
             label: "Total (after discount)",
             amount: subtotalAfterDiscount.toStringAsFixed(2),
-            labelColor: const Color(0xFF64748B),
-            amountColor: const Color(0xFF334155),
+            labelColor: GlobalAppColor.LightTextColorCode,
+            amountColor: GlobalAppColor.DarkTextColorCode,
           ),
 
           // Divider
@@ -2066,7 +2075,7 @@ class HomeWidget {
           _buildSummaryRow(
             label: "Grand Total",
             amount: payableTotal.toStringAsFixed(2),
-            labelColor: const Color(0xFF1E293B),
+            labelColor: GlobalAppColor.DarkTextColorCode,
             amountColor: const Color(0xFFD01B69),
             fontWeight: FontWeight.w800,
             fontSize: 16,
@@ -2093,9 +2102,9 @@ class HomeWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: GlobalAppColor.WhiteColorCode,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFF1F5F9), width: 1.5),
+        border: Border.all(color: GlobalAppColor.LightTextColorCode.withOpacity(0.15), width: 1.5),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.015),
@@ -2117,7 +2126,7 @@ class HomeWidget {
                 style: CommonWidget.CommonTitleTextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w800,
-                  color: const Color(0xFF475569),
+                  color: GlobalAppColor.DarkTextColorCode,
                   letterSpacing: 0.5,
                 ),
               ),
@@ -2131,10 +2140,10 @@ class HomeWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: isLocked ? const Color(0xFFF1F5F9) : const Color(0xFFECFDF5),
+                    color: isLocked ? GlobalAppColor.BodyBgColorCode : const Color(0xFFECFDF5),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: isLocked ? const Color(0xFFE2E8F0) : const Color(0xFFA7F3D0),
+                      color: isLocked ? GlobalAppColor.LightTextColorCode.withOpacity(0.15) : const Color(0xFFA7F3D0),
                       width: 1,
                     ),
                   ),
@@ -2144,7 +2153,7 @@ class HomeWidget {
                       Icon(
                         isLocked ? Icons.lock_outline : Icons.lock_open_outlined,
                         size: 12,
-                        color: isLocked ? const Color(0xFF64748B) : const Color(0xFF10B981),
+                        color: isLocked ? GlobalAppColor.LightTextColorCode : const Color(0xFF10B981),
                       ),
                       const SizedBox(width: 4),
                       Text(
@@ -2152,7 +2161,7 @@ class HomeWidget {
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
-                          color: isLocked ? const Color(0xFF64748B) : const Color(0xFF10B981),
+                          color: isLocked ? GlobalAppColor.LightTextColorCode : const Color(0xFF10B981),
                         ),
                       ),
                     ],
@@ -2167,12 +2176,11 @@ class HomeWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Central Pink Input Container
               Expanded(
                 child: Container(
                   height: 48,
                   decoration: BoxDecoration(
-                    color: isLocked ? const Color(0xFFF8FAFC) : Colors.white,
+                    color: isLocked ? GlobalAppColor.BodyBgColorCode : GlobalAppColor.WhiteColorCode,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: const Color(0xFFD01B69),
@@ -2184,10 +2192,10 @@ class HomeWidget {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       if (isLocked) ...[
-                        const Icon(
+                        Icon(
                           Icons.lock_outline,
                           size: 16,
-                          color: Color(0xFF94A3B8),
+                          color: GlobalAppColor.LightTextColorCode,
                         ),
                         const SizedBox(width: 6),
                       ],
@@ -2204,13 +2212,13 @@ class HomeWidget {
                             fontWeight: FontWeight.w800,
                             color: const Color(0xFFD01B69),
                           ),
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             border: InputBorder.none,
                             isDense: true,
                             contentPadding: EdgeInsets.zero,
                             hintText: 'Enter %',
                             hintStyle: TextStyle(
-                              color: Color(0xFF94A3B8),
+                              color: GlobalAppColor.LightTextColorCode,
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
                             ),
@@ -2227,12 +2235,12 @@ class HomeWidget {
                         ),
                       ),
                       const SizedBox(width: 6),
-                      const Text(
+                      Text(
                         "%",
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
-                          color: Color(0xFF94A3B8),
+                          color: GlobalAppColor.LightTextColorCode,
                         ),
                       ),
                     ],
@@ -2247,18 +2255,18 @@ class HomeWidget {
                   height: 48,
                   child: OutlinedButton.icon(
                     style: OutlinedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: const Color(0xFF475569),
-                      side: const BorderSide(color: Color(0xFFE2E8F0), width: 1.5),
+                      backgroundColor: GlobalAppColor.WhiteColorCode,
+                      foregroundColor: GlobalAppColor.DarkTextColorCode,
+                      side: BorderSide(color: GlobalAppColor.LightTextColorCode.withOpacity(0.15), width: 1.5),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                     ),
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.lock_open_outlined,
                       size: 16,
-                      color: Color(0xFF64748B),
+                      color: GlobalAppColor.LightTextColorCode,
                     ),
                     label: const Text(
                       "Unlock",
@@ -2324,7 +2332,7 @@ class HomeWidget {
               Icon(
                 isLocked ? Icons.lock_outline : Icons.lock_open_outlined,
                 size: 12,
-                color: isLocked ? const Color(0xFF94A3B8) : const Color(0xFF10B981),
+                color: isLocked ? GlobalAppColor.LightTextColorCode : const Color(0xFF10B981),
               ),
               const SizedBox(width: 4),
               Text(
@@ -2334,7 +2342,7 @@ class HomeWidget {
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
-                  color: isLocked ? const Color(0xFF94A3B8) : const Color(0xFF10B981),
+                  color: isLocked ? GlobalAppColor.LightTextColorCode : const Color(0xFF10B981),
                 ),
               ),
             ],
@@ -2632,7 +2640,7 @@ class HomeWidget {
             height: panelHeight,
             child: Material(
               elevation: 24,
-              color: Colors.white,
+              color: GlobalAppColor.WhiteColorCode,
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(20),
                 topRight: Radius.circular(20),
@@ -2669,7 +2677,7 @@ class HomeWidget {
             width: panelWidth,
             child: Material(
               elevation: 16,
-              color: Colors.white,
+              color: GlobalAppColor.WhiteColorCode,
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(5),
                 bottomLeft: Radius.circular(5),
@@ -5441,12 +5449,12 @@ class HomeWidget {
                   vertical: 10,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: GlobalAppColor.WhiteColorCode,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
                     color: isSelected
                         ? const Color(0xFF5C5C8A)
-                        : Colors.grey.shade300,
+                        : GlobalAppColor.LightTextColorCode.withOpacity(0.2),
                     width: isSelected ? 2 : 1,
                   ),
                 ),
@@ -5659,9 +5667,9 @@ class HomeWidget {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: GlobalAppColor.WhiteColorCode,
                     borderRadius: BorderRadius.circular(6),
-                    border: Border.all(color: Colors.grey.shade200),
+                    border: Border.all(color: GlobalAppColor.LightTextColorCode.withOpacity(0.15)),
                   ),
                   child: Column(
                     children: [
@@ -7386,6 +7394,7 @@ class _BillPrintDialogState extends State<_BillPrintDialog>
     return ScaleTransition(
       scale: _scaleAnimation,
       child: AlertDialog(
+        backgroundColor: GlobalAppColor.WhiteColorCode,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
           children: [
@@ -7409,18 +7418,18 @@ class _BillPrintDialogState extends State<_BillPrintDialog>
               ),
             ),
             const SizedBox(width: 14),
-            const Expanded(
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Print Customer Bill', style: TextStyle(fontSize: 18)),
-                  SizedBox(height: 2),
+                  Text('Print Customer Bill', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: GlobalAppColor.DarkTextColorCode)),
+                  const SizedBox(height: 2),
                   Text(
                     'Cashier Receipt',
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.normal,
-                      color: Colors.grey,
+                      color: GlobalAppColor.LightTextColorCode,
                     ),
                   ),
                 ],
@@ -7437,9 +7446,9 @@ class _BillPrintDialogState extends State<_BillPrintDialog>
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: Colors.grey[100],
+                  color: GlobalAppColor.BodyBgColorCode,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey[300]!),
+                  border: Border.all(color: GlobalAppColor.LightTextColorCode.withOpacity(0.15)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -7447,15 +7456,16 @@ class _BillPrintDialogState extends State<_BillPrintDialog>
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
+                        Text(
                           'Order Number',
-                          style: TextStyle(fontSize: 12, color: Colors.grey),
+                          style: TextStyle(fontSize: 12, color: GlobalAppColor.LightTextColorCode),
                         ),
                         Text(
                           '#${widget.order.orderNo}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
+                            color: GlobalAppColor.DarkTextColorCode,
                           ),
                         ),
                       ],
@@ -7464,15 +7474,16 @@ class _BillPrintDialogState extends State<_BillPrintDialog>
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
+                        Text(
                           'Table',
-                          style: TextStyle(fontSize: 12, color: Colors.grey),
+                          style: TextStyle(fontSize: 12, color: GlobalAppColor.LightTextColorCode),
                         ),
                         Text(
                           widget.order.tableName,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
+                            color: GlobalAppColor.DarkTextColorCode,
                           ),
                         ),
                       ],
@@ -7485,10 +7496,10 @@ class _BillPrintDialogState extends State<_BillPrintDialog>
                 children: [
                   Icon(Icons.info_outline, size: 18, color: Colors.blue[700]),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'This will print a customer bill to your cashier printer.',
-                      style: TextStyle(fontSize: 13, height: 1.4),
+                      style: TextStyle(fontSize: 13, height: 1.4, color: GlobalAppColor.DarkTextColorCode),
                     ),
                   ),
                 ],
@@ -7502,7 +7513,7 @@ class _BillPrintDialogState extends State<_BillPrintDialog>
             style: TextButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             ),
-            child: const Text('Cancel', style: TextStyle(fontSize: 15)),
+            child: Text('Cancel', style: TextStyle(fontSize: 15, color: GlobalAppColor.LightTextColorCode)),
           ),
           ElevatedButton.icon(
             onPressed: _isPrinting ? null : () => _printBill(context),
@@ -7798,6 +7809,7 @@ class _KdsPrintDialogState extends State<_KdsPrintDialog>
     return ScaleTransition(
       scale: _scaleAnimation,
       child: AlertDialog(
+        backgroundColor: GlobalAppColor.WhiteColorCode,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
           children: [
@@ -7821,18 +7833,18 @@ class _KdsPrintDialogState extends State<_KdsPrintDialog>
               ),
             ),
             const SizedBox(width: 14),
-            const Expanded(
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Print to KDS', style: TextStyle(fontSize: 18)),
-                  SizedBox(height: 2),
+                  Text('Print to KDS', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: GlobalAppColor.DarkTextColorCode)),
+                  const SizedBox(height: 2),
                   Text(
                     'Kitchen Display System',
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.normal,
-                      color: Colors.grey,
+                      color: GlobalAppColor.LightTextColorCode,
                     ),
                   ),
                 ],
@@ -7849,9 +7861,9 @@ class _KdsPrintDialogState extends State<_KdsPrintDialog>
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: Colors.grey[100],
+                  color: GlobalAppColor.BodyBgColorCode,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey[300]!),
+                  border: Border.all(color: GlobalAppColor.LightTextColorCode.withOpacity(0.15)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -7859,15 +7871,16 @@ class _KdsPrintDialogState extends State<_KdsPrintDialog>
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
+                        Text(
                           'Order Number',
-                          style: TextStyle(fontSize: 12, color: Colors.grey),
+                          style: TextStyle(fontSize: 12, color: GlobalAppColor.LightTextColorCode),
                         ),
                         Text(
                           '#${widget.order.orderNo}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
+                            color: GlobalAppColor.DarkTextColorCode,
                           ),
                         ),
                       ],
@@ -7876,15 +7889,16 @@ class _KdsPrintDialogState extends State<_KdsPrintDialog>
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
+                        Text(
                           'Table',
-                          style: TextStyle(fontSize: 12, color: Colors.grey),
+                          style: TextStyle(fontSize: 12, color: GlobalAppColor.LightTextColorCode),
                         ),
                         Text(
                           widget.order.tableName,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
+                            color: GlobalAppColor.DarkTextColorCode,
                           ),
                         ),
                       ],
@@ -7893,12 +7907,12 @@ class _KdsPrintDialogState extends State<_KdsPrintDialog>
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
+              Text(
                 'Print Format',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: Colors.black87,
+                  color: GlobalAppColor.DarkTextColorCode,
                 ),
               ),
               const SizedBox(height: 10),
@@ -7918,12 +7932,12 @@ class _KdsPrintDialogState extends State<_KdsPrintDialog>
                           )
                         : null,
                     color: _selectedFormat != 'normal'
-                        ? Colors.grey[100]
+                        ? GlobalAppColor.BodyBgColorCode
                         : null,
                     border: Border.all(
                       color: _selectedFormat == 'normal'
                           ? const Color(0xFFF59E0B)
-                          : Colors.grey[300]!,
+                          : GlobalAppColor.LightTextColorCode.withOpacity(0.15),
                       width: _selectedFormat == 'normal' ? 2.5 : 1,
                     ),
                     borderRadius: BorderRadius.circular(10),
@@ -7935,7 +7949,7 @@ class _KdsPrintDialogState extends State<_KdsPrintDialog>
                         size: 24,
                         color: _selectedFormat == 'normal'
                             ? const Color(0xFFF59E0B)
-                            : Colors.grey[600],
+                            : GlobalAppColor.LightTextColorCode,
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -7951,7 +7965,7 @@ class _KdsPrintDialogState extends State<_KdsPrintDialog>
                                     : FontWeight.w600,
                                 color: _selectedFormat == 'normal'
                                     ? const Color(0xFFF59E0B)
-                                    : Colors.grey[800],
+                                    : GlobalAppColor.DarkTextColorCode,
                               ),
                             ),
                             const SizedBox(height: 2),
@@ -7959,7 +7973,7 @@ class _KdsPrintDialogState extends State<_KdsPrintDialog>
                               'Normal KDS format for cooking',
                               style: TextStyle(
                                 fontSize: 12,
-                                color: Colors.grey[600],
+                                color: GlobalAppColor.LightTextColorCode,
                               ),
                             ),
                           ],
@@ -7997,11 +8011,11 @@ class _KdsPrintDialogState extends State<_KdsPrintDialog>
                             ],
                           )
                         : null,
-                    color: _selectedFormat != 'bill' ? Colors.grey[100] : null,
+                    color: _selectedFormat != 'bill' ? GlobalAppColor.BodyBgColorCode : null,
                     border: Border.all(
                       color: _selectedFormat == 'bill'
                           ? const Color(0xFFF59E0B)
-                          : Colors.grey[300]!,
+                          : GlobalAppColor.LightTextColorCode.withOpacity(0.15),
                       width: _selectedFormat == 'bill' ? 2.5 : 1,
                     ),
                     borderRadius: BorderRadius.circular(10),
@@ -8013,7 +8027,7 @@ class _KdsPrintDialogState extends State<_KdsPrintDialog>
                         size: 24,
                         color: _selectedFormat == 'bill'
                             ? const Color(0xFFF59E0B)
-                            : Colors.grey[600],
+                            : GlobalAppColor.LightTextColorCode,
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -8029,7 +8043,7 @@ class _KdsPrintDialogState extends State<_KdsPrintDialog>
                                     : FontWeight.w600,
                                 color: _selectedFormat == 'bill'
                                     ? const Color(0xFFF59E0B)
-                                    : Colors.grey[800],
+                                    : GlobalAppColor.DarkTextColorCode,
                               ),
                             ),
                             const SizedBox(height: 2),
@@ -8037,7 +8051,7 @@ class _KdsPrintDialogState extends State<_KdsPrintDialog>
                               'Full bill with prices to KDS',
                               style: TextStyle(
                                 fontSize: 12,
-                                color: Colors.grey[600],
+                                color: GlobalAppColor.LightTextColorCode,
                               ),
                             ),
                           ],
@@ -8069,7 +8083,7 @@ class _KdsPrintDialogState extends State<_KdsPrintDialog>
             style: TextButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             ),
-            child: const Text('Cancel', style: TextStyle(fontSize: 15)),
+            child: Text('Cancel', style: TextStyle(fontSize: 15, color: GlobalAppColor.LightTextColorCode)),
           ),
           ElevatedButton.icon(
             onPressed: _isPrinting ? null : () => _printToKDS(context),
@@ -8448,9 +8462,9 @@ class _MultiPaymentEntryRowState extends State<_MultiPaymentEntryRow> {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: GlobalAppColor.WhiteColorCode,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        border: Border.all(color: GlobalAppColor.LightTextColorCode.withOpacity(0.15)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.02),
@@ -9298,7 +9312,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                   style: TextStyle(
                     fontSize: 14.5,
                     fontWeight: FontWeight.w700,
-                    color: isCancelled ? Colors.grey.shade400 : const Color(0xFF111827),
+                    color: isCancelled ? Colors.grey.shade400 : GlobalAppColor.DarkTextColorCode,
                     decoration: isCancelled ? TextDecoration.lineThrough : TextDecoration.none,
                   ),
                 ),
@@ -9948,7 +9962,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
           children: [
             Text(label, style: TextStyle(fontSize: 8.5, color: GlobalAppColor.DarkTextColorCode.withOpacity(0.6)), overflow: TextOverflow.ellipsis),
             const SizedBox(height: 2),
-            Text(value, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: valueColor ?? const Color(0xFF374151)), overflow: TextOverflow.ellipsis),
+            Text(value, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: valueColor ?? GlobalAppColor.DarkTextColorCode), overflow: TextOverflow.ellipsis),
           ],
         ),
       ),

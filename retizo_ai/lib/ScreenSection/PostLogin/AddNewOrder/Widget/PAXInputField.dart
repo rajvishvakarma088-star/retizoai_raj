@@ -42,7 +42,7 @@ class _PAXInputFieldState extends State<PAXInputField> {
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 8),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: GlobalAppColor.WhiteColorCode,
             borderRadius: BorderRadius.circular(5),
             border: Border.all(
               color: GlobalAppColor.DarkTextColorCode.withOpacity(.1),

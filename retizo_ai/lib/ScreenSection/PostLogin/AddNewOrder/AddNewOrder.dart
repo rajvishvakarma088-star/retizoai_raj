@@ -56,7 +56,7 @@ class AddNewOrderState extends State<AddNewOrder>
               },
               child: Scaffold(
                 resizeToAvoidBottomInset: false,
-                backgroundColor: const Color(0xFFE5E7EB),
+                backgroundColor: GlobalAppColor.BodyBgColorCode,
                 body: SafeArea(
                   top: false,
                   // AppBar ke liye
@@ -75,7 +75,7 @@ class AddNewOrderState extends State<AddNewOrder>
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: GlobalAppColor.WhiteColorCode,
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.black.withOpacity(0.04),
@@ -97,13 +97,13 @@ class AddNewOrderState extends State<AddNewOrder>
                                     child: Container(
                                       padding: const EdgeInsets.all(8),
                                       decoration: BoxDecoration(
-                                        color: const Color(0xFFF3F4F6),
+                                        color: GlobalAppColor.WhiteColorCode,
                                         borderRadius: BorderRadius.circular(8),
                                       ),
-                                      child: const Icon(
+                                      child: Icon(
                                         Icons.arrow_back_ios_new_rounded,
                                         size: 18,
-                                        color: Color(0xFF374151),
+                                        color: GlobalAppColor.DarkTextColorCode,
                                       ),
                                     ),
                                   ),
@@ -113,7 +113,7 @@ class AddNewOrderState extends State<AddNewOrder>
                                     style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
-                                      color: const Color(0xFF1F2937),
+                                      color: GlobalAppColor.DarkTextColorCode,
                                     ),
                                   ),
                                   if (AddOrderCtrl.isAddOrderLoader) ...[
@@ -169,7 +169,7 @@ class AddNewOrderState extends State<AddNewOrder>
                                           height: screenHeight * 0.82,
                                           child: Material(
                                             elevation: 16,
-                                            color: Colors.white,
+                                            color: GlobalAppColor.WhiteColorCode,
                                             borderRadius: const BorderRadius.only(
                                               topLeft: Radius.circular(16),
                                               topRight: Radius.circular(16),
@@ -249,7 +249,7 @@ class AddNewOrderState extends State<AddNewOrder>
   void _showAllCategoriesBottomSheet(BuildContext context, AddOrderProvider AddOrderCtrl) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: GlobalAppColor.WhiteColorCode,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -405,7 +405,7 @@ class AddNewOrderState extends State<AddNewOrder>
           child: Container(
             width: double.infinity,
             decoration: BoxDecoration(
-              color: const Color(0xFFF3F4F6),
+              color: GlobalAppColor.BodyBgColorCode,
               borderRadius: BorderRadius.circular(AppBorderRadius.sm),
             ),
             child: Padding(
@@ -438,7 +438,7 @@ class AddNewOrderState extends State<AddNewOrder>
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFE5E7EB),
+                                color: GlobalAppColor.LightTextColorCode.withOpacity(0.15),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Text(
@@ -463,10 +463,10 @@ class AddNewOrderState extends State<AddNewOrder>
                                   }
                                   return "${list.length}";
                                 })(),
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
-                                  color: Color(0xFF4B5563),
+                                  color: GlobalAppColor.LightTextColorCode,
                                 ),
                               ),
                             ),
@@ -598,7 +598,7 @@ class AddNewOrderState extends State<AddNewOrder>
                             vertical: 5,
                           ),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFE5E7EB),
+                            color: GlobalAppColor.LightTextColorCode.withOpacity(0.15),
                             borderRadius: BorderRadius.circular(
                               AppBorderRadius.sm,
                             ),
@@ -609,6 +609,7 @@ class AddNewOrderState extends State<AddNewOrder>
                                 : '0',
                             style: CommonWidget.CommonTitleTextStyle(
                               fontWeight: FontWeight.w400,
+                              color: GlobalAppColor.LightTextColorCode,
                             ),
                           ),
                         ),

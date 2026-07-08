@@ -879,10 +879,10 @@ class HomeScreenState extends State<HomeScreen>
             padding: const EdgeInsets.all(12),
             width: 140,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: GlobalAppColor.WhiteColorCode,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: const Color(0xFFE5E7EB),
+                color: GlobalAppColor.LightTextColorCode.withOpacity(0.15),
                 width: 1.0,
               ),
               boxShadow: [
@@ -914,19 +914,19 @@ class HomeScreenState extends State<HomeScreen>
                   const SizedBox(height: 12),
                   Text(
                     count.toString(),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF111827),
+                      color: GlobalAppColor.DarkTextColorCode,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     label,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
-                      color: Color(0xFF6B7280),
+                      color: GlobalAppColor.LightTextColorCode,
                     ),
                   ),
                 ],
@@ -944,7 +944,7 @@ class HomeScreenState extends State<HomeScreen>
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor: GlobalAppColor.WhiteColorCode,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
@@ -972,27 +972,27 @@ class HomeScreenState extends State<HomeScreen>
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
+                      Text(
                         "Filters",
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF111827),
+                          color: GlobalAppColor.DarkTextColorCode,
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.close),
+                        icon: Icon(Icons.close, color: GlobalAppColor.LightTextColorCode),
                         onPressed: () => Navigator.of(context).pop(),
                       ),
                     ],
                   ),
                   const SizedBox(height: 12),
-                  const Text(
+                  Text(
                     "Order Status",
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF4B5563),
+                      color: GlobalAppColor.LightTextColorCode,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -1018,17 +1018,17 @@ class HomeScreenState extends State<HomeScreen>
                           duration: const Duration(milliseconds: 150),
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
-                            color: isSel ? GlobalAppColor.ButtonColor : Colors.white,
+                            color: isSel ? GlobalAppColor.ButtonColor : GlobalAppColor.WhiteColorCode,
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
-                              color: isSel ? GlobalAppColor.ButtonColor : const Color(0xFFD1D5DB),
+                              color: isSel ? GlobalAppColor.ButtonColor : GlobalAppColor.LightTextColorCode.withOpacity(0.3),
                               width: 1.5,
                             ),
                           ),
                           child: Text(
                             label,
                             style: TextStyle(
-                              color: isSel ? Colors.white : const Color(0xFF374151),
+                              color: isSel ? Colors.white : GlobalAppColor.DarkTextColorCode,
                               fontWeight: FontWeight.w600,
                               fontSize: 13,
                             ),
@@ -1038,12 +1038,12 @@ class HomeScreenState extends State<HomeScreen>
                     }).toList(),
                   ),
                   const SizedBox(height: 16),
-                  const Text(
+                  Text(
                     "Priority",
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF4B5563),
+                      color: GlobalAppColor.LightTextColorCode,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -1067,17 +1067,17 @@ class HomeScreenState extends State<HomeScreen>
                           duration: const Duration(milliseconds: 150),
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
-                            color: isSel ? GlobalAppColor.ButtonColor : Colors.white,
+                            color: isSel ? GlobalAppColor.ButtonColor : GlobalAppColor.WhiteColorCode,
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
-                              color: isSel ? GlobalAppColor.ButtonColor : const Color(0xFFD1D5DB),
+                              color: isSel ? GlobalAppColor.ButtonColor : GlobalAppColor.LightTextColorCode.withOpacity(0.3),
                               width: 1.5,
                             ),
                           ),
                           child: Text(
                             p,
                             style: TextStyle(
-                              color: isSel ? Colors.white : const Color(0xFF374151),
+                              color: isSel ? Colors.white : GlobalAppColor.DarkTextColorCode,
                               fontWeight: FontWeight.w600,
                               fontSize: 13,
                             ),
