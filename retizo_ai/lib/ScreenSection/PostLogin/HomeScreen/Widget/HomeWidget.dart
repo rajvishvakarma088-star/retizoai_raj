@@ -1658,10 +1658,10 @@ class HomeWidget {
                               ),
                               Text(
                                 "﷼ $amtStr",
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.w800,
-                                  color: Color(0xFFD01B69),
+                                  color: GlobalAppColor.ButtonColor,
                                 ),
                               ),
                             ],
@@ -1674,8 +1674,8 @@ class HomeWidget {
                                 height: 48,
                                 child: ElevatedButton.icon(
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFFD01B69),
-                                    foregroundColor: Colors.white,
+                                    backgroundColor: GlobalAppColor.ButtonColor.withOpacity(0.12),
+                                    foregroundColor: GlobalAppColor.ButtonColor,
                                     elevation: 0,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(12),
@@ -1685,11 +1685,11 @@ class HomeWidget {
                                       ? const SizedBox.shrink()
                                       : const Icon(Icons.payments_outlined, size: 18),
                                   label: HomeCtrl.isPayBillPayLoading
-                                      ? const SizedBox(
+                                      ? SizedBox(
                                           width: 18,
                                           height: 18,
                                           child: CircularProgressIndicator(
-                                              color: Colors.white, strokeWidth: 2))
+                                              color: GlobalAppColor.ButtonColor, strokeWidth: 2))
                                       : Text(
                                           "Pay $amtStr",
                                           style: const TextStyle(
@@ -1717,7 +1717,7 @@ class HomeWidget {
                                 height: 48,
                                 child: ElevatedButton.icon(
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFF2563EB),
+                                    backgroundColor: GlobalAppColor.ButtonColor,
                                     foregroundColor: Colors.white,
                                     elevation: 0,
                                     shape: RoundedRectangleBorder(
@@ -2017,8 +2017,8 @@ class HomeWidget {
           _buildSummaryRow(
             label: "Net Amount",
             amount: netAmount.toStringAsFixed(2),
-            labelColor: const Color(0xFF2563EB),
-            amountColor: const Color(0xFF2563EB),
+            labelColor: GlobalAppColor.ButtonColor,
+            amountColor: GlobalAppColor.ButtonColor,
             fontWeight: FontWeight.w600,
           ),
           const SizedBox(height: 12),
@@ -2076,7 +2076,7 @@ class HomeWidget {
             label: "Grand Total",
             amount: payableTotal.toStringAsFixed(2),
             labelColor: GlobalAppColor.DarkTextColorCode,
-            amountColor: const Color(0xFFD01B69),
+            amountColor: GlobalAppColor.ButtonColor,
             fontWeight: FontWeight.w800,
             fontSize: 16,
           ),
@@ -2183,7 +2183,7 @@ class HomeWidget {
                     color: isLocked ? GlobalAppColor.BodyBgColorCode : GlobalAppColor.WhiteColorCode,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: const Color(0xFFD01B69),
+                      color: GlobalAppColor.ButtonColor,
                       width: 1.5,
                     ),
                   ),
@@ -2210,7 +2210,7 @@ class HomeWidget {
                           style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w800,
-                            color: const Color(0xFFD01B69),
+                            color: GlobalAppColor.ButtonColor,
                           ),
                           decoration: InputDecoration(
                             border: InputBorder.none,
@@ -6090,12 +6090,12 @@ class _CollapsibleTaxRowState extends State<_CollapsibleTaxRow> {
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text(
+                    Text(
                       "% Total Tax",
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
-                        color: Color(0xFF9333EA),
+                        color: GlobalAppColor.ButtonColor.withOpacity(0.85),
                       ),
                     ),
                     if (hasTaxMap) ...[
@@ -6103,10 +6103,10 @@ class _CollapsibleTaxRowState extends State<_CollapsibleTaxRow> {
                       AnimatedRotation(
                         turns: _expanded ? 0.5 : 0.0,
                         duration: const Duration(milliseconds: 200),
-                        child: const Icon(
+                        child: Icon(
                           Icons.keyboard_arrow_down,
                           size: 14,
-                          color: Color(0xFF9333EA),
+                          color: GlobalAppColor.ButtonColor.withOpacity(0.85),
                         ),
                       ),
                     ],
@@ -6114,10 +6114,10 @@ class _CollapsibleTaxRowState extends State<_CollapsibleTaxRow> {
                 ),
                 Text(
                   "﷼ ${widget.liveTotalTax.toStringAsFixed(2)}",
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF9333EA),
+                    color: GlobalAppColor.ButtonColor.withOpacity(0.85),
                   ),
                 ),
               ],
@@ -6136,7 +6136,7 @@ class _CollapsibleTaxRowState extends State<_CollapsibleTaxRow> {
                     .map((e) {
                   final val = (double.tryParse(e.value.toString()) ?? 0.0) * widget.scale;
                   final isVat = e.key.toUpperCase().contains("VAT");
-                  final color = isVat ? const Color(0xFF2563EB) : const Color(0xFF9333EA);
+                  final color = isVat ? GlobalAppColor.ButtonColor : GlobalAppColor.ButtonColor.withOpacity(0.8);
                   return Padding(
                     padding: const EdgeInsets.only(left: 12, bottom: 4),
                     child: Row(

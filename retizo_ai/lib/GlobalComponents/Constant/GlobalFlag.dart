@@ -1,7 +1,6 @@
 // ignore_for_file: file_names, non_constant_identifier_names, use_build_context_synchronously, deprecated_member_use, await_only_futures, unnecessary_null_comparison, unused_local_variable
 //-✅---------------------------------------------------------------------✅-//
 class GlobalFlag {
-  static String AppDeveloperCompany = 'Developed by AMB Ventures.';
   static String GoogleFonts = 'RoobertPRO';
   static String Close = 'Close';
   static String Response = '✅============API Response: ';
