@@ -1,5 +1,6 @@
 // ignore_for_file: file_names, non_constant_identifier_names, use_build_context_synchronously, deprecated_member_use, await_only_futures, unnecessary_null_comparison, unused_local_variable, invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member
 import 'package:culai/HTTPRepository/Packages.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 
 //-✅---------------------------------------------------------------------✅-//
@@ -521,6 +522,7 @@ class AddNewOrderState extends State<AddNewOrder>
                           const SizedBox(width: 6),
                           InkWell(
                             onTap: () async {
+                              HapticFeedback.lightImpact();
                               if (AddOrderCtrl.selectedItems.isEmpty) {
                                 PopupAlertHelper.showPopupFailedAlert(
                                   context,

@@ -2184,6 +2184,7 @@ class AddOrderWidget {
                           onPressed: AddOrderCtrl.isBookingLoader
                               ? null
                               : () async {
+                                  HapticFeedback.lightImpact();
                                   bool isConnected = await GlobalFunction()
                                       .checkInternetConnection(context);
                                   if (isConnected) {
@@ -2208,6 +2209,7 @@ class AddOrderWidget {
                           onPressed: AddOrderCtrl.isBookingLoader
                               ? null
                               : () async {
+                                  HapticFeedback.lightImpact();
                                   bool isConnected = await GlobalFunction()
                                       .checkInternetConnection(context);
                                   if (isConnected) {

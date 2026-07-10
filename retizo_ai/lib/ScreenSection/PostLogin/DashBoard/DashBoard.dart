@@ -1,6 +1,7 @@
 // ignore_for_file: file_names, non_constant_identifier_names, use_build_context_synchronously, deprecated_member_use, await_only_futures, unnecessary_null_comparison, unused_local_variable, invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member
 import 'dart:async';
 import 'package:culai/HTTPRepository/Packages.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 
 //-✅---------------------------------------------------------------------✅-//
@@ -256,6 +257,7 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
                 offset: const Offset(0, -8), // Position the button slightly upwards
                 child: GestureDetector(
                   onTap: () {
+                    HapticFeedback.lightImpact();
                     CommonWidget().navigateToScreen(context, const AddNewOrder()).then((_) {
                       if (_homeCtrl.pendingRefresh) {
                         _homeCtrl.setPendingRefresh(false);
@@ -320,7 +322,10 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
   }) {
     return Expanded(
       child: InkWell(
-        onTap: onTap,
+        onTap: () {
+          HapticFeedback.lightImpact();
+          onTap();
+        },
         borderRadius: BorderRadius.circular(32),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
