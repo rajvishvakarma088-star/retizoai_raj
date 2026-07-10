@@ -349,27 +349,63 @@ class AddOrderWidget {
                                   ),
                                   decoration: BoxDecoration(
                                     color: GlobalAppColor.WhiteColorCode,
-                                    borderRadius: BorderRadius.circular(5),
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                      color: Colors.grey.shade200,
+                                      width: 0.8,
+                                    ),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.black.withOpacity(0.04),
-                                        blurRadius: 4,
-                                        offset: const Offset(0, 2),
+                                        color: Colors.black.withOpacity(0.03),
+                                        blurRadius: 6,
+                                        offset: const Offset(0, 3),
                                       ),
                                     ],
                                   ),
                                   child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 0,
-                                      vertical: 5,
-                                    ),
+                                    padding: const EdgeInsets.all(6),
                                     child: Column(
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceBetween,
-                                      // space evenly distribute
                                       crossAxisAlignment:
                                           CrossAxisAlignment.center,
                                       children: <Widget>[
+                                        // Product Image / Icon Banner
+                                        Builder(
+                                          builder: (context) {
+                                            final String imgVal = item.mProductIcon ?? '';
+                                            final String imageUrl = imgVal.isNotEmpty
+                                                ? (imgVal.startsWith('http')
+                                                    ? imgVal
+                                                    : '${GlobalServiceURL.ImageBaseUrl}$imgVal')
+                                                : '';
+                                            return Container(
+                                              height: 75,
+                                              width: double.infinity,
+                                              margin: const EdgeInsets.only(bottom: 6),
+                                              decoration: BoxDecoration(
+                                                color: Colors.grey.shade50,
+                                                borderRadius: BorderRadius.circular(8),
+                                              ),
+                                              child: ClipRRect(
+                                                borderRadius: BorderRadius.circular(8),
+                                                child: imageUrl.isNotEmpty
+                                                    ? CommonWidget().RectangleCachedImage(
+                                                        context: context,
+                                                        imageUrl: imageUrl,
+                                                        width: double.infinity,
+                                                        height: 75,
+                                                        decoration: const BoxDecoration(),
+                                                      )
+                                                    : Icon(
+                                                        Symbols.restaurant,
+                                                        color: Colors.grey.shade300,
+                                                        size: 26,
+                                                      ),
+                                              ),
+                                            );
+                                          },
+                                        ),
                                         // Product Name
                                         Flexible(
                                           child: Align(
@@ -377,12 +413,15 @@ class AddOrderWidget {
                                             child: Text(
                                               item.mPName ?? 'N/A',
                                               textAlign: TextAlign.center,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
                                               style:
                                                   CommonWidget.CommonTitleTextStyle(
                                                     color: GlobalAppColor.DarkTextColorCode,
-                                                    fontWeight: FontWeight.w500,
+                                                    fontWeight: FontWeight.w600,
+                                                    fontSize: 13,
                                                     height: 1.2,
-                                                    letterSpacing: 0.5,
+                                                    letterSpacing: 0.3,
                                                   ),
                                             ),
                                           ),
@@ -394,16 +433,18 @@ class AddOrderWidget {
                                             child: Text(
                                               item.mPArbName ?? 'N/A',
                                               textAlign: TextAlign.center,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
                                               style:
                                                   CommonWidget.CommonTitleTextStyle(
-                                                    fontSize: 13,
+                                                    fontSize: 11,
                                                     fontWeight: FontWeight.w300,
-                                                    color: GlobalAppColor.DarkTextColorCode.withOpacity(0.7),
+                                                    color: GlobalAppColor.DarkTextColorCode.withOpacity(0.6),
                                                   ),
                                             ),
                                           ),
                                         ),
-                                        SizedBox(height: 3),
+                                        const SizedBox(height: 3),
                                         // Price Row
                                         Row(
                                           mainAxisAlignment:
@@ -413,17 +454,18 @@ class AddOrderWidget {
                                           children: <Widget>[
                                             Icon(
                                               Symbols.credit_card,
-                                              size: 16,
+                                              size: 13,
                                               color: GlobalAppColor
-                                                  .DarkTextColorCode.withOpacity(.7),
+                                                  .DarkTextColorCode.withOpacity(.6),
                                             ),
-                                            const SizedBox(width: 5),
+                                            const SizedBox(width: 4),
                                             Flexible(
                                               child: Text(
                                                 item.price ?? '0.0',
                                                 textAlign: TextAlign.center,
                                                 style: CommonWidget.CommonTitleTextStyle(
-                                                  fontWeight: FontWeight.w500,
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w600,
                                                   color: GlobalAppColor
                                                       .DarkTextColorCode.withOpacity(.7),
                                                 ),
@@ -471,7 +513,7 @@ class AddOrderWidget {
                                                 child: Text(
                                                   badgeText,
                                                   style: TextStyle(
-                                                    fontSize: 10,
+                                                    fontSize: 9,
                                                     fontWeight: FontWeight.w600,
                                                     color: badgeColor,
                                                   ),
@@ -480,106 +522,94 @@ class AddOrderWidget {
                                             },
                                           ),
                                         ],
-                                        // Add Item
-                                        SizedBox(height: 8),
-                                        Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: <Widget>[
-                                            // Minus Button Circle
-                                            InkWell(
-                                              onTap: () =>
-                                                  AddOrderCtrl.decrementQuantity(
-                                                    item,
-                                                  ),
-                                              child: Container(
-                                                padding: const EdgeInsets.all(
-                                                  3,
+                                        // Add Item rectangular controller
+                                        const SizedBox(height: 6),
+                                        Builder(
+                                          builder: (context) {
+                                            final isOutOfStock = item.stockProduct == true &&
+                                                (AddOrderCtrl.productStockMap[item.mProdId] ?? 0) == 0;
+                                            return Container(
+                                              height: 28,
+                                              decoration: BoxDecoration(
+                                                color: Colors.grey.shade50,
+                                                border: Border.all(
+                                                  color: Colors.grey.shade300,
+                                                  width: 0.8,
                                                 ),
-                                                decoration: BoxDecoration(
-                                                  shape: BoxShape.circle,
-                                                  color: const Color(
-                                                    0xFFFCE7F3,
-                                                  ),
-                                                ),
-                                                child: Icon(
-                                                  Icons.remove,
-                                                  size: 16,
-                                                  color: GlobalAppColor
-                                                      .ButtonDarkColor,
-                                                ),
+                                                borderRadius: BorderRadius.circular(6),
                                               ),
-                                            ),
-                                            const SizedBox(width: 4),
-
-                                            // Current Value
-                                            Container(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                    horizontal: 6,
-                                                    vertical: 4,
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  // Minus Button
+                                                  InkWell(
+                                                    onTap: () => AddOrderCtrl.decrementQuantity(item),
+                                                    child: Container(
+                                                      width: 28,
+                                                      height: double.infinity,
+                                                      alignment: Alignment.center,
+                                                      child: Icon(
+                                                        Icons.remove,
+                                                        size: 14,
+                                                        color: GlobalAppColor.ButtonDarkColor,
+                                                      ),
+                                                    ),
                                                   ),
-                                              child: Text(
-                                                "${AddOrderCtrl.itemQuantity[item.mProdId] ?? 0}",
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 12,
-                                                  color: GlobalAppColor.DarkTextColorCode,
-                                                ),
+                                                  // Divider
+                                                  Container(
+                                                    width: 0.8,
+                                                    color: Colors.grey.shade300,
+                                                    height: double.infinity,
+                                                  ),
+                                                  // Quantity
+                                                  Container(
+                                                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                                                    alignment: Alignment.center,
+                                                    child: Text(
+                                                      "${AddOrderCtrl.itemQuantity[item.mProdId] ?? 0}",
+                                                      style: TextStyle(
+                                                        fontWeight: FontWeight.bold,
+                                                        fontSize: 12,
+                                                        color: GlobalAppColor.DarkTextColorCode,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  // Divider
+                                                  Container(
+                                                    width: 0.8,
+                                                    color: Colors.grey.shade300,
+                                                    height: double.infinity,
+                                                  ),
+                                                  // Plus Button
+                                                  InkWell(
+                                                    onTap: isOutOfStock
+                                                        ? null
+                                                        : () async {
+                                                            await AddOrderCtrl.addItemToCartWithModifierCheck(
+                                                              context,
+                                                              item,
+                                                            );
+                                                          },
+                                                    child: Container(
+                                                      width: 28,
+                                                      height: double.infinity,
+                                                      alignment: Alignment.center,
+                                                      color: isOutOfStock
+                                                          ? Colors.transparent
+                                                          : GlobalAppColor.ButtonColor.withOpacity(0.15),
+                                                      child: Icon(
+                                                        Icons.add,
+                                                        size: 14,
+                                                        color: isOutOfStock
+                                                            ? Colors.grey.shade400
+                                                            : GlobalAppColor.ButtonColor,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
-                                            ),
-                                            const SizedBox(width: 4),
-
-                                            // Plus Button Circle
-                                            InkWell(
-                                              onTap:
-                                                  (item.stockProduct == true &&
-                                                      (AddOrderCtrl
-                                                                  .productStockMap[item
-                                                                  .mProdId] ??
-                                                              0) ==
-                                                          0)
-                                                  ? null // disabled — out of stock
-                                                  : () async {
-                                                      await AddOrderCtrl.addItemToCartWithModifierCheck(
-                                                        context,
-                                                        item,
-                                                      );
-                                                    },
-                                              child: Container(
-                                                padding: const EdgeInsets.all(
-                                                  3,
-                                                ),
-                                                decoration: BoxDecoration(
-                                                  shape: BoxShape.circle,
-                                                  color:
-                                                      (item.stockProduct ==
-                                                              true &&
-                                                          (AddOrderCtrl
-                                                                      .productStockMap[item
-                                                                      .mProdId] ??
-                                                                  0) ==
-                                                              0)
-                                                      ? Colors.grey.shade300
-                                                      : GlobalAppColor
-                                                            .ButtonColor,
-                                                ),
-                                                child: Icon(
-                                                  Icons.add,
-                                                  size: 16,
-                                                  color:
-                                                      (item.stockProduct ==
-                                                              true &&
-                                                          (AddOrderCtrl
-                                                                      .productStockMap[item
-                                                                      .mProdId] ??
-                                                                  0) ==
-                                                              0)
-                                                      ? Colors.grey
-                                                      : Colors.white,
-                                                ),
-                                              ),
-                                            ),
-                                          ],
+                                            );
+                                          },
                                         ),
                                       ],
                                     ),
