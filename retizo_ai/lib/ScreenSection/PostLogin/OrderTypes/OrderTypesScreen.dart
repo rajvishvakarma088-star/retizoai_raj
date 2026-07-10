@@ -27,13 +27,14 @@ class _OrderTypesScreenState extends State<OrderTypesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final langCtrl = Provider.of<LanguageProvider>(context);
     return Consumer<AddOrderProvider>(
       builder: (context, addOrderCtrl, child) {
         return Scaffold(
           backgroundColor: GlobalAppColor.HomeBgColorCode,
           appBar: AppBar(
             title: Text(
-              "Manage Order Types",
+              langCtrl.translate('app.orderTypes'),
               style: CommonWidget.CommonTitleTextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -66,7 +67,7 @@ class _OrderTypesScreenState extends State<OrderTypesScreen> {
                         ),
                         SizedBox(height: 16),
                         Text(
-                          "No Order Types Found",
+                          langCtrl.translate('dashboard.noResult'),
                           style: CommonWidget.CommonTitleTextStyle(
                             fontSize: 18,
                             color: GlobalAppColor.HomeLightTextColor,
@@ -77,7 +78,7 @@ class _OrderTypesScreenState extends State<OrderTypesScreen> {
                           onPressed: () =>
                               _showCreateDialog(context, addOrderCtrl),
                           icon: Icon(Symbols.add),
-                          label: Text("Create First Order Type"),
+                          label: Text(langCtrl.translate('app.createFirstOrderType')),
                         ),
                       ],
                     ),
@@ -163,12 +164,13 @@ class _OrderTypesScreenState extends State<OrderTypesScreen> {
     BuildContext context,
     AddOrderProvider addOrderCtrl,
   ) async {
+    final langCtrl = Provider.of<LanguageProvider>(context, listen: false);
     final nameController = TextEditingController();
 
     await showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text("Create Order Type"),
+        title: Text(langCtrl.translate('app.createOrderType')),
         content: TextField(
           controller: nameController,
           decoration: InputDecoration(
@@ -181,7 +183,7 @@ class _OrderTypesScreenState extends State<OrderTypesScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text("Cancel"),
+            child: Text(langCtrl.translate('app.cancel')),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -199,7 +201,7 @@ class _OrderTypesScreenState extends State<OrderTypesScreen> {
               // ✅ Call POST /order-types/
               await addOrderCtrl.createOrderTypeService(context, name);
             },
-            child: Text("Create"),
+            child: Text(langCtrl.translate('app.create')),
           ),
         ],
       ),
@@ -212,12 +214,13 @@ class _OrderTypesScreenState extends State<OrderTypesScreen> {
     AddOrderProvider addOrderCtrl,
     OrderSummaryTableTypeList orderType,
   ) async {
+    final langCtrl = Provider.of<LanguageProvider>(context, listen: false);
     final nameController = TextEditingController(text: orderType.orderTypeName);
 
     await showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text("Edit Order Type"),
+        title: Text(langCtrl.translate('app.editOrderType')),
         content: TextField(
           controller: nameController,
           decoration: InputDecoration(
@@ -229,7 +232,7 @@ class _OrderTypesScreenState extends State<OrderTypesScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text("Cancel"),
+            child: Text(langCtrl.translate('app.cancel')),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -251,7 +254,7 @@ class _OrderTypesScreenState extends State<OrderTypesScreen> {
                 newName,
               );
             },
-            child: Text("Update"),
+            child: Text(langCtrl.translate('app.update')),
           ),
         ],
       ),
@@ -264,24 +267,25 @@ class _OrderTypesScreenState extends State<OrderTypesScreen> {
     AddOrderProvider addOrderCtrl,
     OrderSummaryTableTypeList orderType,
   ) async {
+    final langCtrl = Provider.of<LanguageProvider>(context, listen: false);
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text("Delete Order Type"),
+        title: Text(langCtrl.translate('app.deleteOrderType')),
         content: Text(
           "Are you sure you want to delete '${orderType.orderTypeName}'?\n\nThis action cannot be undone.",
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text("Cancel"),
+            child: Text(langCtrl.translate('app.cancel')),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: GlobalAppColor.RedCode,
             ),
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text("Delete", style: TextStyle(color: Colors.white)),
+            child: Text(langCtrl.translate('app.delete'), style: TextStyle(color: Colors.white)),
           ),
         ],
       ),

@@ -141,7 +141,7 @@ class LoginScreenState extends State<LoginScreen>
                                         // 6. Title: Organization Login
                                         Center(
                                           child: Text(
-                                            "Organization Login",
+                                            langCtrl.translate('loginPage.title'),
                                             style: CommonWidget.CommonTitleTextStyle(
                                               fontSize: isPortrait ? 22 : 19,
                                               fontWeight: FontWeight.bold,
@@ -149,27 +149,12 @@ class LoginScreenState extends State<LoginScreen>
                                             ),
                                           ),
                                         ),
-                                        if (!isBaseLanguage) ...[
-                                          const SizedBox(height: 4),
-                                          Center(
-                                            child: Text(
-                                              langCtrl.translate('loginPage.title'),
-                                              style: CommonWidget.CommonTitleTextStyle(
-                                                fontSize: isPortrait ? 17 : 15,
-                                                fontWeight: FontWeight.w600,
-                                                color: GlobalAppColor.ButtonColor,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
                                         const SizedBox(height: 10),
 
                                         // 7. Subtitle / Prompt
                                         Center(
                                           child: Text(
-                                            isBaseLanguage
-                                                ? "Please enter your organization's credentials below to continue"
-                                                : langCtrl.translate('loginPage.subtitle'),
+                                            langCtrl.translate('loginPage.subtitle'),
                                             textAlign: TextAlign.center,
                                             style: CommonWidget.CommonTitleTextStyle(
                                               fontSize: isPortrait ? 14 : 12,
@@ -182,8 +167,7 @@ class LoginScreenState extends State<LoginScreen>
 
                                         // 8. Email Input Label
                                         _buildFieldLabel(
-                                          englishLabel: "Email",
-                                          translatedLabel: langCtrl.getSecondaryText('loginPage.email'),
+                                          label: langCtrl.translate('loginPage.email'),
                                           isPortrait: isPortrait,
                                         ),
                                         const SizedBox(height: 6),
@@ -192,16 +176,13 @@ class LoginScreenState extends State<LoginScreen>
                                           controller: LoginCtrl.EmailController,
                                           focusNode: LoginCtrl.myFocusNodeEmail,
                                           keyboardType: TextInputType.emailAddress,
-                                          hintText: isBaseLanguage
-                                              ? "Enter your email"
-                                              : langCtrl.translate('loginPage.emailPlaceholder'),
+                                          hintText: langCtrl.translate('loginPage.emailPlaceholder'),
                                         ),
                                         const SizedBox(height: 20),
 
                                         // 9. Password Input Label
                                         _buildFieldLabel(
-                                          englishLabel: "Password",
-                                          translatedLabel: langCtrl.getSecondaryText('loginPage.password'),
+                                          label: langCtrl.translate('loginPage.password'),
                                           isPortrait: isPortrait,
                                         ),
                                         const SizedBox(height: 6),
@@ -210,9 +191,7 @@ class LoginScreenState extends State<LoginScreen>
                                           controller: LoginCtrl.PasswordController,
                                           focusNode: LoginCtrl.myFocusNodePassword,
                                           keyboardType: TextInputType.visiblePassword,
-                                          hintText: isBaseLanguage
-                                              ? "Enter your password"
-                                              : langCtrl.translate('loginPage.passwordPlaceholder'),
+                                          hintText: langCtrl.translate('loginPage.passwordPlaceholder'),
                                           isPassword: true,
                                         ),
                                         const SizedBox(height: 12),
@@ -253,15 +232,11 @@ class LoginScreenState extends State<LoginScreen>
                                                                   LoginCtrl.toggleCredential.value = !value;
                                                                 },
                                                           child: Text(
-                                                            isBaseLanguage
-                                                                ? "Remember me"
-                                                                : langCtrl.translate('loginPage.rememberMe'),
+                                                            langCtrl.translate('loginPage.rememberMe'),
                                                             style: CommonWidget.CommonTitleTextStyle(
                                                               fontSize: isPortrait ? 14 : 12,
                                                               fontWeight: FontWeight.w500,
-                                                              color: isBaseLanguage
-                                                                  ? GlobalAppColor.LightTextColorCode
-                                                                  : GlobalAppColor.ButtonColor,
+                                                              color: GlobalAppColor.LightTextColorCode,
                                                             ),
                                                             overflow: TextOverflow.ellipsis,
                                                           ),
@@ -291,9 +266,7 @@ class LoginScreenState extends State<LoginScreen>
                                                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                               ),
                                               child: Text(
-                                                isBaseLanguage
-                                                    ? "Forgot Password?"
-                                                    : langCtrl.translate('loginPage.forgotPassword'),
+                                                langCtrl.translate('loginPage.forgotPassword'),
                                                 style: CommonWidget.CommonTitleTextStyle(
                                                   color: GlobalAppColor.ButtonColor,
                                                   fontWeight: FontWeight.w600,
@@ -314,12 +287,8 @@ class LoginScreenState extends State<LoginScreen>
                                             child: CommonWidget().CustomElevatedButton(
                                               isLoading: LoginCtrl.isLoginLoader,
                                               title: LoginCtrl.isLoginLoader
-                                                  ? (isBaseLanguage
-                                                      ? "Logging in..."
-                                                      : langCtrl.translate('loginPage.loggingIn'))
-                                                  : (isBaseLanguage
-                                                      ? "Login"
-                                                      : "Login (${langCtrl.translate('loginPage.login')})"),
+                                                  ? langCtrl.translate('loginPage.loggingIn')
+                                                  : langCtrl.translate('loginPage.login'),
                                               onPressed: LoginCtrl.isLoginLoader
                                                   ? null
                                                   : () => LoginCtrl.SubmitValidation(context),
@@ -346,33 +315,21 @@ class LoginScreenState extends State<LoginScreen>
     );
   }
 
-  // Helper method for rendering label and its translation side by side
+  // Helper method for rendering label
   Widget _buildFieldLabel({
-    required String englishLabel,
-    required String? translatedLabel,
+    required String label,
     required bool isPortrait,
   }) {
     return Row(
       children: [
         Text(
-          englishLabel,
+          label,
           style: CommonWidget.CommonTitleTextStyle(
             fontSize: isPortrait ? 15 : 13,
             fontWeight: FontWeight.w600,
             color: GlobalAppColor.LightTextColorCode,
           ),
         ),
-        if (translatedLabel != null && translatedLabel.isNotEmpty) ...[
-          const SizedBox(width: 8),
-          Text(
-            translatedLabel,
-            style: CommonWidget.CommonTitleTextStyle(
-              fontSize: isPortrait ? 14 : 12,
-              fontWeight: FontWeight.w500,
-              color: GlobalAppColor.ButtonColor,
-            ),
-          ),
-        ],
       ],
     );
   }

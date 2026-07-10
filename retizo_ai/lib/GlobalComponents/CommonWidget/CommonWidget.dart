@@ -826,6 +826,7 @@ class CommonWidget {
     VoidCallback? onUndoDrawer,
   }) {
     final userInfo = Provider.of<UserInfoProvider>(context, listen: false);
+    final langCtrl = Provider.of<LanguageProvider>(context);
     final displayName = userInfo.name ?? 'Admin';
     final userRole = userInfo.type ?? 'Branch Admin';
     final avatarChar = displayName.isNotEmpty ? displayName[0].toUpperCase() : 'A';
@@ -855,7 +856,7 @@ class CommonWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  "Welcome back",
+                  langCtrl.translate('app.welcomeBack'),
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,

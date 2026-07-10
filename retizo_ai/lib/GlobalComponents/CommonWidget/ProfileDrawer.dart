@@ -77,7 +77,7 @@ class ProfileDrawer extends StatelessWidget {
                   child: Row(
                     children: [
                       Text(
-                        "Menu",
+                        langProvider.translate('app.menu'),
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
@@ -208,7 +208,7 @@ class ProfileDrawer extends StatelessWidget {
                       children: [
                         // Language
                         Text(
-                          "Language",
+                          langProvider.translate('app.language'),
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
@@ -234,7 +234,7 @@ class ProfileDrawer extends StatelessWidget {
 
                         // Printers
                         Text(
-                          "Printers",
+                          langProvider.translate('app.printers'),
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
@@ -272,7 +272,7 @@ class ProfileDrawer extends StatelessWidget {
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Text(
-                                    "Printer Configuration",
+                                    langProvider.translate('app.printerConfiguration'),
                                     style: TextStyle(
                                       fontSize: 13,
                                       fontWeight: FontWeight.w500,
@@ -293,7 +293,7 @@ class ProfileDrawer extends StatelessWidget {
 
                         // Theme
                         Text(
-                          "Theme",
+                          langProvider.translate('app.theme'),
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
@@ -322,9 +322,9 @@ class ProfileDrawer extends StatelessWidget {
                       if (onLogout != null) onLogout!();
                     },
                     icon: const Icon(Icons.logout, color: Colors.white),
-                    label: const Text(
-                      "Logout",
-                      style: TextStyle(
+                    label: Text(
+                      langProvider.translate('app.logout'),
+                      style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
                         color: Colors.white,

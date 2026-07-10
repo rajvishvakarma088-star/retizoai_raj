@@ -108,7 +108,7 @@ class HomeScreenState extends State<HomeScreen>
   @override
   Widget build(BuildContext context) {
     // Watch providers to trigger rebuild on language or theme change
-    Provider.of<LanguageProvider>(context);
+    final langCtrl = Provider.of<LanguageProvider>(context);
     Provider.of<ThemeProvider>(context);
 
     return Consumer<HomeProvider>(
@@ -228,7 +228,7 @@ class HomeScreenState extends State<HomeScreen>
                                           child: CommonWidget().CustomSearchTextField(
                                             controller: HomeCtrl.SearchOrderController,
                                             focusNode: HomeCtrl.myFocusNodeSearchOrder,
-                                            hintText: "Search orders...",
+                                            hintText: langCtrl.translate('app.searchOrders'),
                                             onChanged: (value) {
                                               HomeCtrl.SearchFilteredOrders(searchQuery: value);
                                             },
@@ -261,7 +261,7 @@ class HomeScreenState extends State<HomeScreen>
                                                   Icon(Icons.search_rounded, color: Colors.grey.shade600, size: 16),
                                                   const SizedBox(width: 4),
                                                   Text(
-                                                    "Search",
+                                                    langCtrl.translate('app.search'),
                                                     style: TextStyle(
                                                       fontSize: 11,
                                                       fontWeight: FontWeight.w600,
@@ -279,10 +279,8 @@ class HomeScreenState extends State<HomeScreen>
                                               final hasClosed = !isOpen && drawerCtrl.currentDrawer != null;
 
                                               final label = isOpen
-                                                  ? "Drawer Open"
-                                                  : hasClosed
-                                                  ? "Drawer Closed"
-                                                  : "Drawer Closed";
+                                                  ? langCtrl.translate('app.drawerOpen')
+                                                  : langCtrl.translate('app.drawerClosed');
                                               final dotColor = isOpen ? Colors.green : Colors.red;
                                               final bgColor = isOpen ? Colors.green.shade50 : Colors.red.shade50;
                                               final textColor = isOpen ? Colors.green.shade800 : Colors.red.shade800;
@@ -309,7 +307,7 @@ class HomeScreenState extends State<HomeScreen>
                                                         children: [
                                                           Icon(Icons.exit_to_app, color: Colors.red.shade700, size: 18),
                                                           const SizedBox(width: 8),
-                                                          const Text("Close Drawer"),
+                                                          Text(langCtrl.translate('app.closeDrawer')),
                                                         ],
                                                       ),
                                                     ),
@@ -320,7 +318,7 @@ class HomeScreenState extends State<HomeScreen>
                                                         children: [
                                                           Icon(Icons.login, color: GlobalAppColor.ButtonColor, size: 18),
                                                           const SizedBox(width: 8),
-                                                          const Text("Open Drawer"),
+                                                          Text(langCtrl.translate('app.openDrawer')),
                                                         ],
                                                       ),
                                                     ),
@@ -331,7 +329,7 @@ class HomeScreenState extends State<HomeScreen>
                                                         children: [
                                                           Icon(Icons.undo, color: Colors.green.shade700, size: 18),
                                                           const SizedBox(width: 8),
-                                                          const Text("Undo Drawer"),
+                                                          Text(langCtrl.translate('app.undoDrawer')),
                                                         ],
                                                       ),
                                                     ),
@@ -419,10 +417,8 @@ class HomeScreenState extends State<HomeScreen>
                                                 final hasClosed = !isOpen && drawerCtrl.currentDrawer != null;
 
                                                 final label = isOpen
-                                                    ? "Drawer Open"
-                                                    : hasClosed
-                                                    ? "Drawer Closed"
-                                                    : "Drawer Closed";
+                                                    ? langCtrl.translate('app.drawerOpen')
+                                                    : langCtrl.translate('app.drawerClosed');
 
                                                 final dotColor = isOpen ? Colors.green : Colors.red;
                                                 final bgColor = isOpen
@@ -456,7 +452,7 @@ class HomeScreenState extends State<HomeScreen>
                                                           children: [
                                                             Icon(Icons.exit_to_app, color: Colors.red.shade700, size: 18),
                                                             const SizedBox(width: 8),
-                                                            const Text("Close Drawer"),
+                                                            Text(langCtrl.translate('app.closeDrawer')),
                                                           ],
                                                         ),
                                                       ),
@@ -467,7 +463,7 @@ class HomeScreenState extends State<HomeScreen>
                                                           children: [
                                                             Icon(Icons.login, color: GlobalAppColor.ButtonColor, size: 18),
                                                             const SizedBox(width: 8),
-                                                            const Text("Open Drawer"),
+                                                            Text(langCtrl.translate('app.openDrawer')),
                                                           ],
                                                         ),
                                                       ),
@@ -478,7 +474,7 @@ class HomeScreenState extends State<HomeScreen>
                                                           children: [
                                                             Icon(Icons.undo, color: Colors.green.shade700, size: 18),
                                                             const SizedBox(width: 8),
-                                                            const Text("Undo Drawer"),
+                                                            Text(langCtrl.translate('app.undoDrawer')),
                                                           ],
                                                         ),
                                                       ),

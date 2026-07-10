@@ -33,6 +33,7 @@ class AddNewOrderState extends State<AddNewOrder>
   //-✅---------------------------------------------------------------------✅-//
   @override
   Widget build(BuildContext context) {
+    final langCtrl = Provider.of<LanguageProvider>(context);
     return Consumer2<AddOrderProvider, UserInfoProvider>(
       builder: (context, AddOrderCtrl, UserInfoCtrl, child) {
         return LayoutBuilder(
@@ -97,7 +98,7 @@ class AddNewOrderState extends State<AddNewOrder>
                                     child: Container(
                                       padding: const EdgeInsets.all(8),
                                       decoration: BoxDecoration(
-                                        color: GlobalAppColor.WhiteColorCode,
+                                        color: GlobalAppColor.BodyBgColorCode,
                                         borderRadius: BorderRadius.circular(8),
                                       ),
                                       child: Icon(
@@ -109,7 +110,7 @@ class AddNewOrderState extends State<AddNewOrder>
                                   ),
                                   const SizedBox(width: 12),
                                   Text(
-                                    "Add New Order",
+                                    langCtrl.translate('dashboard.addNewOrder'),
                                     style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,

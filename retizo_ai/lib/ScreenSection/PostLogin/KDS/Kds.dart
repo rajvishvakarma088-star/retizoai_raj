@@ -30,6 +30,7 @@ class KdsState extends State<Kds>
   @override
   Widget build(BuildContext context) {
     final themeCtrl = Provider.of<ThemeProvider>(context); // Watch theme changes
+    final langCtrl = Provider.of<LanguageProvider>(context);
     return OrientationBuilder(
       builder: (context, orientation) {
         return Consumer3<KdsProvider, UserInfoProvider, BottomNavProvider>(
@@ -84,7 +85,7 @@ class KdsState extends State<Kds>
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
-                                        "Kitchen Display",
+                                        langCtrl.translate('app.kitchenDisplay'),
                                         style: CommonWidget.CommonTitleTextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 20,
