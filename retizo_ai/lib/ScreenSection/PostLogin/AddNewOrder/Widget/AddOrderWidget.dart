@@ -2,6 +2,7 @@
 
 //-✅---------------------------------------------------------------------✅-//
 import 'package:culai/HTTPRepository/Packages.dart';
+import 'package:flutter/services.dart';
 import 'package:culai/ScreenSection/PostLogin/AddNewOrder/Widget/CashAmount.dart';
 import 'package:flutter/material.dart';
 
@@ -400,7 +401,6 @@ class AddOrderWidget {
                                                     : Icon(
                                                         Symbols.restaurant,
                                                         color: Colors.grey.shade300,
-                                                        size: 26,
                                                       ),
                                               ),
                                             );
@@ -528,85 +528,90 @@ class AddOrderWidget {
                                           builder: (context) {
                                             final isOutOfStock = item.stockProduct == true &&
                                                 (AddOrderCtrl.productStockMap[item.mProdId] ?? 0) == 0;
+                                            final hasQty = (AddOrderCtrl.itemQuantity[item.mProdId] ?? 0) > 0;
                                             return Container(
-                                              height: 28,
+                                              height: 34,
+                                              width: 120,
                                               decoration: BoxDecoration(
                                                 color: Colors.grey.shade50,
                                                 border: Border.all(
-                                                  color: Colors.grey.shade300,
+                                                  color: hasQty
+                                                      ? GlobalAppColor.DarkBlueColor.withOpacity(0.5)
+                                                      : Colors.grey.shade300,
                                                   width: 0.8,
                                                 ),
                                                 borderRadius: BorderRadius.circular(6),
                                               ),
-                                              child: Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  // Minus Button
-                                                  InkWell(
-                                                    onTap: () => AddOrderCtrl.decrementQuantity(item),
-                                                    child: Container(
-                                                      width: 28,
+                                              child: ClipRRect(
+                                                borderRadius: BorderRadius.circular(5),
+                                                child: Row(
+                                                  children: [
+                                                    // Minus Button
+                                                    Expanded(
+                                                      child: _AnimatedActionButton(
+                                                        onTap: () {
+                                                          HapticFeedback.lightImpact();
+                                                          AddOrderCtrl.decrementQuantity(item);
+                                                        },
+                                                        backgroundColor: Colors.transparent,
+                                                        child: Icon(
+                                                          Icons.remove,
+                                                          size: 14,
+                                                          color: GlobalAppColor.DarkBlueColor,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    // Divider
+                                                    Container(
+                                                      width: 0.8,
+                                                      color: Colors.grey.shade300,
                                                       height: double.infinity,
+                                                    ),
+                                                    // Quantity
+                                                    Container(
+                                                      width: 32,
                                                       alignment: Alignment.center,
-                                                      child: Icon(
-                                                        Icons.remove,
-                                                        size: 14,
-                                                        color: GlobalAppColor.ButtonDarkColor,
+                                                      child: Text(
+                                                        "${AddOrderCtrl.itemQuantity[item.mProdId] ?? 0}",
+                                                        style: TextStyle(
+                                                          fontWeight: FontWeight.bold,
+                                                          fontSize: 12,
+                                                          color: GlobalAppColor.DarkTextColorCode,
+                                                        ),
                                                       ),
                                                     ),
-                                                  ),
-                                                  // Divider
-                                                  Container(
-                                                    width: 0.8,
-                                                    color: Colors.grey.shade300,
-                                                    height: double.infinity,
-                                                  ),
-                                                  // Quantity
-                                                  Container(
-                                                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                                                    alignment: Alignment.center,
-                                                    child: Text(
-                                                      "${AddOrderCtrl.itemQuantity[item.mProdId] ?? 0}",
-                                                      style: TextStyle(
-                                                        fontWeight: FontWeight.bold,
-                                                        fontSize: 12,
-                                                        color: GlobalAppColor.DarkTextColorCode,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  // Divider
-                                                  Container(
-                                                    width: 0.8,
-                                                    color: Colors.grey.shade300,
-                                                    height: double.infinity,
-                                                  ),
-                                                  // Plus Button
-                                                  InkWell(
-                                                    onTap: isOutOfStock
-                                                        ? null
-                                                        : () async {
-                                                            await AddOrderCtrl.addItemToCartWithModifierCheck(
-                                                              context,
-                                                              item,
-                                                            );
-                                                          },
-                                                    child: Container(
-                                                      width: 28,
+                                                    // Divider
+                                                    Container(
+                                                      width: 0.8,
+                                                      color: Colors.grey.shade300,
                                                       height: double.infinity,
-                                                      alignment: Alignment.center,
-                                                      color: isOutOfStock
-                                                          ? Colors.transparent
-                                                          : GlobalAppColor.ButtonColor.withOpacity(0.15),
-                                                      child: Icon(
-                                                        Icons.add,
-                                                        size: 14,
-                                                        color: isOutOfStock
-                                                            ? Colors.grey.shade400
-                                                            : GlobalAppColor.ButtonColor,
+                                                    ),
+                                                    // Plus Button
+                                                    Expanded(
+                                                      child: _AnimatedActionButton(
+                                                        onTap: isOutOfStock
+                                                            ? null
+                                                            : () async {
+                                                                HapticFeedback.lightImpact();
+                                                                await AddOrderCtrl.addItemToCartWithModifierCheck(
+                                                                  context,
+                                                                  item,
+                                                                );
+                                                              },
+                                                        backgroundColor: isOutOfStock
+                                                            ? Colors.transparent
+                                                            : GlobalAppColor.DarkBlueColor,
+                                                        child: Icon(
+                                                          Icons.add,
+                                                          size: 14,
+                                                          color: isOutOfStock
+                                                              ? Colors.grey.shade400
+                                                              : Colors.white,
+                                                        ),
                                                       ),
                                                     ),
-                                                  ),
-                                                ],
+                                                  ],
+                                                ),
                                               ),
                                             );
                                           },
@@ -3097,6 +3102,71 @@ class _TableSelectionModalState extends State<_TableSelectionModal> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AnimatedActionButton extends StatefulWidget {
+  final Widget child;
+  final VoidCallback? onTap;
+  final Color backgroundColor;
+
+  const _AnimatedActionButton({
+    required this.child,
+    required this.onTap,
+    this.backgroundColor = Colors.transparent,
+  });
+
+  @override
+  State<_AnimatedActionButton> createState() => _AnimatedActionButtonState();
+}
+
+class _AnimatedActionButtonState extends State<_AnimatedActionButton>
+    with SingleTickerProviderStateMixin {
+  double _scale = 1.0;
+
+  void _onTapDown(TapDownDetails details) {
+    if (widget.onTap != null) {
+      setState(() {
+        _scale = 0.8;
+      });
+    }
+  }
+
+  void _onTapUp(TapUpDetails details) {
+    if (widget.onTap != null) {
+      setState(() {
+        _scale = 1.0;
+      });
+    }
+  }
+
+  void _onTapCancel() {
+    if (widget.onTap != null) {
+      setState(() {
+        _scale = 1.0;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapDown: _onTapDown,
+      onTapUp: _onTapUp,
+      onTapCancel: _onTapCancel,
+      onTap: widget.onTap,
+      child: Container(
+        height: double.infinity,
+        color: widget.backgroundColor,
+        alignment: Alignment.center,
+        child: AnimatedScale(
+          scale: _scale,
+          duration: const Duration(milliseconds: 80),
+          child: widget.child,
         ),
       ),
     );
