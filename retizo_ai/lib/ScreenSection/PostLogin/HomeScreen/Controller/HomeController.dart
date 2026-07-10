@@ -33,6 +33,7 @@ class HomeProvider with ChangeNotifier {
   //--🔹--Order Filter---------------------------------------------------🔹--//
   String selectedFilter = "current";
   bool isHomeLoading = false;
+  final Map<int, OrderData> updatedOrdersMap = {};
   String? payBillLoadingAction;
 
   String get selectedFilterValue => selectedFilter;
@@ -288,6 +289,7 @@ class HomeProvider with ChangeNotifier {
         for (var item in dataList) {
           final order = OrderData.fromJson(item);
           OrderListing.add(order);
+          updatedOrdersMap[order.orderId] = order;
 
           // 🔍 DEBUG: Log order items to identify missing items
           if (order.details.isNotEmpty) {
@@ -892,6 +894,10 @@ class HomeProvider with ChangeNotifier {
 
         // 🔹 Optional: update local OrderListing / Provider if needed
         final updatedOrder = response['order'];
+        if (updatedOrder != null && updatedOrder is Map<String, dynamic>) {
+          final o = OrderData.fromJson(updatedOrder);
+          updatedOrdersMap[o.orderId] = o;
+        }
         // Example: update your OrderListing in provider
         // Clear search controller
         SearchOrderController.clear();
@@ -2561,6 +2567,9 @@ class HomeProvider with ChangeNotifier {
             _paidOrderId,
             formattedDate,
           );
+          if (freshOrder != null) {
+            updatedOrdersMap[freshOrder.orderId] = freshOrder;
+          }
           if (context.mounted) {
             _triggerBillAutoPrint(
               context,

@@ -889,57 +889,33 @@ class HomeWidget {
     // Max width for web
     panelWidth = panelWidth > 500 ? 500 : panelWidth;
 
-    final bool isMobile = screenWidth < 750;
-    final double panelHeight = screenHeight * 0.85; // Height for mobile bottom-sheet
-
     return Stack(
       children: [
         // 🔒 Overlay
         if (HomeCtrl.isPanelOpen)
-          GestureDetector(
-            onTap: () => HomeCtrl.closePanel(),
+          AbsorbPointer(
+            absorbing: true,
             child: Container(color: Colors.black45),
           ),
 
-        // 2️⃣ Sliding panel
+        // 2️⃣ Side panel
         AnimatedPositioned(
-          duration: const Duration(milliseconds: 320),
-          curve: isMobile ? Curves.easeOutCubic : Curves.easeOutBack,
-          left: isMobile ? 0 : null,
-          right: isMobile ? 0 : (HomeCtrl.isPanelOpen ? 0 : -panelWidth),
-          top: isMobile ? null : MediaQuery.of(context).padding.top,
-          bottom: isMobile
-              ? (HomeCtrl.isPanelOpen ? 0 : -panelHeight)
-              : (screenWidth > 900 ? 0 : (60.0 + MediaQuery.of(context).padding.bottom)),
-          width: isMobile ? null : panelWidth,
-          height: isMobile ? panelHeight : null,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOutBack,
+          right: HomeCtrl.isPanelOpen ? 0 : -panelWidth,
+          top: MediaQuery.of(context).padding.top,
+          bottom: screenWidth > 900 ? 0 : (60.0 + MediaQuery.of(context).padding.bottom),
+          width: panelWidth,
           child: Material(
-            elevation: 24,
+            elevation: 16,
             color: GlobalAppColor.WhiteColorCode,
-            borderRadius: isMobile
-                ? const BorderRadius.only(
-                    topLeft: Radius.circular(24),
-                    topRight: Radius.circular(24),
-                  )
-                : const BorderRadius.only(
-                    topLeft: Radius.circular(5),
-                    bottomLeft: Radius.circular(5),
-                  ),
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(5),
+              bottomLeft: Radius.circular(5),
+            ),
             child: Column(
               children: [
-                if (isMobile) ...[
-                  const SizedBox(height: 10),
-                  // Drag handle
-                  Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFD1D5DB),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 5),
+                SizedBox(height: 5),
                 // Header
                 Container(
                   height: kToolbarHeight,
@@ -9114,9 +9090,6 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
   bool _wasPaidAtInit = false;
 
   OrderData get order {
-    if (HomeCtrl.updatedOrdersMap.containsKey(widget.order.orderId)) {
-      return HomeCtrl.updatedOrdersMap[widget.order.orderId]!;
-    }
     return HomeCtrl.OrderListing.firstWhere(
       (o) => o.orderId == widget.order.orderId,
       orElse: () => widget.order,
@@ -9228,9 +9201,9 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               body: ListView(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                 children: [
-                  _buildOrderDetailsSection(),
-                  const SizedBox(height: 12),
                   _buildOrderItemsSection(),
+                  const SizedBox(height: 12),
+                  _buildOrderDetailsSection(),
                   const SizedBox(height: 12),
                   _buildFinancialSummarySection(),
                   const SizedBox(height: 12),
@@ -9258,32 +9231,20 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
         .where((d) => d.itemType.toLowerCase() != 'modifier')
         .toList();
     return _card(
-      topGradient: const [Color(0xFFF59E0B), Color(0xFFEF4444)],
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Color(0xFFF59E0B), Color(0xFFF97316)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.inventory_2_outlined, size: 20, color: Colors.white),
-              ),
-              const SizedBox(width: 12),
+              Icon(Icons.inventory_2_outlined, size: 18, color: GlobalAppColor.ButtonColor),
+              const SizedBox(width: 8),
               Text(
                 'Order Items (${activeItems.length})',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: GlobalAppColor.DarkTextColorCode),
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: GlobalAppColor.DarkTextColorCode),
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
           ...activeItems.map((d) => _buildItemRow(d)),
         ],
       ),
@@ -9302,7 +9263,6 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
     Color dotColor;
     switch (d.status.toLowerCase()) {
       case 'prepared':
-      case 'served':
         dotColor = const Color(0xFF10B981);
         break;
       case 'cancelled':
@@ -9316,7 +9276,6 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
     Color badgeText;
     switch (d.status.toLowerCase()) {
       case 'prepared':
-      case 'served':
         badgeBg = const Color(0xFFDCFCE7);
         badgeText = const Color(0xFF15803D);
         break;
@@ -9330,16 +9289,12 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
     }
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(14),
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: isCancelled ? Colors.grey.shade50 : GlobalAppColor.BodyBgColorCode.withOpacity(0.3),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isCancelled 
-              ? Colors.grey.withOpacity(0.08) 
-              : GlobalAppColor.DarkTextColorCode.withOpacity(0.08)
-        ),
+        color: GlobalAppColor.BodyBgColorCode,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: GlobalAppColor.DarkTextColorCode.withOpacity(0.12)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -9347,15 +9302,15 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
           Row(
             children: [
               Container(
-                width: 10, height: 10,
+                width: 9, height: 9,
                 decoration: BoxDecoration(shape: BoxShape.circle, color: dotColor),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   itemName,
                   style: TextStyle(
-                    fontSize: 15,
+                    fontSize: 14.5,
                     fontWeight: FontWeight.w700,
                     color: isCancelled ? Colors.grey.shade400 : GlobalAppColor.DarkTextColorCode,
                     decoration: isCancelled ? TextDecoration.lineThrough : TextDecoration.none,
@@ -9364,18 +9319,11 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               ),
               const Icon(Icons.block_rounded, size: 15, color: Color(0xFFEF4444)),
               const SizedBox(width: 8),
-              Text(
-                '$qty  ×  ${unitPrice.toStringAsFixed(2)}',
-                style: TextStyle(
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.w600,
-                  color: GlobalAppColor.DarkTextColorCode.withOpacity(0.6),
-                ),
-              ),
-              const SizedBox(width: 10),
+              Text('$qty  ×  ${unitPrice.toStringAsFixed(2)}', style: TextStyle(fontSize: 12.5, color: GlobalAppColor.DarkTextColorCode.withOpacity(0.7))),
+              const SizedBox(width: 8),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(color: badgeBg, borderRadius: BorderRadius.circular(12)),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(color: badgeBg, borderRadius: BorderRadius.circular(20)),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -9388,40 +9336,32 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                   ],
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 8),
               Text(
                 lineTotal.toStringAsFixed(2),
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w800,
-                  color: isCancelled ? Colors.grey.shade400 : GlobalAppColor.DarkTextColorCode,
-                ),
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: GlobalAppColor.DarkTextColorCode),
               ),
             ],
           ),
           if (netAmt != 0 || taxAmt != 0) ...[
-            const SizedBox(height: 10),
+            const SizedBox(height: 8),
             GestureDetector(
               onTap: () => setState(() => _showTaxDetail = !_showTaxDetail),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 decoration: BoxDecoration(
                   color: GlobalAppColor.WhiteColorCode,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: GlobalAppColor.DarkTextColorCode.withOpacity(0.08)),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: GlobalAppColor.DarkTextColorCode.withOpacity(0.12)),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       'Net: ${netAmt.toStringAsFixed(2)}  ·  Tax: ${taxAmt.toStringAsFixed(2)}',
-                      style: TextStyle(
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w500,
-                        color: GlobalAppColor.DarkTextColorCode.withOpacity(0.7),
-                      ),
+                      style: TextStyle(fontSize: 11.5, color: GlobalAppColor.DarkTextColorCode.withOpacity(0.7)),
                     ),
-                    const SizedBox(width: 6),
+                    const SizedBox(width: 4),
                     Icon(
                       _showTaxDetail ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
                       size: 14, color: GlobalAppColor.DarkTextColorCode.withOpacity(0.6),
@@ -9432,24 +9372,8 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
             ),
           ],
           if (d.note.isNotEmpty && d.note != 'N/A' && d.note != 'null') ...[
-            const SizedBox(height: 8),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.amber.withOpacity(0.05),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.amber.withOpacity(0.15)),
-              ),
-              child: Text(
-                '📝 ${d.note}',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.amber.shade900,
-                ),
-              ),
-            ),
+            const SizedBox(height: 6),
+            Text('📝 ${d.note}', style: TextStyle(fontSize: 11.5, color: GlobalAppColor.DarkTextColorCode.withOpacity(0.6))),
           ],
         ],
       ),
@@ -9481,69 +9405,23 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
     }();
 
     return _card(
-      topGradient: const [Color(0xFF2563EB), Color(0xFF7C3AED)],
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Color(0xFF2563EB), Color(0xFF3B82F6)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.remove_red_eye_outlined, size: 20, color: Colors.white),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Order Details',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
-                        color: GlobalAppColor.DarkTextColorCode,
-                        letterSpacing: 0.1,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      '#${order.orderNo.toString().padLeft(4, '0')}',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: GlobalAppColor.DarkTextColorCode.withOpacity(0.5),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: GlobalAppColor.ButtonColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  order.type.toUpperCase(),
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                    color: GlobalAppColor.ButtonColor,
-                    letterSpacing: 0.5,
-                  ),
-                ),
+              Icon(Icons.remove_red_eye_outlined, size: 18, color: GlobalAppColor.ButtonColor),
+              const SizedBox(width: 8),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Order Details', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: GlobalAppColor.DarkTextColorCode)),
+                  Text('#${order.orderNo.toString().padLeft(4, '0')}', style: TextStyle(fontSize: 12, color: GlobalAppColor.DarkTextColorCode.withOpacity(0.6))),
+                ],
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
           Row(
             children: [
               Expanded(child: _infoCell(label: 'CUSTOMER', value: order.customer != 'N/A' && order.customer.isNotEmpty ? order.customer : 'Guest', sub: 'No mob...')),
@@ -9559,7 +9437,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               Expanded(child: _infoCell(label: 'TIME', value: timeStr, sub: order.paymentStatus.isNotEmpty ? order.paymentStatus[0].toUpperCase() + order.paymentStatus.substring(1) : 'Unpaid')),
             ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
           Wrap(
             spacing: 8,
             runSpacing: 6,
@@ -9576,11 +9454,11 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
 
   Widget _infoCell({required String label, required String value, String? sub}) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: GlobalAppColor.BodyBgColorCode.withOpacity(0.3),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: GlobalAppColor.DarkTextColorCode.withOpacity(0.08)),
+        color: GlobalAppColor.BodyBgColorCode,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: GlobalAppColor.DarkTextColorCode.withOpacity(0.12)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -9589,39 +9467,15 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 9.5,
-                    fontWeight: FontWeight.w700,
-                    color: GlobalAppColor.DarkTextColorCode.withOpacity(0.4),
-                    letterSpacing: 0.8,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  value,
-                  style: TextStyle(
-                    fontSize: 14.5,
-                    fontWeight: FontWeight.w700,
-                    color: GlobalAppColor.DarkTextColorCode,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
+                Text(label, style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.w600, color: GlobalAppColor.DarkTextColorCode.withOpacity(0.6), letterSpacing: 0.7)),
+                const SizedBox(height: 2),
+                Text(value, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: GlobalAppColor.DarkTextColorCode), overflow: TextOverflow.ellipsis),
               ],
             ),
           ),
           if (sub != null) ...[
             const SizedBox(width: 4),
-            Text(
-              sub,
-              style: TextStyle(
-                fontSize: 10.5,
-                fontWeight: FontWeight.w500,
-                color: GlobalAppColor.DarkTextColorCode.withOpacity(0.4),
-              ),
-              overflow: TextOverflow.ellipsis,
-            ),
+            Text(sub, style: TextStyle(fontSize: 10.5, color: GlobalAppColor.DarkTextColorCode.withOpacity(0.5)), overflow: TextOverflow.ellipsis),
           ],
         ],
       ),
@@ -9629,81 +9483,14 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
   }
 
   Widget _statusPill(String label) {
-    List<Color> gradient = [Colors.white, Colors.white];
-    Color border = GlobalAppColor.DarkTextColorCode.withOpacity(0.12);
-    Color text = GlobalAppColor.DarkTextColorCode;
-
-    final lower = label.toLowerCase();
-    if (lower.contains('status:')) {
-      final status = lower.split('status:').last.trim();
-      if (status == 'served' || status == 'completed' || status == 'paid') {
-        gradient = [const Color(0xFFDCFCE7), const Color(0xFFBBF7D0)];
-        border = const Color(0xFF86EFAC);
-        text = const Color(0xFF15803D);
-      } else if (status == 'pending' || status == 'preparing' || status == 'unpaid') {
-        gradient = [const Color(0xFFFEF3C7), const Color(0xFFFDE68A)];
-        border = const Color(0xFFFCD34D);
-        text = const Color(0xFFB45309);
-      } else if (status == 'cancelled' || status == 'failed') {
-        gradient = [const Color(0xFFFEE2E2), const Color(0xFFFCA5A5)];
-        border = const Color(0xFFFCA5A5);
-        text = const Color(0xFFB91C1C);
-      } else {
-        gradient = [const Color(0xFFEFF6FF), const Color(0xFFBFDBFE)];
-        border = const Color(0xFF93C5FD);
-        text = const Color(0xFF1D4ED8);
-      }
-    } else if (lower.contains('payment:')) {
-      final payment = lower.split('payment:').last.trim();
-      if (payment == 'paid') {
-        gradient = [const Color(0xFFDCFCE7), const Color(0xFFBBF7D0)];
-        border = const Color(0xFF86EFAC);
-        text = const Color(0xFF15803D);
-      } else if (payment == 'unpaid') {
-        gradient = [const Color(0xFFFEF3C7), const Color(0xFFFDE68A)];
-        border = const Color(0xFFFCD34D);
-        text = const Color(0xFFB45309);
-      } else {
-        gradient = [const Color(0xFFEFF6FF), const Color(0xFFBFDBFE)];
-        border = const Color(0xFF93C5FD);
-        text = const Color(0xFF1D4ED8);
-      }
-    } else if (lower.contains('priority:')) {
-      final priority = lower.split('priority:').last.trim();
-      if (priority == 'high' || priority == 'urgent') {
-        gradient = [const Color(0xFFFEE2E2), const Color(0xFFFCA5A5)];
-        border = const Color(0xFFFCA5A5);
-        text = const Color(0xFFB91C1C);
-      } else if (priority == 'medium' || priority == 'normal') {
-        gradient = [const Color(0xFFEFF6FF), const Color(0xFFBFDBFE)];
-        border = const Color(0xFF93C5FD);
-        text = const Color(0xFF1D4ED8);
-      } else {
-        gradient = [const Color(0xFFF3F4F6), const Color(0xFFE5E7EB)];
-        border = const Color(0xFFD1D5DB);
-        text = const Color(0xFF374151);
-      }
-    }
-
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: gradient,
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: GlobalAppColor.WhiteColorCode,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: border, width: 1),
+        border: Border.all(color: GlobalAppColor.DarkTextColorCode.withOpacity(0.12)),
       ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          color: text,
-        ),
-      ),
+      child: Text(label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: GlobalAppColor.DarkTextColorCode)),
     );
   }
 
@@ -9719,61 +9506,32 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
     final grandTotal = order.grandTotal;
 
     return _card(
-      topGradient: const [Color(0xFF0D9488), Color(0xFF10B981)],
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Color(0xFF0D9488), Color(0xFF10B981)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.analytics_outlined, size: 20, color: Colors.white),
-              ),
-              const SizedBox(width: 12),
-              Text(
-                'Financial Summary',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: GlobalAppColor.DarkTextColorCode),
-              ),
+              Icon(Icons.attach_money_rounded, size: 18, color: GlobalAppColor.ButtonColor),
+              const SizedBox(width: 8),
+              Text('Financial Summary', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: GlobalAppColor.DarkTextColorCode)),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
           _finRow('Cancelled Items', '- ${cancelledTotal.toStringAsFixed(2)}', valueColor: const Color(0xFFEF4444)),
           _finRow('Net Amount', netAmount.toStringAsFixed(2), valueColor: GlobalAppColor.ButtonColor),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-              color: GlobalAppColor.BodyBgColorCode.withOpacity(0.3),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: GlobalAppColor.DarkTextColorCode.withOpacity(0.08)),
+              color: GlobalAppColor.BodyBgColorCode,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: GlobalAppColor.DarkTextColorCode.withOpacity(0.12)),
             ),
             child: Row(
               children: [
-                Text(
-                  '% Total Tax',
-                  style: TextStyle(
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w500,
-                    color: GlobalAppColor.DarkTextColorCode.withOpacity(0.6),
-                  ),
-                ),
+                Text('% Total Tax', style: TextStyle(fontSize: 13.5, color: GlobalAppColor.DarkTextColorCode.withOpacity(0.7))),
                 const Spacer(),
-                Text(
-                  taxAmount.toStringAsFixed(2),
-                  style: TextStyle(
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w700,
-                    color: GlobalAppColor.DarkTextColorCode,
-                  ),
-                ),
+                Text(taxAmount.toStringAsFixed(2), style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: GlobalAppColor.DarkTextColorCode)),
               ],
             ),
           ),
@@ -9782,26 +9540,12 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
           if (chargeAmt > 0) _finRow('Charges', chargeAmt.toStringAsFixed(2)),
           if ((double.tryParse(order.adjustAmt) ?? 0) != 0)
             _finRow('Adjustment', '${(double.tryParse(order.adjustAmt) ?? 0) >= 0 ? '+' : ''}${order.adjustAmt}'),
-          Divider(color: Colors.grey.shade200, thickness: 1.5, height: 24),
+          Divider(color: Colors.grey.shade200, thickness: 1.5, height: 20),
           Row(
             children: [
-              Text(
-                'Grand Total',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                  color: GlobalAppColor.DarkTextColorCode,
-                ),
-              ),
+              Text('Grand Total', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: GlobalAppColor.DarkTextColorCode)),
               const Spacer(),
-              Text(
-                grandTotal.toStringAsFixed(2),
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w900,
-                  color: GlobalAppColor.ButtonColor,
-                ),
-              ),
+              Text(grandTotal.toStringAsFixed(2), style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: GlobalAppColor.DarkTextColorCode)),
             ],
           ),
         ],
@@ -9811,26 +9555,12 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
 
   Widget _finRow(String label, String value, {Color? valueColor}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.symmetric(vertical: 5),
       child: Row(
         children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: GlobalAppColor.DarkTextColorCode.withOpacity(0.6),
-            ),
-          ),
+          Text(label, style: TextStyle(fontSize: 13.5, color: GlobalAppColor.DarkTextColorCode.withOpacity(0.7))),
           const Spacer(),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              color: valueColor ?? const Color(0xFF374151),
-            ),
-          ),
+          Text(value, style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: valueColor ?? const Color(0xFF374151))),
         ],
       ),
     );
@@ -9842,37 +9572,20 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
     final refundAmt = double.tryParse(order.refundAmt) ?? 0;
     final paid = order.totalPaidAmount;
     final remaining = order.remainingBalance;
-    final isFullyPaid = (remaining <= 0.01 && (paid > 0 || (double.tryParse(order.totalAmt) ?? 0) > 0.01)) || 
-        order.paymentStatus.toLowerCase() == 'paid' || 
-        order.orderStatus.toLowerCase() == 'completed';
+    final isFullyPaid = remaining <= 0.01 && paid > 0;
 
     return _card(
-      topGradient: const [Color(0xFF4F46E5), Color(0xFF2563EB)],
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Color(0xFF4F46E5), Color(0xFF3B82F6)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.payments_outlined, size: 20, color: Colors.white),
-              ),
-              const SizedBox(width: 12),
-              Text(
-                'Payment Workspace',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: GlobalAppColor.DarkTextColorCode),
-              ),
+              const Icon(Icons.attach_money_rounded, size: 18, color: Color(0xFF15803D)),
+              const SizedBox(width: 8),
+              Text('Payment Workspace', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: GlobalAppColor.DarkTextColorCode)),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
           if (!isFullyPaid) ...[
             Row(
               children: [
@@ -9884,63 +9597,29 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
             const SizedBox(height: 10),
           ],
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             decoration: BoxDecoration(
-              color: GlobalAppColor.BodyBgColorCode.withOpacity(0.3),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: GlobalAppColor.DarkTextColorCode.withOpacity(0.08)),
+              color: GlobalAppColor.BodyBgColorCode,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: GlobalAppColor.DarkTextColorCode.withOpacity(0.12)),
             ),
             child: Row(
               children: [
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Paid',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: GlobalAppColor.DarkTextColorCode.withOpacity(0.5),
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      paid.toStringAsFixed(2),
-                      style: const TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w800,
-                        color: Color(0xFF10B981),
-                      ),
-                    ),
+                    Text('Paid', style: TextStyle(fontSize: 11, color: GlobalAppColor.DarkTextColorCode.withOpacity(0.6))),
+                    const SizedBox(height: 2),
+                    Text(paid.toStringAsFixed(2), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Color(0xFF10B981))),
                   ],
-                ),
-                const Spacer(),
-                Container(
-                  height: 30,
-                  width: 1,
-                  color: GlobalAppColor.DarkTextColorCode.withOpacity(0.15),
                 ),
                 const Spacer(),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text(
-                      'Remaining',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: GlobalAppColor.DarkTextColorCode.withOpacity(0.5),
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      remaining.toStringAsFixed(2),
-                      style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w800,
-                        color: GlobalAppColor.ButtonColor,
-                      ),
-                    ),
+                    Text('Remaining', style: TextStyle(fontSize: 11, color: GlobalAppColor.DarkTextColorCode.withOpacity(0.6))),
+                    const SizedBox(height: 2),
+                    Text(remaining.toStringAsFixed(2), style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: GlobalAppColor.ButtonColor)),
                   ],
                 ),
               ],
@@ -9996,75 +9675,39 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               children: [
                 Expanded(
                   flex: 3,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF2563EB), Color(0xFF3B82F6)],
-                        begin: Alignment.centerLeft,
-                        end: Alignment.centerRight,
-                      ),
-                      borderRadius: BorderRadius.circular(30),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFF2563EB).withOpacity(0.25),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (HomeCtrl.PayBillPaymentListing.isEmpty) {
+                        HomeCtrl.getPayBillPaymentMethodsListService(context);
+                      }
+                      HomeCtrl.openPanelWithData(order);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: GlobalAppColor.ButtonColor,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                      elevation: 0,
                     ),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        if (HomeCtrl.PayBillPaymentListing.isEmpty) {
-                          HomeCtrl.getPayBillPaymentMethodsListService(context);
-                        }
-                        HomeCtrl.openPanelWithData(order);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.transparent,
-                        shadowColor: Colors.transparent,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                        elevation: 0,
-                      ),
-                      child: const Text('Pay Bill', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
-                    ),
+                    child: const Text('Pay Bill', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
                   ),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   flex: 3,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFFEF4444), Color(0xFFF87171)],
-                        begin: Alignment.centerLeft,
-                        end: Alignment.centerRight,
-                      ),
-                      borderRadius: BorderRadius.circular(30),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFFEF4444).withOpacity(0.25),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
+                  child: ElevatedButton(
+                    onPressed: () {
+                      HomeCtrl.selectedOrder = order;
+                      HomeCtrl.cancelOrderService(context, order.orderId, '');
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFDC2626),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                      elevation: 0,
                     ),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        HomeCtrl.selectedOrder = order;
-                        HomeCtrl.cancelOrderService(context, order.orderId, '');
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.transparent,
-                        shadowColor: Colors.transparent,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                        elevation: 0,
-                      ),
-                      child: const Text('Cancel', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
-                    ),
+                    child: const Text('Cancel', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -10094,18 +9737,18 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
 
   Widget _payInfoCell({required String label, required String value}) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: GlobalAppColor.BodyBgColorCode.withOpacity(0.3),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: GlobalAppColor.DarkTextColorCode.withOpacity(0.08)),
+        color: GlobalAppColor.BodyBgColorCode,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: GlobalAppColor.DarkTextColorCode.withOpacity(0.12)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: GlobalAppColor.DarkTextColorCode.withOpacity(0.4), letterSpacing: 0.8)),
+          Text(label, style: TextStyle(fontSize: 9, fontWeight: FontWeight.w600, color: GlobalAppColor.DarkTextColorCode.withOpacity(0.6), letterSpacing: 0.7)),
           const SizedBox(height: 4),
-          Text(value, style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: GlobalAppColor.DarkTextColorCode)),
+          Text(value, style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: GlobalAppColor.DarkTextColorCode)),
         ],
       ),
     );
@@ -10116,32 +9759,11 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
     final isCompleted = order.orderStatus.toLowerCase() == 'completed' || order.orderStatus.toLowerCase() == 'cancelled';
 
     return _card(
-      topGradient: const [Color(0xFF7C3AED), Color(0xFFEC4899)],
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Color(0xFF7C3AED), Color(0xFFEC4899)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.bolt_rounded, size: 20, color: Colors.white),
-              ),
-              const SizedBox(width: 12),
-              Text(
-                'Payment Actions',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: GlobalAppColor.DarkTextColorCode),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
+          Text('Payment Actions', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: GlobalAppColor.DarkTextColorCode)),
+          const SizedBox(height: 14),
           // Status & Priority dropdowns
           Row(
             children: [
@@ -10258,23 +9880,15 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
     required ValueChanged<String?>? onChanged,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
       decoration: BoxDecoration(
-        color: GlobalAppColor.BodyBgColorCode.withOpacity(0.3),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: GlobalAppColor.DarkTextColorCode.withOpacity(0.08)),
+        color: GlobalAppColor.BodyBgColorCode,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: GlobalAppColor.DarkTextColorCode.withOpacity(0.12)),
       ),
       child: Row(
         children: [
-          Text(
-            prefix,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: GlobalAppColor.DarkTextColorCode.withOpacity(0.5),
-            ),
-          ),
-          const SizedBox(width: 4),
+          Text(prefix, style: TextStyle(fontSize: 11.5, color: GlobalAppColor.DarkTextColorCode.withOpacity(0.6))),
           Expanded(
             child: HomeWidget().buildDropdown(
               items: items,
@@ -10292,25 +9906,18 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
       onTap: onTap,
       child: Container(
         width: fullWidth ? double.infinity : null,
-        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
         decoration: BoxDecoration(
-          color: GlobalAppColor.BodyBgColorCode.withOpacity(0.3),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: GlobalAppColor.DarkTextColorCode.withOpacity(0.08)),
+          color: GlobalAppColor.BodyBgColorCode,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: GlobalAppColor.DarkTextColorCode.withOpacity(0.12)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 16, color: GlobalAppColor.DarkTextColorCode),
+            Icon(icon, size: 15, color: GlobalAppColor.DarkTextColorCode),
             const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: GlobalAppColor.DarkTextColorCode,
-              ),
-            ),
+            Text(label, style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: GlobalAppColor.DarkTextColorCode)),
           ],
         ),
       ),
@@ -10363,26 +9970,14 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
   }
 
   //----- SHARED CARD WRAPPER -----------------------------------------------//
-  Widget _card({required Widget child, List<Color>? topGradient}) {
+  Widget _card({required Widget child}) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: GlobalAppColor.WhiteColorCode,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.withOpacity(0.12), width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 16,
-            offset: const Offset(0, 8),
-          ),
-          BoxShadow(
-            color: Colors.black.withOpacity(0.01),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 2))],
       ),
       child: child,
     );
